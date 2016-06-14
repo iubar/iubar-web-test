@@ -6,6 +6,7 @@ use Facebook\WebDriver\WebDriverBy;
 use Facebook\WebDriver\WebDriverExpectedCondition;
 use Facebook\WebDriver\Remote\DesiredCapabilities;
 use League\CLImate\CLImate;
+use Facebook\WebDriver\Remote\DriverCommand;
 
 /**
  * PHPUnit_Framework_TestCase Develop
@@ -198,11 +199,12 @@ class Web_TestCase extends Root_TestCase {
             echo "Taking a screenshot..." . PHP_EOL;
             
             // The path where save the screenshot
-            $screenshot = $screenshots_path . date('Y-m-d_His') . ".png";
-            $this->getWd()->takeScreenshot($screenshot);
+            $save_as = $screenshots_path . date('Y-m-d_His') . ".png";
+            // $this->getWd()->takeScreenshot($save_as);
+            $this->takeScreenshot2($save_as);
             
-            if (! file_exists($screenshot)) {
-                throw new Exception('Could not save screenshot: ' . $screenshot);
+            if (! file_exists($save_as)) {
+                throw new Exception('Could not save screenshot: ' . $save_as);
             }
             
             if ($element) {
@@ -212,20 +214,20 @@ class Web_TestCase extends Root_TestCase {
                 $element_src_y = $element->getLocation()->getY();
                 
                 // Create image instances
-                $src = imagecreatefrompng($screenshot);
+                $src = imagecreatefrompng($save_as);
                 $dest = imagecreatetruecolor($element_width, $element_height);
                 
                 // Copy
                 imagecopy($dest, $src, 0, 0, $element_src_x, $element_src_y, $element_width, $element_height);
                 
-                imagepng($dest, $screenshot); // overwrite the full screenshot
+                imagepng($dest, $save_as); // overwrite the full screenshot
                 
-                if (! file_exists($screenshot)) {
-                    throw new Exception('Could not save the cropped screenshot' . $screenshot);
+                if (! file_exists($save_as)) {
+                    throw new Exception('Could not save the cropped screenshot' . $save_as);
                 }
             }
             
-            self::$screenshots[] = $screenshot;
+            self::$screenshots[] = $save_as;
         }
     }
 
@@ -411,6 +413,9 @@ class Web_TestCase extends Root_TestCase {
         $records = $wd->manage()->getLog('browser');
         $severe_records = array();
         // search for the error in the console
+        
+        self::$climate->info('Records: ' . count($records));
+        
         foreach ($records as $record) {
             if ($record['level'] == 'SEVERE') {
                 if (! self::shouldSkip($record['message'])) {
@@ -419,10 +424,12 @@ class Web_TestCase extends Root_TestCase {
             }
         }
         
+        self::$climate->info('Filtered records (severe): ' . count($severe_records));
+        
         $console_error = count($severe_records);
         if (self::DEBUG) {
             $output = @rt($severe_records);
-            echo $output . PHP_EOL;
+            echo "-->" . $output . PHP_EOL;
         }
         
         // write the console error in log file
@@ -481,4 +488,38 @@ class Web_TestCase extends Root_TestCase {
     private function write_color_msg($color, $msg) {
         self::$climate->to('out')->$color($msg);
     }
+    
+      public function takeScreenshot2($save_as = null) {
+
+        $screenshot = base64_decode($this->getWd()->execute(DriverCommand::SCREENSHOT));
+        $im = imagecreatefromstring($screenshot);
+        
+        // define some colours to use with the image
+        $yellow = imagecolorallocate($im, 255, 255, 0);
+        $black = imagecolorallocate($im, 0, 0, 0);
+        
+        // get the width and the height of the image
+        $width = imagesx($im);
+        $height = imagesy($im);
+        
+        // draw a black rectangle across the bottom, say, 20 pixels of the image:
+        imagefilledrectangle($im, 0, ($height-20) , $width, $height, $black);
+        
+        // now we want to write in the centre of the rectangle:
+        $font = 24; // store the int ID of the system font we're using in $font
+        $text = "VAFFANCULO !"; // store the text we're going to write in $text
+        // calculate the left position of the text:
+        $leftTextPos = ( $width - imagefontwidth($font)*strlen($text) )/2;
+        // finally, write the string:
+        imagestring($im, $font, $leftTextPos, $height-18, $text, $yellow);
+        
+        if ($save_as) {
+        // output the image to file
+            imagepng($im, $save_as);
+        }
+        
+        // tidy up
+        imagedestroy($im);
+    }
+    
 }
