@@ -193,7 +193,7 @@ class Web_TestCase extends Root_TestCase {
      * @param string $element the element to capture
      * @throws Exception if the screenshot or the directory where to save doesn't exist
      */
-    public function takeScreenshot($element = null) {
+    public function takeScreenshot($msg, $element = null) {
         $screenshots_path = getEnv('SCREENSHOTS_PATH');
         if ($screenshots_path) {
             echo "Taking a screenshot..." . PHP_EOL;
@@ -201,30 +201,10 @@ class Web_TestCase extends Root_TestCase {
             // The path where save the screenshot
             $save_as = $screenshots_path . date('Y-m-d_His') . ".png";
             // $this->getWd()->takeScreenshot($save_as);
-            $this->takeScreenshot2($save_as);
+            $this->takeScreenshot2($msg, $element, $save_as);
             
             if (! file_exists($save_as)) {
                 throw new Exception('Could not save screenshot: ' . $save_as);
-            }
-            
-            if ($element) {
-                $element_width = $element->getSize()->getWidth();
-                $element_height = $element->getSize()->getHeight();
-                $element_src_x = $element->getLocation()->getX();
-                $element_src_y = $element->getLocation()->getY();
-                
-                // Create image instances
-                $src = imagecreatefrompng($save_as);
-                $dest = imagecreatetruecolor($element_width, $element_height);
-                
-                // Copy
-                imagecopy($dest, $src, 0, 0, $element_src_x, $element_src_y, $element_width, $element_height);
-                
-                imagepng($dest, $save_as); // overwrite the full screenshot
-                
-                if (! file_exists($save_as)) {
-                    throw new Exception('Could not save the cropped screenshot' . $save_as);
-                }
             }
             
             self::$screenshots[] = $save_as;
@@ -243,7 +223,7 @@ class Web_TestCase extends Root_TestCase {
         echo PHP_EOL;
         self::$climate->to('out')->red("EXCEPTION: " . $msg);
         if (self::TAKE_A_SCREENSHOT) {
-            $this->takeScreenshot();
+            $this->takeScreenshot($msg);
         }
         parent::onNotSuccessfulTest($e);
     }
@@ -488,9 +468,8 @@ class Web_TestCase extends Root_TestCase {
     private function write_color_msg($color, $msg) {
         self::$climate->to('out')->$color($msg);
     }
-    
-      public function takeScreenshot2($save_as = null) {
 
+    private function takeScreenshot2($msg, $save_as = null) {
         $screenshot = base64_decode($this->getWd()->execute(DriverCommand::SCREENSHOT));
         $im = imagecreatefromstring($screenshot);
         
@@ -503,23 +482,40 @@ class Web_TestCase extends Root_TestCase {
         $height = imagesy($im);
         
         // draw a black rectangle across the bottom, say, 20 pixels of the image:
-        imagefilledrectangle($im, 0, ($height-20) , $width, $height, $black);
+        imagefilledrectangle($im, 0, ($height - 20), $width, $height, $black);
         
         // now we want to write in the centre of the rectangle:
         $font = 24; // store the int ID of the system font we're using in $font
-        $text = "VAFFANCULO !"; // store the text we're going to write in $text
-        // calculate the left position of the text:
-        $leftTextPos = ( $width - imagefontwidth($font)*strlen($text) )/2;
+                    // calculate the left position of the text:
+        $leftTextPos = ($width - imagefontwidth($font) * strlen($text)) / 2;
         // finally, write the string:
-        imagestring($im, $font, $leftTextPos, $height-18, $text, $yellow);
+        imagestring($im, $font, $leftTextPos, $height - 18, $msg, $yellow);
         
-        if ($save_as) {
-        // output the image to file
-            imagepng($im, $save_as);
+        if ($element) {
+            $element_width = $element->getSize()->getWidth();
+            $element_height = $element->getSize()->getHeight();
+            $element_src_x = $element->getLocation()->getX();
+            $element_src_y = $element->getLocation()->getY();
+            
+            // Create image instances
+            $dest = imagecreatetruecolor($element_width, $element_height);
+            
+            // Copy
+            imagecopy($dest, $im, 0, 0, $element_src_x, $element_src_y, $element_width, $element_height);
+            
+            if ($save_as) {
+                // output the image to file
+                imagepng($dest, $save_as);
+            }
+        } else {
+            
+            if ($save_as) {
+                // output the image to file
+                imagepng($im, $save_as);
+            }
         }
         
         // tidy up
         imagedestroy($im);
     }
-    
 }
