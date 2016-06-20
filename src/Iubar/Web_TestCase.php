@@ -19,7 +19,7 @@ use Facebook\WebDriver\Remote\DriverCommand;
  */
 class Web_TestCase extends Root_TestCase {
 
-    const DEBUG = true;
+    const DEBUG = false;
 
     const TAKE_A_SCREENSHOT = true;
     
@@ -41,10 +41,13 @@ class Web_TestCase extends Root_TestCase {
     const START = 'start';
 
     protected static $screenshots = array();
+    
+    protected static $dump_files = array();
 
     protected static $webDriver;
 
-    protected static $selenium_shutdown;
+    protected static $selenium_server_shutdown;
+    protected static $selenium_session_shutdown;
     
     // easily output colored text and special formatting
     protected static $climate;
@@ -74,7 +77,7 @@ class Web_TestCase extends Root_TestCase {
         $capabilities = null;
         
         // set capabilities according to the browers
-        switch (getEnv('BROWSER')) {
+        switch (getenv('BROWSER')) {
             case self::PHANTOMJS:
                 echo "Inizializing PhantomJs browser" . PHP_EOL;
                 $capabilities = DesiredCapabilities::phantomjs();
@@ -104,16 +107,17 @@ class Web_TestCase extends Root_TestCase {
         
         $server_root = null;
         // set Travis params
-        if (getEnv('TRAVIS')) {
+        if (getenv('TRAVIS')) {
             echo "Travis detected..." . PHP_EOL;
-            $capabilities->setCapability('tunnel-identifier', getEnv('TRAVIS_JOB_NUMBER'));
-            $username = getEnv('SAUCE_USERNAME');
-            $access_key = getEnv('SAUCE_ACCESS_KEY');
-            $server_root = "http://" . $username . ":" . $access_key . "@" . getEnv('SELENIUM_SERVER');
+            $capabilities->setCapability('tunnel-identifier', getenv('TRAVIS_JOB_NUMBER'));
+            $username = getenv('SAUCE_USERNAME');
+            $access_key = getenv('SAUCE_ACCESS_KEY');
+            $server_root = "http://" . $username . ":" . $access_key . "@" . getenv('SELENIUM_SERVER');
         } else {
-            $server_root = "http://" . getEnv('SELENIUM_SERVER');
+            $server_root = "http://" . getenv('SELENIUM_SERVER');
         }
-        self::$selenium_shutdown = $server_root . '/selenium-server/driver/?cmd=shutDownSeleniumServer';
+        self::$selenium_server_shutdown = $server_root . '/selenium-server/driver/?cmd=shutDownSeleniumServer';
+        self::$selenium_session_shutdown = $server_root . '/selenium-server/driver/?cmd=shutDown';
         $server = $server_root . "/wd/hub";
         echo "Server: " . $server . PHP_EOL;
         
@@ -143,7 +147,9 @@ class Web_TestCase extends Root_TestCase {
         if (getEnv('BROWSER') != self::MARIONETTE) {
             // Console
             $types = self::$webDriver->manage()->getAvailableLogTypes();
-            print_r($types);
+            if (self::DEBUG) {
+                print_r($types);
+            }
         }
     }
 
@@ -151,16 +157,37 @@ class Web_TestCase extends Root_TestCase {
      * Close the WebDriver and show the screenshot in the browser if there is
      */
     public static function tearDownAfterClass() {
-        self::closeAllWindows();
+        
+        if(getenv('BROWSER') != self::PHANTOMJS){
+            echo "Closing all windows... " . PHP_EOL;         
+            self::closeAllWindows();
+        }
+        
+        echo "Quitting webdriver... " . PHP_EOL;
         self::$webDriver->quit();
         
         // if there is at least a screenshot show it in the browser
         if (count(self::$screenshots) > 0) {
+            if(getenv('BROWSER') == self::PHANTOMJS){
+                die("Assertion failed: There should be no screenshot for phantomjs headless browser." . PHP_EOL);
+            }
             echo "Taken " . count(self::$screenshots) . " screenshots" . PHP_EOL;
             $first_screenshot = self::$screenshots[0];
-            self::startShell(self::START . " " . getEnv('BROWSER') . " " . $first_screenshot);
-            echo PHP_EOL . self::START . " " . getEnv('BROWSER') . " " . $first_screenshot . PHP_EOL;
+            echo "Opening the last screenshot..." . PHP_EOL;
+            $cmd =  self::START . " " . getenv('BROWSER') . " " . $first_screenshot;
+            echo "Executing: " . $cmd . PHP_EOL;
+            self::startShell($cmd);           
         }
+        
+        if (count(self::$dump_files) > 0) {
+            echo "Dump " . count(self::$dump_files) . " files" . PHP_EOL;
+            $first_dump = self::$dump_files[0];
+            echo "Opening the last dump..." . PHP_EOL;
+            $cmd = self::START . " " . getenv('BROWSER') . " " . $first_dump;
+            echo "Executing: " . $cmd . PHP_EOL;
+            self::startShell($cmd);          
+        }
+        
     }
 
     /**
@@ -199,7 +226,7 @@ class Web_TestCase extends Root_TestCase {
             echo "Taking a screenshot..." . PHP_EOL;
             
             // The path where save the screenshot
-            $save_as = $screenshots_path . date('Y-m-d_His') . ".png";
+            $save_as = $screenshots_path . DIRECTORY_SEPARATOR . date('Y-m-d_His') . ".png";
             // $this->getWd()->takeScreenshot($save_as);
             $this->takeScreenshot2($msg, $element, $save_as);
             
@@ -223,7 +250,9 @@ class Web_TestCase extends Root_TestCase {
         echo PHP_EOL;
         self::$climate->to('out')->red("EXCEPTION: " . $msg);
         if (self::TAKE_A_SCREENSHOT) {
-            $this->takeScreenshot($msg);
+            if(getenv('BROWSER') != self::PHANTOMJS){
+                $this->takeScreenshot($msg);
+            }
         }
         parent::onNotSuccessfulTest($e);
     }
@@ -385,8 +414,8 @@ class Web_TestCase extends Root_TestCase {
         $console_error = 0;
         
         // marionette doesn't have the console
-        if (getEnv('BROWSER') == self::MARIONETTE) {
-            throw new \InvalidArgumentException('Browser ' . getEnv('BROWSER') . ' non supportato dal metodo');
+        if (getenv('BROWSER') == self::MARIONETTE) {
+            throw new \InvalidArgumentException('Browser ' . getenv('BROWSER') . ' non supportato dal metodo');
         }
         
         $wd = $this->getWd();
@@ -409,22 +438,26 @@ class Web_TestCase extends Root_TestCase {
         $console_error = count($severe_records);
         if (self::DEBUG) {
             $output = @rt($severe_records);
-            echo "-->" . $output . PHP_EOL;
-        }
-        
-        // write the console error in log file
-        if (self::DEBUG && ! getEnv('TRAVIS')) {
-            $data = json_encode($severe_records, JSON_PRETTY_PRINT);
-            $screenshots_path = getEnv('SCREENSHOTS_PATH');
-            $path = $screenshots_path . "/..";
-            if (! is_dir($path)) {
-                die("PATH NOT FOUND: " . $path . PHP_EOL);
+            echo "-->" . $output . PHP_EOL;        
+            if (!getenv('TRAVIS')) {
+                $this->dumpConsoleError($severe_records); // write the console error in log file
             }
-            file_put_contents($path . "/" . date('Y-m-d_His') . "_console.txt", $data);
         }
         
         echo PHP_EOL . 'Errori sulla console: ' . $console_error . PHP_EOL;
         $this->assertEquals(0, $console_error);
+    }
+    
+    private function dumpConsoleError($records){
+        $data = json_encode($records, JSON_PRETTY_PRINT);
+        $screenshots_path = getenv('SCREENSHOTS_PATH');
+        $path = $screenshots_path . "/..";
+        if (! is_dir($path)) {
+            die("Path not found: " . $path . " (check the SCREENSHOTS_PATH env variable)" . PHP_EOL);
+        }
+        $dump_file = $path . DIRECTORY_SEPARATOR . date('Y-m-d_His') . "_console.json";        
+        file_put_contents($dump_file, $data);
+        self::$dump_files[] = $dump_file;
     }
 
     /**
@@ -454,8 +487,11 @@ class Web_TestCase extends Root_TestCase {
      */
     private function formatErrorMsg($e) {
         $msg = $e->getMessage();
-        $array = explode("\n", $msg);
-        $msg = $array[0] . "...";
+        $array = explode('\n', $msg);
+        $msg = $array[0];
+        if(count($array)>1){
+            $msg = $msg . "...";
+        }
         return $msg;
     }
 
@@ -469,7 +505,7 @@ class Web_TestCase extends Root_TestCase {
         self::$climate->to('out')->$color($msg);
     }
 
-    private function takeScreenshot2($msg, $save_as = null) {
+    private function takeScreenshot2($msg, $element, $save_as = null) {
         $screenshot = base64_decode($this->getWd()->execute(DriverCommand::SCREENSHOT));
         $im = imagecreatefromstring($screenshot);
         
@@ -481,15 +517,40 @@ class Web_TestCase extends Root_TestCase {
         $width = imagesx($im);
         $height = imagesy($im);
         
-        // draw a black rectangle across the bottom, say, 20 pixels of the image:
-        imagefilledrectangle($im, 0, ($height - 20), $width, $height, $black);
+        // Split the message in two lines
+        // $msg = wordwrap($msg, 7, "\n");
+        $first = null;
+        $second = null;
+        $box_height = 25;
+        $box_inner_height = 24;
+        if(strlen($msg)>80){
+            $pos = strlen($msg)/2;
+            $first = substr($msg, 0, $pos);
+            $second = substr($msg, $pos + 1);
+            $box_height = $box_height * 2;
+            $box_inner_height = $box_inner_height * 2;
+        }else{
+            $first = $msg;
+        }
+        
+        
+        // draw a black rectangle across the bottom, say, 50 pixels of the image:
+        imagefilledrectangle($im, 0, ($height - $box_height), $width, $height, $black);
         
         // now we want to write in the centre of the rectangle:
         $font = 24; // store the int ID of the system font we're using in $font
-                    // calculate the left position of the text:
-        $leftTextPos = ($width - imagefontwidth($font) * strlen($text)) / 2;
+                      
+        // calculate the left position of the text:        
+        $leftTextPos1 = ($width - imagefontwidth($font) * strlen($first)) / 2;
+        if($second){
+            $leftTextPos2 = ($width - imagefontwidth($font) * strlen($second)) / 2;
+        }
+        
         // finally, write the string:
-        imagestring($im, $font, $leftTextPos, $height - 18, $msg, $yellow);
+        imagestring($im, $font, $leftTextPos1, $height - $box_inner_height, $first, $yellow);
+        if($second){
+            imagestring($im, $font, $leftTextPos2, $height - ($box_inner_height/2), $second, $yellow);
+        }
         
         if ($element) {
             $element_width = $element->getSize()->getWidth();
