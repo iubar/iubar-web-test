@@ -424,7 +424,7 @@ class Web_TestCase extends Root_TestCase {
         $severe_records = array();
         // search for the error in the console
         
-        self::$climate->info('Records: ' . count($records));
+        // self::$climate->info('Records: ' . count($records));
         
         foreach ($records as $record) {
             if ($record['level'] == 'SEVERE') {
@@ -434,7 +434,7 @@ class Web_TestCase extends Root_TestCase {
             }
         }
         
-        self::$climate->info('Filtered records (severe): ' . count($severe_records));
+        // self::$climate->info('Filtered records (severe): ' . count($severe_records));
         
         $console_error = count($severe_records);
         if (self::DEBUG) {
