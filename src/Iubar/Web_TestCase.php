@@ -580,6 +580,11 @@ class Web_TestCase extends Root_TestCase {
         imagedestroy($im);
     }
 
+    /**
+     * For future use
+     *
+     * @param string $id the id
+     */
     protected function clickByIdWithJs($id) {
         $script = "\$('#" . $id . "').click();";
         $arguments = array();
