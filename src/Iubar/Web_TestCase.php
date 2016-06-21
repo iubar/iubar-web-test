@@ -27,7 +27,7 @@ class Web_TestCase extends Root_TestCase {
     const DEFAULT_WAIT_TIMEOUT = 15;
     
     // milliseconds
-    const DEFAULT_WAIT_INTERVAL = 1000;
+    const DEFAULT_WAIT_INTERVAL = 3000;
     
     // Browser
     const PHANTOMJS = 'phantomjs';
@@ -37,8 +37,6 @@ class Web_TestCase extends Root_TestCase {
     const FIREFOX = 'firefox';
 
     const MARIONETTE = 'marionette';
-
-    const START = 'start';
 
     protected static $screenshots = array();
 
@@ -97,6 +95,7 @@ class Web_TestCase extends Root_TestCase {
                 echo "Inizializing Marionette browser" . PHP_EOL;
                 $capabilities = DesiredCapabilities::firefox();
                 $capabilities->setCapability(self::MARIONETTE, true);
+                // $capabilities->setCapability('firefox_binary', 'C:/Program Files (x86)/Firefox Developer Edition/firefox.exe');
                 break;
             default:
                 $error = "Browser '" . getEnv('BROWSER') . "' not supported.";
@@ -176,18 +175,14 @@ class Web_TestCase extends Root_TestCase {
             echo "Taken " . count(self::$screenshots) . " screenshots" . PHP_EOL;
             $first_screenshot = self::$screenshots[0];
             echo "Opening the last screenshot..." . PHP_EOL;
-            $cmd = self::START . " " . getenv('BROWSER') . " " . $first_screenshot;
-            echo "Executing: " . $cmd . PHP_EOL;
-            self::startShell($cmd);
+            self::openBrowser($first_screenshot);
         }
         
         if (count(self::$dump_files) > 0) {
             echo "Dump " . count(self::$dump_files) . " files" . PHP_EOL;
             $first_dump = self::$dump_files[0];
-            echo "Opening the last dump..." . PHP_EOL;
-            $cmd = self::START . " " . getenv('BROWSER') . " " . $first_dump;
-            echo "Executing: " . $cmd . PHP_EOL;
-            self::startShell($cmd);
+            echo "Opening the last console dump..." . PHP_EOL;
+            self::openBrowser($first_dump);
         }
     }
 
@@ -215,28 +210,17 @@ class Web_TestCase extends Root_TestCase {
         return $output;
     }
 
-    /**
-     * Take a screenshot of the webpage
-     *
-     * @param string $element the element to capture
-     * @throws Exception if the screenshot or the directory where to save doesn't exist
-     */
-    private function takeScreenshot($msg, $element = null) {
-        $screenshots_path = getEnv('SCREENSHOTS_PATH');
-        if ($screenshots_path) {
-            echo "Taking a screenshot..." . PHP_EOL;
-            
-            // The path where save the screenshot
-            $save_as = $screenshots_path . DIRECTORY_SEPARATOR . date('Y-m-d_His') . ".png";
-            // $this->getWd()->takeScreenshot($save_as);
-            $this->takeScreenshot2($msg, $element, $save_as);
-            
-            if (! file_exists($save_as)) {
-                throw new Exception('Could not save screenshot: ' . $save_as);
+    protected static function openBrowser($url) {
+        $browser = getEnv('BROWSER');
+        if (getenv('BROWSER') == self::PHANTOMJS) {
+            $browser = "chrome";
+        } else 
+            if (getenv('BROWSER') == self::MARIONETTE) {
+                $browser = "firefox";
             }
-            
-            self::$screenshots[] = $save_as;
-        }
+        echo "Opening browser at: " . $url . PHP_EOL;
+        $cmd = "start " . $browser . " " . $url; // Warning: Windows specific code
+        self::startShell($cmd);
     }
 
     /**
@@ -398,12 +382,24 @@ class Web_TestCase extends Root_TestCase {
     }
 
     /**
+     * For future use
+     *
+     * @param string $id the id
+     */
+    protected function clickByIdWithJs($id) {
+        $script = "\$('#" . $id . "').click();";
+        $arguments = array();
+        $this->getWd()->executeScript($script, $arguments);
+    }
+
+    /**
      * Shutdown Selenium Server
      *
      * Metodo non utilizzato. L'azione è delegata allo script che avvia il test.
      */
     protected function quitSelenium() {
-        $this->startShell(self::START . " " . getEnv('BROWSER') . " " . self::$selenium_shutdown);
+        echo "Quitting Selenium..." . PHP_EOL;
+        self::openBrowser(self::$selenium_shutdown);
     }
 
     /**
@@ -581,13 +577,26 @@ class Web_TestCase extends Root_TestCase {
     }
 
     /**
-     * For future use
+     * Take a screenshot of the webpage
      *
-     * @param string $id the id
+     * @param string $element the element to capture
+     * @throws Exception if the screenshot or the directory where to save doesn't exist
      */
-    protected function clickByIdWithJs($id) {
-        $script = "\$('#" . $id . "').click();";
-        $arguments = array();
-        $this->getWd()->executeScript($script, $arguments);
+    private function takeScreenshot($msg, $element = null) {
+        $screenshots_path = getEnv('SCREENSHOTS_PATH');
+        if ($screenshots_path) {
+            echo "Taking a screenshot..." . PHP_EOL;
+            
+            // The path where save the screenshot
+            $save_as = $screenshots_path . DIRECTORY_SEPARATOR . date('Y-m-d_His') . ".png";
+            // $this->getWd()->takeScreenshot($save_as);
+            $this->takeScreenshot2($msg, $element, $save_as);
+            
+            if (! file_exists($save_as)) {
+                throw new Exception('Could not save screenshot: ' . $save_as);
+            }
+            
+            self::$screenshots[] = $save_as;
+        }
     }
 }
