@@ -391,6 +391,15 @@ class Web_TestCase extends Root_TestCase {
         $arguments = array();
         $this->getWd()->executeScript($script, $arguments);
     }
+    
+    protected function clickByIdWithJs2($drop_area, $file) {
+        // TODO: verificare che $drop_area sia visibile
+        // TODO: verificare se file essitt
+        $js_file = __DIR__ . DIRECTORY_SEPARATOR . 'js/drag.js';
+        // TODO: verificare se file essitt        
+        $js_src = file_get_contents($js_file);
+        $this->getWd()->executeScript($js_src, array($drop_area)).sendKeys($file);
+    }
 
     /**
      * Shutdown Selenium Server
