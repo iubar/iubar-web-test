@@ -27,7 +27,7 @@ class Web_TestCase extends Root_TestCase {
     const DEFAULT_WAIT_TIMEOUT = 15;
     
     // milliseconds
-    const DEFAULT_WAIT_INTERVAL = 3000;
+    const DEFAULT_WAIT_INTERVAL = 1000;
     
     // Browser
     const PHANTOMJS = 'phantomjs';
