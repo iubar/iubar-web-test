@@ -70,7 +70,7 @@ class Web_TestCase extends Root_TestCase {
             if (getenv('BROWSER') != self::PHANTOMJS) {
                 $screenshots_path = getEnv('SCREENSHOTS_PATH');
                 if ($screenshots_path && ! is_writable($screenshots_path)) {
-                    die("ERRORE percorso non scrivibile: " . $screenshots_path . PHP_EOL);
+                    $this->fail("ERRORE percorso non scrivibile: " . $screenshots_path . PHP_EOL);
                 }
             }
         }
@@ -100,7 +100,7 @@ class Web_TestCase extends Root_TestCase {
             default:
                 $error = "Browser '" . getEnv('BROWSER') . "' not supported.";
                 $error .= PHP_EOL . "(you should set the BROWSER global var with a supported browser name)";
-                die("ERROR: " . $error . PHP_EOL);
+                $this->fail("ERROR: " . $error . PHP_EOL);
         }
         
         // create the WebDriver
@@ -127,7 +127,7 @@ class Web_TestCase extends Root_TestCase {
             self::$webDriver = RemoteWebDriver::create($server, $capabilities, $connection_timeout_in_ms, $request_timeout_in_ms); // This is the default
         } catch (\Exception $e) {
             $error = "Exception: " . $e->getMessage();
-            die($error . PHP_EOL);
+            $this->fail($error . PHP_EOL);
         }
         
         // set some timeouts
@@ -170,7 +170,7 @@ class Web_TestCase extends Root_TestCase {
         // if there is at least a screenshot show it in the browser
         if (count(self::$screenshots) > 0) {
             if (getenv('BROWSER') == self::PHANTOMJS) {
-                die("Assertion failed: There should be no screenshot for phantomjs headless browser." . PHP_EOL);
+                $this->fail("Assertion failed: There should be no screenshot for phantomjs headless browser." . PHP_EOL);
             }
             echo "Taken " . count(self::$screenshots) . " screenshots" . PHP_EOL;
             $first_screenshot = self::$screenshots[0];
@@ -450,7 +450,7 @@ class Web_TestCase extends Root_TestCase {
         $screenshots_path = getenv('SCREENSHOTS_PATH');
         $path = $screenshots_path . "/..";
         if (! is_dir($path)) {
-            die("Path not found: " . $path . " (check the SCREENSHOTS_PATH env variable)" . PHP_EOL);
+            $this->fail("Path not found: " . $path . " (check the SCREENSHOTS_PATH env variable)" . PHP_EOL);
         }
         $dump_file = $path . DIRECTORY_SEPARATOR . date('Y-m-d_His') . "_console.json";
         file_put_contents($dump_file, $data);
