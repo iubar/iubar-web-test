@@ -391,14 +391,24 @@ class Web_TestCase extends Root_TestCase {
         $arguments = array();
         $this->getWd()->executeScript($script, $arguments);
     }
-    
+
     protected function clickByIdWithJs2($drop_area, $file) {
-        // TODO: verificare che $drop_area sia visibile
-        // TODO: verificare se file essitt
+        // vedi anche: https://github.com/facebook/php-webdriver/blob/787e71db74e42cdf13a41d500f75ea43da84bc75/tests/functional/FileUploadTest.php
         $js_file = __DIR__ . DIRECTORY_SEPARATOR . 'js\drag.js';
-        // TODO: verificare se file essitt        
+        if (! is_file($js_file)) {
+            $this->fail("File not found: " . $js_file . PHP_EOL);
+        }
         $js_src = file_get_contents($js_file);
-        $this->getWd()->executeScript($js_src, array($drop_area)).sendKeys($file);
+        if (! $drop_area) {
+            $this->fail("\$drop_area is null" . PHP_EOL);
+        }
+        $file_input = $this->getWd()->executeScript($js_src, array(
+            $drop_area
+        ));
+        if (! $file_input) {
+            $this->fail("\$file_input is null" . PHP_EOL);
+        }
+        $file_input->sendKeys($file);
     }
 
     /**
