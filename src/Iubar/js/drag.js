@@ -1,6 +1,7 @@
 var tgt = arguments[0];
 var e = document.createElement("input");
-e.type = "" + "file";
+e.setAttribute("id", "upload");
+e.type = "file";
 e.addEventListener("change", function(event) {
     var dataTransfer = {
         dropEffect: "",

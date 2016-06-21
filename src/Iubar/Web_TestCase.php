@@ -393,6 +393,14 @@ class Web_TestCase extends Root_TestCase {
     }
 
     protected function clickByIdWithJs2($drop_area, $file) {
+        
+        if (! is_file($file)) {
+            $this->fail("File not found: " . $file . PHP_EOL);
+        }
+        
+        try {
+            
+
         // vedi anche: https://github.com/facebook/php-webdriver/blob/787e71db74e42cdf13a41d500f75ea43da84bc75/tests/functional/FileUploadTest.php
         $js_file = __DIR__ . DIRECTORY_SEPARATOR . 'js\drag.js';
         if (! is_file($js_file)) {
@@ -402,13 +410,31 @@ class Web_TestCase extends Root_TestCase {
         if (! $drop_area) {
             $this->fail("\$drop_area is null" . PHP_EOL);
         }
-        $file_input = $this->getWd()->executeScript($js_src, array(
-            $drop_area
-        ));
+        $return = $this->getWd()->executeScript($js_src, array($drop_area));
+        
+        $this->getWd()->manage()->timeouts()->implicitlyWait(2);
+        
+        $file_input = $this->getWd()->findElement(WebDriverBy::id("upload")); // RemoteWebElement obj    
         if (! $file_input) {
             $this->fail("\$file_input is null" . PHP_EOL);
+        }else{
+            print_r($file_input);
+            $file_input->sendKeys($file);
         }
-        $file_input->sendKeys($file);
+       
+        $this->getWd()->manage()->timeouts()->implicitlyWait(10); // TODO: vberificare perchè l'attesa implicita non funziona !
+        
+        // wait for at most 10s for the page tile to be 'My Page'
+        // sleep for 500ms and retries if it the title is not correct.
+        $this->getWd()->wait(10, 500)->until(
+            WebDriverExpectedCondition::titleIs('My Page')
+            );
+        
+        } catch (\Exception $e) {
+            $this->fail("ARGH");
+        }
+        
+
     }
 
     /**
