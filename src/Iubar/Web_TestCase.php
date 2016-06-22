@@ -476,6 +476,9 @@ class Web_TestCase extends Root_TestCase {
         $this->assertEquals(0, $console_error);
     }
 
+    /**
+     * Log buffer is reset after each request.
+     */
     protected function clearConsole() {
         $this->getWd()
             ->manage()
