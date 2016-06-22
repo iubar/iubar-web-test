@@ -27,7 +27,7 @@ class Web_TestCase extends Root_TestCase {
     const DEFAULT_WAIT_TIMEOUT = 15;
     
     // milliseconds
-    const DEFAULT_WAIT_INTERVAL = 1000;
+    const DEFAULT_WAIT_INTERVAL = 5000;
     
     // Browser
     const PHANTOMJS = 'phantomjs';
@@ -464,13 +464,13 @@ class Web_TestCase extends Root_TestCase {
         // self::$climate->info('Filtered records (severe): ' . count($severe_records));
         
         $console_error = count($severe_records);
-        if (self::DEBUG) {
-            $output = @rt($severe_records);
-            echo "-->" . $output . PHP_EOL;
+//        if (self::DEBUG) {
+//             $output = @rt($severe_records);
+//             echo "-->" . $output . PHP_EOL;
             if (! getenv('TRAVIS')) {
                 $this->dumpConsoleError($severe_records); // write the console error in log file
             }
-        }
+//        }
         
         echo PHP_EOL . 'Errori sulla console: ' . $console_error . PHP_EOL;
         $this->assertEquals(0, $console_error);
