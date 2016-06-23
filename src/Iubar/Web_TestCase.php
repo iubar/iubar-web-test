@@ -15,6 +15,7 @@ use Facebook\WebDriver\Remote\DriverCommand;
  *        
  * @see : https://gist.github.com/huangzhichong/3284966 Cheat sheet for using php webdriver
  * @see : https://gist.github.com/aczietlow/7c4834f79a7afd920d8f Cheat sheet for using php webdriver
+ * @see : https://github.com/facebook/php-webdriver/wiki
  *     
  */
 class Web_TestCase extends Root_TestCase {
@@ -51,6 +52,8 @@ class Web_TestCase extends Root_TestCase {
     // easily output colored text and special formatting
     protected static $climate;
 
+    protected static $files_to_del = array();
+    
     /**
      * Start the WebDriver
      *
@@ -184,6 +187,13 @@ class Web_TestCase extends Root_TestCase {
             echo "Opening the last console dump..." . PHP_EOL;
             self::openBrowser($first_dump);
         }
+        
+        // delete all temp files
+        
+        foreach(self::$files_to_del as $file){
+            unlink($file);
+        }
+        
     }
 
     /**
@@ -439,20 +449,32 @@ class Web_TestCase extends Root_TestCase {
      * @throws \InvalidArgumentException if the read of the browser's console isn't support from the browser
      */
     protected function assertNoErrorsOnConsole() {
+        $console_error = $this->countErrorsOnConsole();        
+        echo PHP_EOL . 'Errori sulla console: ' . $console_error . PHP_EOL;
+        $this->assertEquals(0, $console_error);
+    }
+    
+    protected function assertErrorsOnConsole($n) {
+        $console_error = $this->countErrorsOnConsole();    
+        echo PHP_EOL . 'Errori sulla console: ' . $console_error . PHP_EOL;
+        $this->assertEquals($n, $console_error);
+    }
+    
+    private function countErrorsOnConsole() {
         $console_error = 0;
-        
+    
         // marionette doesn't have the console
         if (getenv('BROWSER') == self::MARIONETTE) {
             throw new \InvalidArgumentException('Browser ' . getenv('BROWSER') . ' non supportato dal metodo');
         }
-        
+    
         $wd = $this->getWd();
         $records = $wd->manage()->getLog('browser');
         $severe_records = array();
         // search for the error in the console
-        
+    
         // self::$climate->info('Records: ' . count($records));
-        
+    
         foreach ($records as $record) {
             if ($record['level'] == 'SEVERE') {
                 if (! self::shouldSkip($record['message'])) {
@@ -460,22 +482,21 @@ class Web_TestCase extends Root_TestCase {
                 }
             }
         }
-        
+    
         // self::$climate->info('Filtered records (severe): ' . count($severe_records));
-        
+    
         $console_error = count($severe_records);
-//        if (self::DEBUG) {
-//             $output = @rt($severe_records);
-//             echo "-->" . $output . PHP_EOL;
-            if (! getenv('TRAVIS')) {
-                $this->dumpConsoleError($severe_records); // write the console error in log file
-            }
-//        }
-        
-        echo PHP_EOL . 'Errori sulla console: ' . $console_error . PHP_EOL;
-        $this->assertEquals(0, $console_error);
+        //        if (self::DEBUG) {
+        //             $output = @rt($severe_records);
+        //             echo "-->" . $output . PHP_EOL;
+        if (! getenv('TRAVIS')) {
+            $this->dumpConsoleError($severe_records); // write the console error in log file
+        }
+        //        }
+    
+        return $console_error;
     }
-
+    
     /**
      * Log buffer is reset after each request.
      */
@@ -639,4 +660,11 @@ class Web_TestCase extends Root_TestCase {
             self::$screenshots[] = $save_as;
         }
     }
+    
+    protected function waitForTagWithText($tag, $substr, $timeout = self::DEFAULT_WAIT_TIMEOUT, $interval = self::DEFAULT_WAIT_INTERVAL) {
+        $this->getWd()
+        ->wait($timeout, $interval)
+        ->until(WebDriverExpectedCondition::textToBePresentInElement(WebDriverBy::tagName($tag), $substr));
+    }
+    
 }
