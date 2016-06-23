@@ -604,16 +604,6 @@ class Web_TestCase extends Root_TestCase {
     }
 
     /**
-     * Write the message with a specific color in the output
-     *
-     * @param string $color the color
-     * @param string $msg the message
-     */
-    private function write_color_msg($color, $msg) {
-        self::$climate->to('out')->$color($msg);
-    }
-
-    /**
      * Take a screenshot of the webpage
      *
      * @param string $element the element to capture
@@ -622,7 +612,7 @@ class Web_TestCase extends Root_TestCase {
     private function takeScreenshot($msg, $element = null) {
         $screenshots_path = getEnv('SCREENSHOTS_PATH');
         if ($screenshots_path) {
-            $this->write_color_msg(red, 'Taking a screenshot...');
+            echo PHP_EOL . 'Taking a screenshot...' . PHP_EOL;
             
             // The path where save the screenshot
             $save_as = $screenshots_path . DIRECTORY_SEPARATOR . date('Y-m-d_His') . ".png";
