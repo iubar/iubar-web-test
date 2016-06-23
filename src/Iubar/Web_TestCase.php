@@ -391,7 +391,7 @@ class Web_TestCase extends Root_TestCase {
      * Wait at most $timeout seconds until at least one result is shown
      *
      * @param string $tag the tag
-     * @param string $substr
+     * @param string $substr the text of the tag
      * @param int $timeout the timeout in seconds
      * @param int $interval the interval in miliseconds
      */
