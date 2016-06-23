@@ -39,6 +39,10 @@ class Web_TestCase extends Root_TestCase {
 
     const MARIONETTE = 'marionette';
 
+    const JS_DRAG_SCRIPT = 'js\drag.js';
+
+    const NO_ERRORS = 0;
+
     protected static $screenshots = array();
 
     protected static $dump_files = array();
@@ -53,7 +57,7 @@ class Web_TestCase extends Root_TestCase {
     protected static $climate;
 
     protected static $files_to_del = array();
-    
+
     /**
      * Start the WebDriver
      *
@@ -153,21 +157,22 @@ class Web_TestCase extends Root_TestCase {
             // Console
             $types = self::$webDriver->manage()->getAvailableLogTypes();
             if (self::DEBUG) {
+                self::$climate->info('Avaiable browser logs types:');
                 print_r($types);
             }
         }
     }
 
     /**
-     * Close the WebDriver and show the screenshot in the browser if there is
+     * Close the WebDriver and show the screenshot in the browser
      */
     public static function tearDownAfterClass() {
         if (getenv('BROWSER') != self::PHANTOMJS) {
-            echo "Closing all windows... " . PHP_EOL;
+            self::$climate->info('Closing all windows...');
             self::closeAllWindows();
         }
         
-        echo "Quitting webdriver... " . PHP_EOL;
+        self::$climate->info('Quitting webdriver...');
         self::$webDriver->quit();
         
         // if there is at least a screenshot show it in the browser
@@ -177,27 +182,25 @@ class Web_TestCase extends Root_TestCase {
             }
             echo "Taken " . count(self::$screenshots) . " screenshots" . PHP_EOL;
             $first_screenshot = self::$screenshots[0];
-            echo "Opening the last screenshot..." . PHP_EOL;
+            self::$climate->info('Opening the last screenshot...');
             self::openBrowser($first_screenshot);
         }
         
         if (count(self::$dump_files) > 0) {
             echo "Dump " . count(self::$dump_files) . " files" . PHP_EOL;
             $first_dump = self::$dump_files[0];
-            echo "Opening the last console dump..." . PHP_EOL;
+            self::$climate->info('Opening the last console dump...');
             self::openBrowser($first_dump);
         }
         
         // delete all temp files
-        
-        foreach(self::$files_to_del as $file){
+        foreach (self::$files_to_del as $file) {
             unlink($file);
         }
-        
     }
 
     /**
-     * Close all windows
+     * Close all browser windows
      */
     protected static function closeAllWindows() {
         $wd = self::$webDriver;
@@ -220,6 +223,11 @@ class Web_TestCase extends Root_TestCase {
         return $output;
     }
 
+    /**
+     * Open the browser at the specific url
+     *
+     * @param string $url the url
+     */
     protected static function openBrowser($url) {
         $browser = getEnv('BROWSER');
         if (getenv('BROWSER') == self::PHANTOMJS) {
@@ -228,8 +236,10 @@ class Web_TestCase extends Root_TestCase {
             if (getenv('BROWSER') == self::MARIONETTE) {
                 $browser = "firefox";
             }
-        echo "Opening browser at: " . $url . PHP_EOL;
-        $cmd = "start " . $browser . " " . $url; // Warning: Windows specific code
+        self::$climate->info('Opening browser at: ' . $url);
+        
+        // Warning: Windows specific code
+        $cmd = "start " . $browser . " " . $url;
         self::startShell($cmd);
     }
 
@@ -343,8 +353,8 @@ class Web_TestCase extends Root_TestCase {
     /**
      * waitForAjax : wait for all ajax request to close
      *
-     * @param integer $timeout timeout in seconds
-     * @param integer $interval interval in miliseconds
+     * @param int $timeout the timeout in seconds
+     * @param int $interval the interval in miliseconds
      * @return void
      */
     protected function waitForAjax($timeout = self::DEFAULT_WAIT_TIMEOUT, $interval = self::DEFAULT_WAIT_INTERVAL) {
@@ -363,11 +373,25 @@ class Web_TestCase extends Root_TestCase {
     /**
      * waitForAjax : wait for all ajax request to close
      *
-     * @param integer $timeout timeout in seconds
+     * @param int $timeout the timeout in seconds
      */
     protected function waitAjaxLoad2($timeout = 10) {
         $this->getWd()->waitForJS('return !!window.jQuery && window.jQuery.active == 0;', $timeout);
         $this->getWd()->wait(1);
+    }
+
+    /**
+     * Wait at most $timeout seconds until at least one result is shown
+     *
+     * @param string $tag the tag
+     * @param string $substr
+     * @param int $timeout the timeout in seconds
+     * @param int $interval the interval in miliseconds
+     */
+    protected function waitForTagWithText($tag, $substr, $timeout = self::DEFAULT_WAIT_TIMEOUT, $interval = self::DEFAULT_WAIT_INTERVAL) {
+        $this->getWd()
+            ->wait($timeout, $interval)
+            ->until(WebDriverExpectedCondition::textToBePresentInElement(WebDriverBy::tagName($tag), $substr));
     }
 
     /**
@@ -393,6 +417,7 @@ class Web_TestCase extends Root_TestCase {
 
     /**
      * For future use
+     * Execute a javascript script
      *
      * @param string $id the id
      */
@@ -402,21 +427,36 @@ class Web_TestCase extends Root_TestCase {
         $this->getWd()->executeScript($script, $arguments);
     }
 
+    /**
+     * Click on the drop area and execute the js script to upload a file
+     *
+     * @param string $drop_area the area to click where upload the file
+     * @param string $file the file to upload
+     */
     protected function clickByIdWithJs2($drop_area, $file) {
+        $wd = $this->getWd();
+        
+        // check the file
         if (! is_file($file)) {
             $this->fail("File not found: " . $file . PHP_EOL);
         }
         
         // vedi anche: https://github.com/facebook/php-webdriver/blob/787e71db74e42cdf13a41d500f75ea43da84bc75/tests/functional/FileUploadTest.php
-        $js_file = __DIR__ . DIRECTORY_SEPARATOR . 'js\drag.js';
+        $js_file = __DIR__ . DIRECTORY_SEPARATOR . self::JS_DRAG_SCRIPT;
+        
+        // check the js script
         if (! is_file($js_file)) {
             $this->fail("File not found: " . $js_file . PHP_EOL);
         }
         $js_src = file_get_contents($js_file);
+        
+        // check the drop area
         if (! $drop_area) {
             $this->fail("\$drop_area is null" . PHP_EOL);
         }
-        $return = $this->getWd()->executeScript($js_src, array(
+        
+        // execute the js drag file script
+        $return = $wd->executeScript($js_src, array(
             $drop_area
         ));
         
@@ -425,10 +465,11 @@ class Web_TestCase extends Root_TestCase {
             ->timeouts()
             ->implicitlyWait(2);
         
-        $file_input = $this->getWd()->findElement(WebDriverBy::id("upload")); // RemoteWebElement obj
+        $file_input = $wd->findElement(WebDriverBy::id("upload")); // RemoteWebElement obj
         if (! $file_input) {
             $this->fail("\$file_input is null" . PHP_EOL);
         } else {
+            // upload the file
             $file_input->sendKeys($file);
         }
     }
@@ -439,42 +480,54 @@ class Web_TestCase extends Root_TestCase {
      * Metodo non utilizzato. L'azione è delegata allo script che avvia il test.
      */
     protected function quitSelenium() {
-        echo "Quitting Selenium..." . PHP_EOL;
+        self::$climate->info('Quitting Selenium...');
         self::openBrowser(self::$selenium_shutdown);
     }
 
     /**
-     * Search if the browser's console has error and assuming that are zero
+     * Clear the log buffer of the browser, log buffer is reset after each request
+     */
+    protected function clearBrowserConsole() {
+        $this->getWd()
+            ->manage()
+            ->getLog('browser');
+    }
+
+    /**
+     * Assert that the browser's console has $n errors
+     *
+     * @param int $n the number of the errors you want DEFAULT:zero
+     */
+    protected function assertErrorsOnConsole($n = self::NO_ERRORS) {
+        $console_error = $this->countErrorsOnConsole();
+        echo PHP_EOL . 'Errori sulla console: ' . $console_error . PHP_EOL;
+        if ($n == self::NO_ERRORS) {
+            $this->assertEquals(0, $console_error);
+        } else {
+            // you expected some errors
+            $this->assertEquals($n, $console_error);
+        }
+    }
+
+    /**
+     * Search if the browser's console has error
      *
      * @throws \InvalidArgumentException if the read of the browser's console isn't support from the browser
+     * @return number
      */
-    protected function assertNoErrorsOnConsole() {
-        $console_error = $this->countErrorsOnConsole();        
-        echo PHP_EOL . 'Errori sulla console: ' . $console_error . PHP_EOL;
-        $this->assertEquals(0, $console_error);
-    }
-    
-    protected function assertErrorsOnConsole($n) {
-        $console_error = $this->countErrorsOnConsole();    
-        echo PHP_EOL . 'Errori sulla console: ' . $console_error . PHP_EOL;
-        $this->assertEquals($n, $console_error);
-    }
-    
     private function countErrorsOnConsole() {
         $console_error = 0;
-    
+        
         // marionette doesn't have the console
         if (getenv('BROWSER') == self::MARIONETTE) {
             throw new \InvalidArgumentException('Browser ' . getenv('BROWSER') . ' non supportato dal metodo');
         }
-    
+        
         $wd = $this->getWd();
         $records = $wd->manage()->getLog('browser');
         $severe_records = array();
+        
         // search for the error in the console
-    
-        // self::$climate->info('Records: ' . count($records));
-    
         foreach ($records as $record) {
             if ($record['level'] == 'SEVERE') {
                 if (! self::shouldSkip($record['message'])) {
@@ -482,30 +535,20 @@ class Web_TestCase extends Root_TestCase {
                 }
             }
         }
-    
-        // self::$climate->info('Filtered records (severe): ' . count($severe_records));
-    
         $console_error = count($severe_records);
-        //        if (self::DEBUG) {
-        //             $output = @rt($severe_records);
-        //             echo "-->" . $output . PHP_EOL;
-        if (! getenv('TRAVIS')) {
-            $this->dumpConsoleError($severe_records); // write the console error in log file
+        
+        // write the console error in log file
+        if (self::DEBUG && ! getenv('TRAVIS')) {
+            $this->dumpConsoleError($severe_records);
         }
-        //        }
-    
         return $console_error;
     }
-    
-    /**
-     * Log buffer is reset after each request.
-     */
-    protected function clearConsole() {
-        $this->getWd()
-            ->manage()
-            ->getLog('browser');
-    }
 
+    /**
+     * Write the console error in log file
+     *
+     * @param string $records the errors' record
+     */
     private function dumpConsoleError($records) {
         $data = json_encode($records, JSON_PRETTY_PRINT);
         $screenshots_path = getenv('SCREENSHOTS_PATH');
@@ -563,6 +606,36 @@ class Web_TestCase extends Root_TestCase {
         self::$climate->to('out')->$color($msg);
     }
 
+    /**
+     * Take a screenshot of the webpage
+     *
+     * @param string $element the element to capture
+     * @throws Exception if the screenshot or the directory where to save doesn't exist
+     */
+    private function takeScreenshot($msg, $element = null) {
+        $screenshots_path = getEnv('SCREENSHOTS_PATH');
+        if ($screenshots_path) {
+            $this->write_color_msg(red, 'Taking a screenshot...');
+            
+            // The path where save the screenshot
+            $save_as = $screenshots_path . DIRECTORY_SEPARATOR . date('Y-m-d_His') . ".png";
+            // $this->getWd()->takeScreenshot($save_as);
+            $this->takeScreenshot2($msg, $element, $save_as);
+            
+            if (! file_exists($save_as)) {
+                throw new Exception('Could not save screenshot: ' . $save_as);
+            }
+            self::$screenshots[] = $save_as;
+        }
+    }
+
+    /**
+     * Create the screenshot with an error message on the bottom of the image
+     *
+     * @param string $msg the message
+     * @param string $element the element to capture
+     * @param string $save_as the path where save the screenshot
+     */
     private function takeScreenshot2($msg, $element, $save_as = null) {
         $screenshot = base64_decode($this->getWd()->execute(DriverCommand::SCREENSHOT));
         $im = imagecreatefromstring($screenshot);
@@ -636,35 +709,4 @@ class Web_TestCase extends Root_TestCase {
         // tidy up
         imagedestroy($im);
     }
-
-    /**
-     * Take a screenshot of the webpage
-     *
-     * @param string $element the element to capture
-     * @throws Exception if the screenshot or the directory where to save doesn't exist
-     */
-    private function takeScreenshot($msg, $element = null) {
-        $screenshots_path = getEnv('SCREENSHOTS_PATH');
-        if ($screenshots_path) {
-            echo "Taking a screenshot..." . PHP_EOL;
-            
-            // The path where save the screenshot
-            $save_as = $screenshots_path . DIRECTORY_SEPARATOR . date('Y-m-d_His') . ".png";
-            // $this->getWd()->takeScreenshot($save_as);
-            $this->takeScreenshot2($msg, $element, $save_as);
-            
-            if (! file_exists($save_as)) {
-                throw new Exception('Could not save screenshot: ' . $save_as);
-            }
-            
-            self::$screenshots[] = $save_as;
-        }
-    }
-    
-    protected function waitForTagWithText($tag, $substr, $timeout = self::DEFAULT_WAIT_TIMEOUT, $interval = self::DEFAULT_WAIT_INTERVAL) {
-        $this->getWd()
-        ->wait($timeout, $interval)
-        ->until(WebDriverExpectedCondition::textToBePresentInElement(WebDriverBy::tagName($tag), $substr));
-    }
-    
 }
