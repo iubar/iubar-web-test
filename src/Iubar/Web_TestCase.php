@@ -13,12 +13,12 @@ use Facebook\WebDriver\Remote\DriverCommand;
  *
  * @author Matteo
  *        
- * @global browser
- * @global selenium_server
- * @global selenium_path
- * @global screenshots_path
- * @global ft_username
- * @global ft_password
+ * @global env BROWSER
+ * @global env SELENIUM_SERVER
+ * @global env SELENIUM_PATH
+ * @global env SCREENSHOTS_PATH
+ * @global env FT_USERNAME
+ * @global env FT_PASSWORD
  *        
  * @see : https://gist.github.com/huangzhichong/3284966 Cheat sheet for using php webdriver
  * @see : https://gist.github.com/aczietlow/7c4834f79a7afd920d8f Cheat sheet for using php webdriver
