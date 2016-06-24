@@ -559,13 +559,15 @@ class Web_TestCase extends Root_TestCase {
     private function dumpConsoleError($records) {
         $data = json_encode($records, JSON_PRETTY_PRINT);
         $screenshots_path = getenv('SCREENSHOTS_PATH');
-        $path = $screenshots_path . "/..";
-        if (! is_dir($path)) {
-            $this->fail("Path not found: " . $path . " (check the SCREENSHOTS_PATH env variable)" . PHP_EOL);
+        if($screenshots_path){
+            $path = $screenshots_path . "/..";
+            if (! is_dir($path)) {
+                $this->fail("Path not found: " . $path . " (check the SCREENSHOTS_PATH env variable)" . PHP_EOL);
+            }
+            $dump_file = $path . DIRECTORY_SEPARATOR . date('Y-m-d_His') . "_console.json";
+            file_put_contents($dump_file, $data);
+            self::$dump_files[] = $dump_file;
         }
-        $dump_file = $path . DIRECTORY_SEPARATOR . date('Y-m-d_His') . "_console.json";
-        file_put_contents($dump_file, $data);
-        self::$dump_files[] = $dump_file;
     }
 
     /**
