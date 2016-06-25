@@ -46,7 +46,7 @@ class Web_TestCase extends Root_TestCase {
 
     const MARIONETTE = 'marionette';
 
-    const JS_DRAG_SCRIPT = 'js\drag.js';
+    const JS_DRAG_SCRIPT = 'js/drag.js';
 
     const NO_ERRORS = 0;
 
