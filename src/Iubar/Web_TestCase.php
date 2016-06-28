@@ -12,18 +12,17 @@ use Facebook\WebDriver\Remote\DriverCommand;
  * PHPUnit_Framework_TestCase Develop
  *
  * @author Matteo
- *        
+ * 
  * @global env BROWSER
  * @global env SELENIUM_SERVER
  * @global env SELENIUM_PATH
  * @global env SCREENSHOTS_PATH
  * @global env FT_USERNAME
  * @global env FT_PASSWORD
- *        
+ * 
  * @see : https://gist.github.com/huangzhichong/3284966 Cheat sheet for using php webdriver
  * @see : https://gist.github.com/aczietlow/7c4834f79a7afd920d8f Cheat sheet for using php webdriver
  * @see : https://github.com/facebook/php-webdriver/wiki
- *     
  */
 class Web_TestCase extends Root_TestCase {
 
@@ -70,7 +69,6 @@ class Web_TestCase extends Root_TestCase {
      *
      * @global string BROWSER
      * @global string TRAVIS
-     *        
      */
     public static function setUpBeforeClass() {
         self::$climate = new CLImate();
@@ -83,7 +81,7 @@ class Web_TestCase extends Root_TestCase {
         if (self::TAKE_A_SCREENSHOT) {
             if (getenv('BROWSER') != self::PHANTOMJS) {
                 $screenshots_path = getEnv('SCREENSHOTS_PATH');
-                if ($screenshots_path && ! is_writable($screenshots_path)) {
+                if ($screenshots_path && !is_writable($screenshots_path)) {
                     die("ERRORE percorso non scrivibile: " . $screenshots_path . PHP_EOL);
                 }
             }
@@ -153,10 +151,7 @@ class Web_TestCase extends Root_TestCase {
             ->setScriptTimeout(240); // Set the amount of time (in seconds) to wait for an asynchronous script to finish execution before throwing an error.
         
         /*
-         * Window size
-         * $self::$webDriver->manage()->window()->maximize();
-         * $window = new WebDriverDimension(1024, 768);
-         * $this->webDriver->manage()->window()->setSize($window);
+         * Window size $self::$webDriver->manage()->window()->maximize(); $window = new WebDriverDimension(1024, 768); $this->webDriver->manage()->window()->setSize($window);
          */
         
         // write avaiable browser logs (not works with marionette)
@@ -254,7 +249,6 @@ class Web_TestCase extends Root_TestCase {
      * This method is called when a test method did not execute successfully
      *
      * @param \Exception $e the exception
-     *       
      */
     public function onNotSuccessfulTest(\Exception $e) {
         // reduced the error message
@@ -423,8 +417,7 @@ class Web_TestCase extends Root_TestCase {
     }
 
     /**
-     * For future use
-     * Execute a javascript script
+     * For future use Execute a javascript script
      *
      * @param string $id the id
      */
@@ -444,7 +437,7 @@ class Web_TestCase extends Root_TestCase {
         $wd = $this->getWd();
         
         // check the file
-        if (! is_file($file)) {
+        if (!is_file($file)) {
             $this->fail("File not found: " . $file . PHP_EOL);
         }
         
@@ -452,13 +445,13 @@ class Web_TestCase extends Root_TestCase {
         $js_file = __DIR__ . DIRECTORY_SEPARATOR . self::JS_DRAG_SCRIPT;
         
         // check the js script
-        if (! is_file($js_file)) {
+        if (!is_file($js_file)) {
             $this->fail("File not found: " . $js_file . PHP_EOL);
         }
         $js_src = file_get_contents($js_file);
         
         // check the drop area
-        if (! $drop_area) {
+        if (!$drop_area) {
             $this->fail("\$drop_area is null" . PHP_EOL);
         }
         
@@ -473,7 +466,7 @@ class Web_TestCase extends Root_TestCase {
             ->implicitlyWait(2);
         
         $file_input = $wd->findElement(WebDriverBy::id("upload")); // RemoteWebElement obj
-        if (! $file_input) {
+        if (!$file_input) {
             $this->fail("\$file_input is null" . PHP_EOL);
         } else {
             // upload the file
@@ -483,7 +476,6 @@ class Web_TestCase extends Root_TestCase {
 
     /**
      * Shutdown Selenium Server
-     *
      * Metodo non utilizzato. L'azione è delegata allo script che avvia il test.
      */
     protected function quitSelenium() {
@@ -537,7 +529,7 @@ class Web_TestCase extends Root_TestCase {
         // search for the error in the console
         foreach ($records as $record) {
             if ($record['level'] == 'SEVERE') {
-                if (! self::shouldSkip($record['message'])) {
+                if (!self::shouldSkip($record['message'])) {
                     $severe_records[] = $record;
                 }
             }
@@ -545,7 +537,7 @@ class Web_TestCase extends Root_TestCase {
         $console_error = count($severe_records);
         
         // write the console error in log file
-        if (self::DEBUG && ! getenv('TRAVIS')) {
+        if (self::DEBUG && !getenv('TRAVIS')) {
             $this->dumpConsoleError($severe_records);
         }
         return $console_error;
@@ -561,7 +553,7 @@ class Web_TestCase extends Root_TestCase {
         $screenshots_path = getenv('SCREENSHOTS_PATH');
         if ($screenshots_path) {
             $path = $screenshots_path . "/..";
-            if (! is_dir($path)) {
+            if (!is_dir($path)) {
                 $this->fail("Path not found: " . $path . " (check the SCREENSHOTS_PATH env variable)" . PHP_EOL);
             }
             $dump_file = $path . DIRECTORY_SEPARATOR . date('Y-m-d_His') . "_console.json";
@@ -621,7 +613,7 @@ class Web_TestCase extends Root_TestCase {
             // $this->getWd()->takeScreenshot($save_as);
             $this->takeScreenshot2($msg, $element, $save_as);
             
-            if (! file_exists($save_as)) {
+            if (!file_exists($save_as)) {
                 throw new Exception('Could not save screenshot: ' . $save_as);
             }
             self::$screenshots[] = $save_as;
