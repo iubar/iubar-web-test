@@ -12,14 +12,14 @@ use Facebook\WebDriver\Remote\DriverCommand;
  * PHPUnit_Framework_TestCase Develop
  *
  * @author Matteo
- * 
  * @global env BROWSER
  * @global env SELENIUM_SERVER
  * @global env SELENIUM_PATH
  * @global env SCREENSHOTS_PATH
+ * @global env FT_HOST
  * @global env FT_USERNAME
  * @global env FT_PASSWORD
- * 
+ * @global env TRAVIS
  * @see : https://gist.github.com/huangzhichong/3284966 Cheat sheet for using php webdriver
  * @see : https://gist.github.com/aczietlow/7c4834f79a7afd920d8f Cheat sheet for using php webdriver
  * @see : https://github.com/facebook/php-webdriver/wiki
@@ -49,11 +49,15 @@ class Web_TestCase extends Root_TestCase {
 
     const NO_ERRORS = 0;
 
+    protected static $openLastScreenshot = true;
+
+    protected static $openLastDumpFile = true;
+
     protected static $screenshots = array();
 
     protected static $dump_files = array();
 
-    protected static $webDriver;
+    protected static $webDriver = null;
 
     protected static $selenium_server_shutdown;
 
@@ -64,13 +68,35 @@ class Web_TestCase extends Root_TestCase {
 
     protected static $files_to_del = array();
 
+    protected static $browser = null;
+
+    protected static $selenium_server = null;
+
+    protected static $selenium_path = null;
+
+    protected static $screenshots_path = null;
+
+    protected static $ft_host = null;
+
+    protected static $ft_username = null;
+
+    protected static $ft_password = null;
+
+    private static $travis = null;
+
     /**
      * Start the WebDriver
-     *
-     * @global string BROWSER
-     * @global string TRAVIS
      */
     public static function setUpBeforeClass() {
+        self::$browser = getenv('BROWSER');
+        self::$selenium_server = getenv('SELENIUM_SERVER');
+        self::$selenium_path = getenv('SELENIUM_PATH');
+        self::$screenshots_path = getenv('SCREENSHOTS_PATH');
+        self::$ft_host = getenv('FT_HOST');
+        self::$ft_username = getenv('FT_USERNAME');
+        self::$ft_password = getenv('FT_PASSWORD');
+        self::$travis = getenv('TRAVIS');
+        
         self::$climate = new CLImate();
         
         // Usage with SauceLabs:
@@ -79,8 +105,8 @@ class Web_TestCase extends Root_TestCase {
         
         // check if you can take screenshots and path exist
         if (self::TAKE_A_SCREENSHOT) {
-            if (getenv('BROWSER') != self::PHANTOMJS) {
-                $screenshots_path = getEnv('SCREENSHOTS_PATH');
+            if (self::$browser != self::PHANTOMJS) {
+                $screenshots_path = self::$screenshots_path;
                 if ($screenshots_path && !is_writable($screenshots_path)) {
                     die("ERRORE percorso non scrivibile: " . $screenshots_path . PHP_EOL);
                 }
@@ -90,7 +116,7 @@ class Web_TestCase extends Root_TestCase {
         $capabilities = null;
         
         // set capabilities according to the browers
-        switch (getenv('BROWSER')) {
+        switch (self::$browser) {
             case self::PHANTOMJS:
                 echo "Inizializing PhantomJs browser" . PHP_EOL;
                 $capabilities = DesiredCapabilities::phantomjs();
@@ -110,7 +136,7 @@ class Web_TestCase extends Root_TestCase {
                 // $capabilities->setCapability('firefox_binary', 'C:/Program Files (x86)/Firefox Developer Edition/firefox.exe');
                 break;
             default:
-                $error = "Browser '" . getEnv('BROWSER') . "' not supported.";
+                $error = "Browser '" . self::$browser . "' not supported.";
                 $error .= PHP_EOL . "(you should set the BROWSER global var with a supported browser name)";
                 die("ERROR: " . $error . PHP_EOL);
         }
@@ -121,7 +147,7 @@ class Web_TestCase extends Root_TestCase {
         
         $server_root = null;
         // set Travis params
-        if (getenv('TRAVIS')) {
+        if (self::$travis) {
             echo "Travis detected..." . PHP_EOL;
             $capabilities->setCapability('tunnel-identifier', getenv('TRAVIS_JOB_NUMBER'));
             $username = getenv('SAUCE_USERNAME');
@@ -155,7 +181,7 @@ class Web_TestCase extends Root_TestCase {
          */
         
         // write avaiable browser logs (not works with marionette)
-        if (getEnv('BROWSER') != self::MARIONETTE) {
+        if (self::$browser != self::MARIONETTE) {
             // Console
             $types = self::$webDriver->manage()->getAvailableLogTypes();
             if (self::DEBUG) {
@@ -169,7 +195,7 @@ class Web_TestCase extends Root_TestCase {
      * Close the WebDriver and show the screenshot in the browser
      */
     public static function tearDownAfterClass() {
-        if (getenv('BROWSER') != self::PHANTOMJS) {
+        if (self::$browser != self::PHANTOMJS) {
             self::$climate->info('Closing all windows...');
             self::closeAllWindows();
         }
@@ -178,8 +204,8 @@ class Web_TestCase extends Root_TestCase {
         self::$webDriver->quit();
         
         // if there is at least a screenshot show it in the browser
-        if (count(self::$screenshots) > 0) {
-            if (getenv('BROWSER') == self::PHANTOMJS) {
+        if (self::$openLastScreenshot && count(self::$screenshots) > 0) {
+            if (self::$browser == self::PHANTOMJS) {
                 die("Assertion failed: There should be no screenshot for phantomjs headless browser." . PHP_EOL);
             }
             echo "Taken " . count(self::$screenshots) . " screenshots" . PHP_EOL;
@@ -188,7 +214,7 @@ class Web_TestCase extends Root_TestCase {
             self::openBrowser($first_screenshot);
         }
         
-        if (count(self::$dump_files) > 0) {
+        if (self::$openLastDumpFile && count(self::$dump_files) > 0) {
             echo "Dump " . count(self::$dump_files) . " files" . PHP_EOL;
             $first_dump = self::$dump_files[0];
             self::$climate->info('Opening the last console dump...');
@@ -199,6 +225,15 @@ class Web_TestCase extends Root_TestCase {
         foreach (self::$files_to_del as $file) {
             unlink($file);
         }
+    }
+
+    /**
+     * Return true is Travis is set
+     *
+     * @return string true is Travis is set
+     */
+    protected function isTravis() {
+        return self::$travis;
     }
 
     /**
@@ -231,11 +266,11 @@ class Web_TestCase extends Root_TestCase {
      * @param string $url the url
      */
     protected static function openBrowser($url) {
-        $browser = getEnv('BROWSER');
-        if (getenv('BROWSER') == self::PHANTOMJS) {
+        $browser = self::$browser;
+        if (self::$browser == self::PHANTOMJS) {
             $browser = "chrome";
         } else 
-            if (getenv('BROWSER') == self::MARIONETTE) {
+            if (self::$browser == self::MARIONETTE) {
                 $browser = "firefox";
             }
         self::$climate->info('Opening browser at: ' . $url);
@@ -256,7 +291,7 @@ class Web_TestCase extends Root_TestCase {
         echo PHP_EOL;
         self::$climate->to('out')->red("EXCEPTION: " . $msg);
         if (self::TAKE_A_SCREENSHOT) {
-            if (getenv('BROWSER') != self::PHANTOMJS) {
+            if (self::$browser != self::PHANTOMJS) {
                 $this->takeScreenshot($msg);
             }
         }
@@ -475,8 +510,7 @@ class Web_TestCase extends Root_TestCase {
     }
 
     /**
-     * Shutdown Selenium Server
-     * Metodo non utilizzato. L'azione è delegata allo script che avvia il test.
+     * Shutdown Selenium Server Metodo non utilizzato. L'azione è delegata allo script che avvia il test.
      */
     protected function quitSelenium() {
         self::$climate->info('Quitting Selenium...');
@@ -518,8 +552,8 @@ class Web_TestCase extends Root_TestCase {
         $console_error = 0;
         
         // marionette doesn't have the console
-        if (getenv('BROWSER') == self::MARIONETTE) {
-            throw new \InvalidArgumentException('Browser ' . getenv('BROWSER') . ' non supportato dal metodo');
+        if (self::$browser == self::MARIONETTE) {
+            throw new \InvalidArgumentException('Browser ' . self::$browser . ' non supportato dal metodo');
         }
         
         $wd = $this->getWd();
@@ -537,7 +571,7 @@ class Web_TestCase extends Root_TestCase {
         $console_error = count($severe_records);
         
         // write the console error in log file
-        if (self::DEBUG && !getenv('TRAVIS')) {
+        if (self::DEBUG && !self::$travis) {
             $this->dumpConsoleError($severe_records);
         }
         return $console_error;
@@ -550,7 +584,7 @@ class Web_TestCase extends Root_TestCase {
      */
     private function dumpConsoleError($records) {
         $data = json_encode($records, JSON_PRETTY_PRINT);
-        $screenshots_path = getenv('SCREENSHOTS_PATH');
+        $screenshots_path = self::$screenshots_path;
         if ($screenshots_path) {
             $path = $screenshots_path . "/..";
             if (!is_dir($path)) {
@@ -604,7 +638,7 @@ class Web_TestCase extends Root_TestCase {
      * @throws Exception if the screenshot or the directory where to save doesn't exist
      */
     private function takeScreenshot($msg, $element = null) {
-        $screenshots_path = getEnv('SCREENSHOTS_PATH');
+        $screenshots_path = self::$screenshots_path;
         if ($screenshots_path) {
             echo PHP_EOL . 'Taking a screenshot...' . PHP_EOL;
             
