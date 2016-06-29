@@ -4,7 +4,7 @@
 	
     "require": {
         "php": ">=5.5.0",
-        "facebook/webdriver": "*",
+        "facebook/webdriver": "dev-community@dev",
         "guzzlehttp/guzzle": "~6.0",
         "league/climate":"*",
         "digitalnature/php-ref": "*"
