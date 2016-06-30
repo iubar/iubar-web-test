@@ -488,7 +488,9 @@ class Web_TestCase extends Root_TestCase {
     protected function clickByIdWithJs2($drop_area, $file) {
         $wd = $this->getWd();
         
-        // check the file
+        $file = realpath($file);
+        
+        // check the file        
         if (!is_file($file)) {
             $this->fail("File not found: " . $file . PHP_EOL);
         } else {
@@ -527,10 +529,10 @@ class Web_TestCase extends Root_TestCase {
             $this->fail("\$file_input is null" . PHP_EOL);
         } else {
             // upload the file
-            echo "Uploading file..." . PHP_EOL;
-            $file_input->sendKeys($file);
-            
-            //file_input->setFileDetector(new LocalFileDetector())->sendKeys($file);
+            echo "Uploading file: " . $file . PHP_EOL;
+            //$file_input->sendKeys($file);            
+            $file_input->setFileDetector(new LocalFileDetector())->sendKeys($file);
+            // echo "Attribute is: " . $file_input->getAttribute('value') . PHP_EOL; // Facebook\WebDriver\Exception\StaleElementReferenceException: stale element reference: element is not attached to the page document
         }
     }
 
