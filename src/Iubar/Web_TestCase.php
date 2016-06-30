@@ -527,7 +527,7 @@ class Web_TestCase extends Root_TestCase {
         $this->getWd()
             ->manage()
             ->timeouts()
-            ->implicitlyWait(4);
+            ->implicitlyWait(2);
         
         $file_input = $wd->findElement(WebDriverBy::id("upload")); // RemoteWebElement obj
         if (!$file_input) {
