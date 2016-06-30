@@ -83,6 +83,8 @@ class Web_TestCase extends Root_TestCase {
     protected static $ft_password = null;
 
     private static $travis = null;
+    
+    public static $port = null; // default is 4444
 
     /**
      * Start the WebDriver
@@ -116,6 +118,7 @@ class Web_TestCase extends Root_TestCase {
         $capabilities = null;
         
         // set capabilities according to the browers
+        // @see: https://wiki.saucelabs.com/display/DOCS/Platform+Configurator
         switch (self::$browser) {
             case self::PHANTOMJS:
                 echo "Inizializing PhantomJs browser" . PHP_EOL;
@@ -124,10 +127,14 @@ class Web_TestCase extends Root_TestCase {
             case self::CHROME:
                 echo "Inizializing Chrome browser" . PHP_EOL;
                 $capabilities = DesiredCapabilities::chrome();
+                // $capabilities->setCapability("version", "51.0");
+                // $capabilities->setCapability("platform", "Windows 10");
                 break;
             case self::FIREFOX:
                 echo "Inizializing Firefox browser" . PHP_EOL;
                 $capabilities = DesiredCapabilities::firefox();
+                // $capabilities->setCapability("version", "46.0");
+                // $capabilities->setCapability("platform", "Windows 10");
                 break;
             case self::MARIONETTE:
                 echo "Inizializing Marionette browser" . PHP_EOL;
@@ -135,11 +142,22 @@ class Web_TestCase extends Root_TestCase {
                 $capabilities->setCapability(self::MARIONETTE, true);
                 // $capabilities->setCapability('firefox_binary', 'C:/Program Files (x86)/Firefox Developer Edition/firefox.exe');
                 break;
+            case self::SAFARI:
+                $capabilities = DesiredCapabilities::safari();
+                $capabilities->setCapability('platform', 'OS X 10.11');
+                $capabilities->setCapability('version', '9.0');
+                break;
             default:
                 $error = "Browser '" . self::$browser . "' not supported.";
                 $error .= PHP_EOL . "(you should set the BROWSER global var with a supported browser name)";
                 die("ERROR: " . $error . PHP_EOL);
         }
+        
+ 
+ 
+        
+        
+        
         
         // create the WebDriver
         $connection_timeout_in_ms = 10 * 1000; // Set the maximum time of a request
@@ -158,6 +176,9 @@ class Web_TestCase extends Root_TestCase {
         }
         self::$selenium_server_shutdown = $server_root . '/selenium-server/driver/?cmd=shutDownSeleniumServer';
         self::$selenium_session_shutdown = $server_root . '/selenium-server/driver/?cmd=shutDown';
+        if($this->port){
+            $server = $server_root . ":" . $this->port;
+        }
         $server = $server_root . "/wd/hub";
         echo "Server: " . $server . PHP_EOL;
         
