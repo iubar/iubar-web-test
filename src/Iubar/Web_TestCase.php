@@ -7,6 +7,7 @@ use Facebook\WebDriver\WebDriverExpectedCondition;
 use Facebook\WebDriver\Remote\DesiredCapabilities;
 use League\CLImate\CLImate;
 use Facebook\WebDriver\Remote\DriverCommand;
+use Facebook\WebDriver\Remote\LocalFileDetector;
 
 /**
  * PHPUnit_Framework_TestCase Develop
@@ -83,9 +84,10 @@ class Web_TestCase extends Root_TestCase {
     protected static $ft_password = null;
 
     private static $travis = null;
-    
-    public static $port = null; // default is 4444
 
+    public static $port = null;
+    // default is 4444
+    
     /**
      * Start the WebDriver
      */
@@ -153,12 +155,6 @@ class Web_TestCase extends Root_TestCase {
                 die("ERROR: " . $error . PHP_EOL);
         }
         
- 
- 
-        
-        
-        
-        
         // create the WebDriver
         $connection_timeout_in_ms = 10 * 1000; // Set the maximum time of a request
         $request_timeout_in_ms = 20 * 1000; // Set the maximum time of a request
@@ -174,11 +170,11 @@ class Web_TestCase extends Root_TestCase {
         } else {
             $server_root = "http://" . getenv('SELENIUM_SERVER');
         }
+        if (self::$port) {
+            $server_root = $server_root . ":" . self::$port;
+        }
         self::$selenium_server_shutdown = $server_root . '/selenium-server/driver/?cmd=shutDownSeleniumServer';
         self::$selenium_session_shutdown = $server_root . '/selenium-server/driver/?cmd=shutDown';
-        if(self::$port){
-            $server = $server_root . ":" . self::$port;
-        }
         $server = $server_root . "/wd/hub";
         echo "Server: " . $server . PHP_EOL;
         
@@ -495,6 +491,10 @@ class Web_TestCase extends Root_TestCase {
         // check the file
         if (!is_file($file)) {
             $this->fail("File not found: " . $file . PHP_EOL);
+        } else {
+            if (!is_readable($file)) {
+                $this->fail("File not readable: " . $file . PHP_EOL);
+            }
         }
         
         // vedi anche: https://github.com/facebook/php-webdriver/blob/787e71db74e42cdf13a41d500f75ea43da84bc75/tests/functional/FileUploadTest.php
@@ -516,17 +516,21 @@ class Web_TestCase extends Root_TestCase {
             $drop_area
         ));
         
+        echo "Waiting the js script execution..." . PHP_EOL;
         $this->getWd()
             ->manage()
             ->timeouts()
-            ->implicitlyWait(2);
+            ->implicitlyWait(4);
         
         $file_input = $wd->findElement(WebDriverBy::id("upload")); // RemoteWebElement obj
         if (!$file_input) {
             $this->fail("\$file_input is null" . PHP_EOL);
         } else {
             // upload the file
+            echo "Uploading file..." . PHP_EOL;
             $file_input->sendKeys($file);
+            
+            //file_input->setFileDetector(new LocalFileDetector())->sendKeys($file);
         }
     }
 
