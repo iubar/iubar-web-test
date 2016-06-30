@@ -17,9 +17,9 @@ use Facebook\WebDriver\Remote\LocalFileDetector;
  * @global env SELENIUM_SERVER
  * @global env SELENIUM_PATH
  * @global env SCREENSHOTS_PATH
- * @global env FT_HOST
- * @global env FT_USERNAME
- * @global env FT_PASSWORD
+ * @global env APP_HOST
+ * @global env APP_USERNAME
+ * @global env APP_PASSWORD
  * @global env TRAVIS
  * @see : https://gist.github.com/huangzhichong/3284966 Cheat sheet for using php webdriver
  * @see : https://gist.github.com/aczietlow/7c4834f79a7afd920d8f Cheat sheet for using php webdriver
@@ -45,6 +45,8 @@ class Web_TestCase extends Root_TestCase {
     const FIREFOX = 'firefox';
 
     const MARIONETTE = 'marionette';
+    
+    const SAFARI = 'safari';
 
     const JS_DRAG_SCRIPT = 'js/drag.js';
 
@@ -77,11 +79,11 @@ class Web_TestCase extends Root_TestCase {
 
     protected static $screenshots_path = null;
 
-    protected static $ft_host = null;
+    protected static $app_host = null;
 
-    protected static $ft_username = null;
+    protected static $app_username = null;
 
-    protected static $ft_password = null;
+    protected static $app_password = null;
 
     private static $travis = null;
 
@@ -96,9 +98,9 @@ class Web_TestCase extends Root_TestCase {
         self::$selenium_server = getenv('SELENIUM_SERVER');
         self::$selenium_path = getenv('SELENIUM_PATH');
         self::$screenshots_path = getenv('SCREENSHOTS_PATH');
-        self::$ft_host = getenv('FT_HOST');
-        self::$ft_username = getenv('FT_USERNAME');
-        self::$ft_password = getenv('FT_PASSWORD');
+        self::$app_host = getenv('APP_HOST');
+        self::$app_username = getenv('APP_USERNAME');
+        self::$app_password = getenv('APP_PASSWORD');
         self::$travis = getenv('TRAVIS');
         
         self::$climate = new CLImate();
@@ -145,6 +147,9 @@ class Web_TestCase extends Root_TestCase {
                 // $capabilities->setCapability('firefox_binary', 'C:/Program Files (x86)/Firefox Developer Edition/firefox.exe');
                 break;
             case self::SAFARI:
+                if(self::isWindows()){
+                    $this->fail("Can't test with Safari on Windows Os" . PHP_EOL);
+                }
                 $capabilities = DesiredCapabilities::safari();
                 $capabilities->setCapability('platform', 'OS X 10.11');
                 $capabilities->setCapability('version', '9.0');
@@ -760,5 +765,13 @@ class Web_TestCase extends Root_TestCase {
         
         // tidy up
         imagedestroy($im);
+    }
+    
+    protected static function isWindows(){
+        $b = false;
+        if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
+            $b=true;
+        }
+        return $b;
     }
 }
