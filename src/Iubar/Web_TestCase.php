@@ -29,7 +29,7 @@ class Web_TestCase extends Root_TestCase {
 
     const DEBUG = false;
 
-    const TAKE_A_SCREENSHOT = true;
+    const TAKE_SCREENSHOTS = true;
     
     // seconds
     const DEFAULT_WAIT_TIMEOUT = 15;
@@ -110,7 +110,7 @@ class Web_TestCase extends Root_TestCase {
         // set on .tavis.yml and env.bat: SELENIUM_SERVER (hostname + port, without protocol);
         
         // check if you can take screenshots and path exist
-        if (self::TAKE_A_SCREENSHOT) {
+        if (self::TAKE_SCREENSHOTS) {
             if (self::$browser != self::PHANTOMJS) {
                 $screenshots_path = self::$screenshots_path;
                 if ($screenshots_path && !is_writable($screenshots_path)) {
@@ -312,7 +312,7 @@ class Web_TestCase extends Root_TestCase {
         $msg = $this->formatErrorMsg($e);
         echo PHP_EOL;
         self::$climate->to('out')->red("EXCEPTION: " . $msg);
-        if (self::TAKE_A_SCREENSHOT) {
+        if (self::TAKE_SCREENSHOTS) {
             if (self::$browser != self::PHANTOMJS) {
                 $this->takeScreenshot($msg);
             }
