@@ -9,7 +9,6 @@ use GuzzleHttp\Exception\RequestException;
  * PHPUnit_Framework_TestCase Develop
  *
  * @author Matteo
- *        
  */
 class RestApi_TestCase extends Root_TestCase {
 

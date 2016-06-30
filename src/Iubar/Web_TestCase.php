@@ -45,12 +45,15 @@ class Web_TestCase extends Root_TestCase {
     const FIREFOX = 'firefox';
 
     const MARIONETTE = 'marionette';
-    
+
     const SAFARI = 'safari';
 
     const JS_DRAG_SCRIPT = 'js/drag.js';
 
     const NO_ERRORS = 0;
+    
+    // default is 4444
+    public static $port = null;
 
     protected static $openLastScreenshot = true;
 
@@ -87,9 +90,6 @@ class Web_TestCase extends Root_TestCase {
 
     private static $travis = null;
 
-    public static $port = null;
-    // default is 4444
-    
     /**
      * Start the WebDriver
      */
@@ -147,7 +147,7 @@ class Web_TestCase extends Root_TestCase {
                 // $capabilities->setCapability('firefox_binary', 'C:/Program Files (x86)/Firefox Developer Edition/firefox.exe');
                 break;
             case self::SAFARI:
-                if(self::isWindows()){
+                if (self::isWindows()) {
                     $this->fail("Can't test with Safari on Windows Os" . PHP_EOL);
                 }
                 $capabilities = DesiredCapabilities::safari();
@@ -250,15 +250,6 @@ class Web_TestCase extends Root_TestCase {
     }
 
     /**
-     * Return true is Travis is set
-     *
-     * @return string true is Travis is set
-     */
-    protected function isTravis() {
-        return self::$travis;
-    }
-
-    /**
      * Close all browser windows
      */
     protected static function closeAllWindows() {
@@ -303,6 +294,19 @@ class Web_TestCase extends Root_TestCase {
     }
 
     /**
+     * Return if the Os is Windows
+     *
+     * @return boolean true if the Os is Windows
+     */
+    protected static function isWindows() {
+        $b = false;
+        if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
+            $b = true;
+        }
+        return $b;
+    }
+
+    /**
      * This method is called when a test method did not execute successfully
      *
      * @param \Exception $e the exception
@@ -318,6 +322,15 @@ class Web_TestCase extends Root_TestCase {
             }
         }
         parent::onNotSuccessfulTest($e);
+    }
+
+    /**
+     * Return true is Travis is set
+     *
+     * @return string true is Travis is set
+     */
+    protected function isTravis() {
+        return self::$travis;
     }
 
     /**
@@ -495,7 +508,7 @@ class Web_TestCase extends Root_TestCase {
         
         $file = realpath($file);
         
-        // check the file        
+        // check the file
         if (!is_file($file)) {
             $this->fail("File not found: " . $file . PHP_EOL);
         } else {
@@ -535,7 +548,7 @@ class Web_TestCase extends Root_TestCase {
         } else {
             // upload the file
             echo "Uploading file: " . $file . PHP_EOL;
-            //$file_input->sendKeys($file);            
+            // $file_input->sendKeys($file);
             $file_input->setFileDetector(new LocalFileDetector())->sendKeys($file);
             // echo "Attribute is: " . $file_input->getAttribute('value') . PHP_EOL; // Facebook\WebDriver\Exception\StaleElementReferenceException: stale element reference: element is not attached to the page document
         }
@@ -765,13 +778,5 @@ class Web_TestCase extends Root_TestCase {
         
         // tidy up
         imagedestroy($im);
-    }
-    
-    protected static function isWindows(){
-        $b = false;
-        if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
-            $b=true;
-        }
-        return $b;
     }
 }
