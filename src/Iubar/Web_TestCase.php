@@ -176,8 +176,8 @@ class Web_TestCase extends Root_TestCase {
         }
         self::$selenium_server_shutdown = $server_root . '/selenium-server/driver/?cmd=shutDownSeleniumServer';
         self::$selenium_session_shutdown = $server_root . '/selenium-server/driver/?cmd=shutDown';
-        if($this->port){
-            $server = $server_root . ":" . $this->port;
+        if(self::$port){
+            $server = $server_root . ":" . self::$port;
         }
         $server = $server_root . "/wd/hub";
         echo "Server: " . $server . PHP_EOL;
