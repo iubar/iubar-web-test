@@ -157,7 +157,7 @@ class Web_TestCase extends Root_TestCase {
                 $capabilities = DesiredCapabilities::safari();
                 $capabilities->setCapability('platform', 'OS X 10.11');
                 $capabilities->setCapability('version', '9.0');
-                $capabilities->setCapability('safari.options', '{cleanSession: true}');   
+                //$capabilities->setCapability('safari.options', '{cleanSession: true}');   
                 $capabilities->setCapability('cleanSession', 'true'); 
                 break;
             default:
@@ -578,10 +578,6 @@ class Web_TestCase extends Root_TestCase {
             // $file_input->sendKeys($file);
             $file_input->setFileDetector(new LocalFileDetector())->sendKeys($file);
             // echo "Attribute is: " . $file_input->getAttribute('value') . PHP_EOL; // Facebook\WebDriver\Exception\StaleElementReferenceException: stale element reference: element is not attached to the page document
-            $this->getWd()
-                ->manage()
-                ->timeouts()
-                ->implicitlyWait(2);
         }
     }
 
