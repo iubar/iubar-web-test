@@ -50,6 +50,8 @@ class Web_TestCase extends Root_TestCase {
 
     const JS_DRAG_SCRIPT = 'js/drag.js';
     
+    const JS_DELETECOOKIES_SCRIPT = 'js/delete_cookies2.js';
+    
     const SAUCELABS = 'saucelabs';
     
     const BROWSERSTACK = 'browserstack';
@@ -157,8 +159,7 @@ class Web_TestCase extends Root_TestCase {
                 $capabilities = DesiredCapabilities::safari();
                 $capabilities->setCapability('platform', 'OS X 10.11');
                 $capabilities->setCapability('version', '9.0');
-                $capabilities->setCapability('safari.options', '{cleanSession: true}');   // ???
-                //$capabilities->setCapability('cleanSession', 'true');  // ???
+                $capabilities->setCapability('cleanSession', 'true');  // inifluente !!!
                 break;
             default:
                 $error = "Browser '" . self::$browser . "' not supported.";
@@ -513,14 +514,11 @@ class Web_TestCase extends Root_TestCase {
             return;
     }
 
-    /**
-     * For future use Execute a javascript script
-     *
-     * @param string $id the id
-     */
-    protected function clickByIdWithJs($id) {
-        $script = "\$('#" . $id . "').click();";
+
+    protected function deleteAllCookies() {
         $arguments = array();
+        $js_file = __DIR__ . DIRECTORY_SEPARATOR . self::JS_DELETECOOKIES_SCRIPT;
+        $script = file_get_contents($js_file);
         $this->getWd()->executeScript($script, $arguments);
     }
 
@@ -530,10 +528,12 @@ class Web_TestCase extends Root_TestCase {
      * @param string $drop_area the area to click where upload the file
      * @param string $file the file to upload
      */
-    protected function clickByIdWithJs2($drop_area, $file) {
-        $wd = $this->getWd();
+    protected function clickByIdWithJs2($drop_area, $file) { //TODO: rename method: dragfileToUpload()
         
-        $file = realpath($file);
+        // check the drop area
+        if (!$drop_area) {
+            $this->fail("\$drop_area is null" . PHP_EOL);
+        }
         
         // check the file
         if (!is_file($file)) {
@@ -544,6 +544,10 @@ class Web_TestCase extends Root_TestCase {
             }
         }
         
+        $wd = $this->getWd();
+        
+        $file = realpath($file);        
+        
         // vedi anche: https://github.com/facebook/php-webdriver/blob/787e71db74e42cdf13a41d500f75ea43da84bc75/tests/functional/FileUploadTest.php
         $js_file = __DIR__ . DIRECTORY_SEPARATOR . self::JS_DRAG_SCRIPT;
         
@@ -551,15 +555,10 @@ class Web_TestCase extends Root_TestCase {
         if (!is_file($js_file)) {
             $this->fail("File not found: " . $js_file . PHP_EOL);
         }
-        $js_src = file_get_contents($js_file);
-        
-        // check the drop area
-        if (!$drop_area) {
-            $this->fail("\$drop_area is null" . PHP_EOL);
-        }
-        
+        $script = file_get_contents($js_file);
+                
         // execute the js drag file script
-        $return = $wd->executeScript($js_src, array(
+        $return = $wd->executeScript($script, array(
             $drop_area
         ));
         
