@@ -536,7 +536,7 @@ class Web_TestCase extends Root_TestCase {
             $drop_area
         ));
         
-        echo "Waiting the js script execution..." . PHP_EOL;
+        echo PHP_EOL . "Waiting the js script execution..." . PHP_EOL;
         $this->getWd()
             ->manage()
             ->timeouts()
