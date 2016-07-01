@@ -540,7 +540,7 @@ class Web_TestCase extends Root_TestCase {
         $this->getWd()
             ->manage()
             ->timeouts()
-            ->implicitlyWait(3);
+            ->implicitlyWait(2);
         
         $file_input = $wd->findElement(WebDriverBy::id("upload")); // RemoteWebElement obj
         if (!$file_input) {
@@ -551,6 +551,10 @@ class Web_TestCase extends Root_TestCase {
             // $file_input->sendKeys($file);
             $file_input->setFileDetector(new LocalFileDetector())->sendKeys($file);
             // echo "Attribute is: " . $file_input->getAttribute('value') . PHP_EOL; // Facebook\WebDriver\Exception\StaleElementReferenceException: stale element reference: element is not attached to the page document
+            $this->getWd()
+                ->manage()
+                ->timeouts()
+                ->implicitlyWait(2);
         }
     }
 
