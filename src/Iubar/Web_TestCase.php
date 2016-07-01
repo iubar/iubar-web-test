@@ -592,7 +592,7 @@ class Web_TestCase extends Root_TestCase {
         if ($n) {
             $this->assertEquals($n, $console_error);
         } else {
-            $this->assertGreaterThan(0, $console_error); // o assertLessThan ???
+            $this->assertLessThan(5, $console_error);
         }
     }
 
