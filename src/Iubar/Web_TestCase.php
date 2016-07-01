@@ -564,10 +564,7 @@ class Web_TestCase extends Root_TestCase {
         ));
         
         echo PHP_EOL . "Waiting the js script execution..." . PHP_EOL;
-        $this->getWd()
-            ->manage()
-            ->timeouts()
-            ->implicitlyWait(2);
+        $wd->manage()->timeouts()->implicitlyWait(2);
         
         $file_input = $wd->findElement(WebDriverBy::id("upload")); // RemoteWebElement obj
         if (!$file_input) {
