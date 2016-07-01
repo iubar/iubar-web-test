@@ -27,7 +27,7 @@ use Facebook\WebDriver\Remote\LocalFileDetector;
  */
 class Web_TestCase extends Root_TestCase {
 
-    const DEBUG = false;
+    const DEBUG = true;
 
     const TAKE_SCREENSHOTS = true;
     
