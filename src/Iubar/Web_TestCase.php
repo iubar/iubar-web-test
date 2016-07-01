@@ -50,6 +50,10 @@ class Web_TestCase extends Root_TestCase {
 
     const JS_DRAG_SCRIPT = 'js/drag.js';
     
+    const SAUCELABS = 'saucelabs';
+    
+    const BROWSERSTACK = 'browserstack';
+    
     // default is 4444
     public static $port = null;
 
@@ -87,6 +91,8 @@ class Web_TestCase extends Root_TestCase {
     protected static $app_password = null;
 
     private static $travis = null;
+    
+    private static $browser_testing_tool ;
 
     /**
      * Start the WebDriver
@@ -100,7 +106,7 @@ class Web_TestCase extends Root_TestCase {
         self::$app_username = getenv('APP_USERNAME');
         self::$app_password = getenv('APP_PASSWORD');
         self::$travis = getenv('TRAVIS');
-        
+        self::$browser_testing_tool = getenv('BROWSER_TESTING_TOOL');
         self::$climate = new CLImate();
         
         // Usage with SauceLabs:
@@ -166,10 +172,23 @@ class Web_TestCase extends Root_TestCase {
         // set Travis params
         if (self::$travis) {
             echo "Travis detected..." . PHP_EOL;
-            $capabilities->setCapability('tunnel-identifier', getenv('TRAVIS_JOB_NUMBER'));
-            $username = getenv('SAUCE_USERNAME');
-            $access_key = getenv('SAUCE_ACCESS_KEY');
-            $server_root = "http://" . $username . ":" . $access_key . "@" . getenv('SELENIUM_SERVER');
+            if (self::$browser_testing_tool) {
+                if (self::$browser_testing_tool == self::SAUCELABS) {
+                    $capabilities->setCapability('tunnel-identifier', getenv('TRAVIS_JOB_NUMBER'));
+                    $username = getenv('SAUCE_USERNAME');
+                    $access_key = getenv('SAUCE_ACCESS_KEY');
+                } else  if (self::$browser_testing_tool == self::BROWSERSTACK) {
+                    $capabilities->setCapability('browserstack.debug', true);
+                    $capabilities->setCapability('browserstack.local', true);
+                    $capabilities->setCapability('browserstack.localIdentifier', 'change me');
+                    $capabilities->setCapability('takesScreenshot', true);
+                    $username = getenv('BROWSERSTACK_USERNAME');
+                    $access_key = getenv('BROWSERSTACK_ACCESS_KEY');
+                    }
+                $server_root = "http://" . $username . ":" . $access_key . "@" . getenv('SELENIUM_SERVER');
+            }
+            
+            
         } else {
             $server_root = "http://" . getenv('SELENIUM_SERVER');
         }
