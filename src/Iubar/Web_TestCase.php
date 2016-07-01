@@ -34,7 +34,7 @@ class Web_TestCase extends Root_TestCase {
     // seconds
     const DEFAULT_WAIT_TIMEOUT = 15;
     
-    // milliseconds
+    // the interval in miliseconds
     const DEFAULT_WAIT_INTERVAL = 1000;
     
     // Browser
@@ -388,11 +388,10 @@ class Web_TestCase extends Root_TestCase {
      *
      * @param string $tag the tag of the element
      * @param int $timeout the timeout in seconds
-     * @param int $interval the interval in miliseconds
      */
-    protected function waitForTag($tag, $timeout = self::DEFAULT_WAIT_TIMEOUT, $interval = self::DEFAULT_WAIT_INTERVAL) {
+    protected function waitForTag($tag, $timeout = self::DEFAULT_WAIT_TIMEOUT) {
         $this->getWd()
-            ->wait($timeout, $interval)
+            ->wait($timeout, self::DEFAULT_WAIT_INTERVAL)
             ->until(WebDriverExpectedCondition::visibilityOfElementLocated(WebDriverBy::tagName($tag)));
     }
 
@@ -401,13 +400,24 @@ class Web_TestCase extends Root_TestCase {
      *
      * @param string $css the css of the element
      * @param int $timeout the timeout in seconds
-     * @param int $interval the interval in miliseconds
      */
-    protected function waitForCss($css, $timeout = self::DEFAULT_WAIT_TIMEOUT, $interval = self::DEFAULT_WAIT_INTERVAL) {
+    protected function waitForCss($css, $timeout = self::DEFAULT_WAIT_TIMEOUT) {
         $this->getWd()
-            ->wait($timeout, $interval)
+            ->wait($timeout, self::DEFAULT_WAIT_INTERVAL)
             ->until(WebDriverExpectedCondition::visibilityOfElementLocated(WebDriverBy::cssSelector($css)));
     }
+    
+    /**
+    * Wait at most $timeout seconds until at least one result is shown
+    *
+    * @param string $className the class name of the element
+    * @param int $timeout the timeout in seconds
+    */
+    protected function waitForClassName($className, $timeout = self::DEFAULT_WAIT_TIMEOUT) {
+        $this->getWd()
+        ->wait($timeout, self::DEFAULT_WAIT_INTERVAL)
+        ->until(WebDriverExpectedCondition::visibilityOfElementLocated(WebDriverBy::className($className)));
+    }    
 
     /**
      * Wait at most $timeout seconds until at least one result is shown
@@ -425,12 +435,11 @@ class Web_TestCase extends Root_TestCase {
      * waitForAjax : wait for all ajax request to close
      *
      * @param int $timeout the timeout in seconds
-     * @param int $interval the interval in miliseconds
      * @return void
      */
-    protected function waitForAjax($timeout = self::DEFAULT_WAIT_TIMEOUT, $interval = self::DEFAULT_WAIT_INTERVAL) {
+     protected function waitForAjax($timeout = self::DEFAULT_WAIT_TIMEOUT) {
         $this->getWd()
-            ->wait($timeout, $interval)
+            ->wait($timeout, self::DEFAULT_WAIT_INTERVAL)
             ->until(function () {
             // jQuery: "jQuery.active" or $.active
             // Prototype: "Ajax.activeRequestCount"
@@ -457,11 +466,10 @@ class Web_TestCase extends Root_TestCase {
      * @param string $tag the tag
      * @param string $substr the text of the tag
      * @param int $timeout the timeout in seconds
-     * @param int $interval the interval in miliseconds
      */
-    protected function waitForTagWithText($tag, $substr, $timeout = self::DEFAULT_WAIT_TIMEOUT, $interval = self::DEFAULT_WAIT_INTERVAL) {
+    protected function waitForTagWithText($tag, $substr, $timeout = self::DEFAULT_WAIT_TIMEOUT) {
         $this->getWd()
-            ->wait($timeout, $interval)
+            ->wait($timeout, self::DEFAULT_WAIT_INTERVAL)
             ->until(WebDriverExpectedCondition::textToBePresentInElement(WebDriverBy::tagName($tag), $substr));
     }
 
