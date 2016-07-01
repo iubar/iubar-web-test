@@ -157,6 +157,8 @@ class Web_TestCase extends Root_TestCase {
                 $capabilities = DesiredCapabilities::safari();
                 $capabilities->setCapability('platform', 'OS X 10.11');
                 $capabilities->setCapability('version', '9.0');
+                $capabilities->setCapability('safari.options', '{cleanSession: true}');   
+                $capabilities->setCapability('cleanSession', 'true'); 
                 break;
             default:
                 $error = "Browser '" . self::$browser . "' not supported.";
