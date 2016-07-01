@@ -49,8 +49,6 @@ class Web_TestCase extends Root_TestCase {
     const SAFARI = 'safari';
 
     const JS_DRAG_SCRIPT = 'js/drag.js';
-
-    const NO_ERRORS = 0;
     
     // default is 4444
     public static $port = null;
@@ -406,18 +404,18 @@ class Web_TestCase extends Root_TestCase {
             ->wait($timeout, self::DEFAULT_WAIT_INTERVAL)
             ->until(WebDriverExpectedCondition::visibilityOfElementLocated(WebDriverBy::cssSelector($css)));
     }
-    
+
     /**
-    * Wait at most $timeout seconds until at least one result is shown
-    *
-    * @param string $className the class name of the element
-    * @param int $timeout the timeout in seconds
-    */
+     * Wait at most $timeout seconds until at least one result is shown
+     *
+     * @param string $className the class name of the element
+     * @param int $timeout the timeout in seconds
+     */
     protected function waitForClassName($className, $timeout = self::DEFAULT_WAIT_TIMEOUT) {
         $this->getWd()
-        ->wait($timeout, self::DEFAULT_WAIT_INTERVAL)
-        ->until(WebDriverExpectedCondition::visibilityOfElementLocated(WebDriverBy::className($className)));
-    }    
+            ->wait($timeout, self::DEFAULT_WAIT_INTERVAL)
+            ->until(WebDriverExpectedCondition::visibilityOfElementLocated(WebDriverBy::className($className)));
+    }
 
     /**
      * Wait at most $timeout seconds until at least one result is shown
@@ -437,7 +435,7 @@ class Web_TestCase extends Root_TestCase {
      * @param int $timeout the timeout in seconds
      * @return void
      */
-     protected function waitForAjax($timeout = self::DEFAULT_WAIT_TIMEOUT) {
+    protected function waitForAjax($timeout = self::DEFAULT_WAIT_TIMEOUT) {
         $this->getWd()
             ->wait($timeout, self::DEFAULT_WAIT_INTERVAL)
             ->until(function () {
@@ -588,15 +586,21 @@ class Web_TestCase extends Root_TestCase {
      *
      * @param int $n the number of the errors you want DEFAULT:zero
      */
-    protected function assertErrorsOnConsole($n = self::NO_ERRORS) {
+    protected function assertErrorsOnConsole($n = 0) {
         $console_error = $this->countErrorsOnConsole();
         echo PHP_EOL . 'Errori sulla console: ' . $console_error . PHP_EOL;
-        if ($n == self::NO_ERRORS) {
-            $this->assertEquals(0, $console_error);
-        } else {
-            // you expected some errors
+        if ($n) {
             $this->assertEquals($n, $console_error);
+        } else {
+            $this->assertGreaterThan(0, $console_error); // o assertLessThan ???
         }
+    }
+
+    /**
+     * Assert that the browser's console has zero errors
+     */
+    protected function assertNoErrorsOnConsole() {
+        return $this->assertErrorsOnConsole(0);
     }
 
     /**
