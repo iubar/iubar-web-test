@@ -7,7 +7,7 @@ use Facebook\WebDriver\WebDriverExpectedCondition;
 use Facebook\WebDriver\Remote\DesiredCapabilities;
 use Facebook\WebDriver\Remote\DriverCommand;
 use Facebook\WebDriver\Remote\LocalFileDetector;
-use League\CLImate\CLImate;
+use \League\CLImate\CLImate;
 
 /**
  * PHPUnit_Framework_TestCase Develop

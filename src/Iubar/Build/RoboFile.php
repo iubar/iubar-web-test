@@ -33,8 +33,14 @@ class RoboFile extends \Robo\Tasks {
     
     private $screenshots_path = null;
     
+    private $working_path = '';
+    
+    function __construct($working_path) {
+        $this->working_path = $working_path;
+    }
+    
     public function start() {
-        $this->climate = new League\CLImate\CLImate();
+        $this->climate = new \League\CLImate\CLImate();
         echo "Iinitializing..." . PHP_EOL;
         $this->init();
         
@@ -93,15 +99,15 @@ class RoboFile extends \Robo\Tasks {
 
     private function putenv($var_name, $path){
         if (!getenv($var_name)) {
-            if ($this->isRelativePath(path)) {
-                $path = __DIR__ . path;
+            if ($this->isRelativePath($path)) {
+              $path = $this->$working_path . DIRECTORY_SEPARATOR . $path;
             }
         }        
-        if (!is_dir(path)) {
-            die("Path not found: " . path . PHP_EOL);
+        if (!is_dir($path)) {
+            die("Path not found: " . $path . PHP_EOL);
         }
         if (!getenv($var_name)) {
-            putenv($var_name . '=' . path);
+            putenv($var_name . '=' . $path);
         }
     }
   
@@ -128,10 +134,8 @@ class RoboFile extends \Robo\Tasks {
         }
         
         if(!getenv('APP_USERNAME')){
-            if (!$app_username) {
-                $app_username = $ini_array['app_username'];
-                putenv('APP_USERNAME=' . $app_username);
-            }
+            $app_username = $ini_array['app_username'];
+            putenv('APP_USERNAME=' . $app_username);
         }
         
         // Posso specificare la password a) come variabile d'ambiente, b) nel file .ini, c) in modo interattivo da console
@@ -154,7 +158,7 @@ class RoboFile extends \Robo\Tasks {
         $this->putenv('LOGS_PATH', $this->logs_path);
         
         $this->screenshots_path = $ini_array['screenshots_path'];
-        $this->putenv('SCREENSHOTS_PATH', $this->screenshots_pat);
+        $this->putenv('SCREENSHOTS_PATH', $this->screenshots_path);
         
         $this->composer_json_path = $ini_array['composer_json_path'];
         $this->putenv('COMPOSER_JSON_PATH', $this->composer_json_path);
