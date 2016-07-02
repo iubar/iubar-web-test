@@ -1,13 +1,13 @@
 <?php
-namespace Iubar;
+namespace Iubar\Test;
 
 use Facebook\WebDriver\Remote\RemoteWebDriver;
 use Facebook\WebDriver\WebDriverBy;
 use Facebook\WebDriver\WebDriverExpectedCondition;
 use Facebook\WebDriver\Remote\DesiredCapabilities;
-use League\CLImate\CLImate;
 use Facebook\WebDriver\Remote\DriverCommand;
 use Facebook\WebDriver\Remote\LocalFileDetector;
+use League\CLImate\CLImate;
 
 /**
  * PHPUnit_Framework_TestCase Develop
@@ -84,6 +84,8 @@ class Web_TestCase extends Root_TestCase {
 
     protected static $selenium_path = null;
 
+    protected static $logs_path = null;
+    
     protected static $screenshots_path = null;
 
     protected static $app_host = null;
@@ -94,22 +96,63 @@ class Web_TestCase extends Root_TestCase {
 
     private static $travis = null;
     
-    private static $browser_testing_tool ;
+    protected static $travis_job_number = null;
+    
+    private static $browser_testing_tool = null;
+    
+    protected static $browser_testing_tool = null;
+    
+    protected static $sauce_access_username = null;
+    
+    protected static $sauce_access_key = null;
+    
+    protected static $browserstack_username = null;
+    
+    protected static $browserstack_acces_key = null;
+    
+    protected static function printEnviroments() {
+        echo PHP_EOL . "Enviroment variables for Phpunit" . PHP_EOL . PHP_EOL;
+        echo "LOGS_PATH: " . getenv("LOGS_PATH") . PHP_EOL;
+        echo "SCREENSHOTS_PATH: " . getenv("SCREENSHOTS_PATH") . PHP_EOL;
+        echo "SELENIUM PATH: " . getenv("SELENIUM_PATH") . PHP_EOL;
+        echo "SELENIUM SERVER: " . getenv("SELENIUM_SERVER") . PHP_EOL;
+        echo "BROWSER:  " . getenv("BROWSER") . PHP_EOL;
+        echo "APP_HOST: " . getenv("APP_HOST") . PHP_EOL;
+        echo "APP_USERNAME: " . getenv("APP_USERNAME") . PHP_EOL;
+        echo "APP_PASSWORD: " . formatPassword(getenv("APP_PASSWORD")) . PHP_EOL;
+        echo "TRAVIS: " . getenv("TRAVIS") . PHP_EOL;
+        echo "TRAVIS_JOB_NUMBER: " . getenv("TRAVIS_JOB_NUMBER") . PHP_EOL;
+        echo "BROWSER_TESTING_TOOL: " . getenv("BROWSER_TESTING_TOOL") . PHP_EOL;
+        echo "SAUCE_USERNAME: " . getenv("SAUCE_USERNAME") . PHP_EOL;
+        echo "SAUCE_ACCESS_KEY: " . formatPassword(getenv("SAUCE_ACCESS_KEY")) . PHP_EOL;
+        echo "BROWSERSTACK_USERNAME: " . getenv("BROWSERSTACK_USERNAME") . PHP_EOL;
+        echo "BROWSERSTACK_ACCESS_KEY: " . formatPassword(getenv("BROWSERSTACK_ACCESS_KEY")) . PHP_EOL;
+    }  
 
     /**
      * Start the WebDriver
      */
     public static function setUpBeforeClass() {
+        
+        self::printEnviroments();
+        
+        self::$climate = new CLImate();
+        
         self::$browser = getenv('BROWSER');
         self::$selenium_server = getenv('SELENIUM_SERVER');
         self::$selenium_path = getenv('SELENIUM_PATH');
+        self::$logs_path = getenv('LOGS_PATH');
         self::$screenshots_path = getenv('SCREENSHOTS_PATH');
         self::$app_host = getenv('APP_HOST');
         self::$app_username = getenv('APP_USERNAME');
         self::$app_password = getenv('APP_PASSWORD');
         self::$travis = getenv('TRAVIS');
+        self::$travis_job_number = getenv('TRAVIS_JOB_NUMBER');
         self::$browser_testing_tool = getenv('BROWSER_TESTING_TOOL');
-        self::$climate = new CLImate();
+        self::$sauce_access_username = getenv('SAUCE_USERNAME');
+        self::$sauce_access_key = getenv('SAUCE_ACCESS_KEY');
+        self::$browserstack_username = getenv('BROWSERSTACK_USERNAME');
+        self::$browserstack_acces_key = getenv('BROWSERSTACK_ACCESS_KEY');
         
         // Usage with SauceLabs:
         // set on Travis: SAUCE_USERNAME and SAUCE_ACCESS_KEY
@@ -177,23 +220,22 @@ class Web_TestCase extends Root_TestCase {
             echo "Travis detected..." . PHP_EOL;
             if (self::$browser_testing_tool) {
                 if (self::$browser_testing_tool == self::SAUCELABS) {
-                    $capabilities->setCapability('tunnel-identifier', getenv('TRAVIS_JOB_NUMBER'));
-                    $username = getenv('SAUCE_USERNAME');
-                    $access_key = getenv('SAUCE_ACCESS_KEY');
+                    $capabilities->setCapability('tunnel-identifier', self::$travis_job_number);
+                    $username = self::$sauce_access_username ;
+                    $access_key = self::$sauce_access_key;
                 } else  if (self::$browser_testing_tool == self::BROWSERSTACK) {
                     $capabilities->setCapability('browserstack.debug', true);
                     $capabilities->setCapability('browserstack.local', true);
                     $capabilities->setCapability('browserstack.localIdentifier', 'change me');
                     $capabilities->setCapability('takesScreenshot', true);
-                    $username = getenv('BROWSERSTACK_USERNAME');
-                    $access_key = getenv('BROWSERSTACK_ACCESS_KEY');
-                    }
-                $server_root = "http://" . $username . ":" . $access_key . "@" . getenv('SELENIUM_SERVER');
+                    $username = self::$browserstack_username;
+                    $access_key = self::$browserstack_acces_key;
+                }
+                $server_root = "http://" . $username . ":" . $access_key . "@" . self::$selenium_server; // Attention: never print-out this string.
             }
             
-            
         } else {
-            $server_root = "http://" . getenv('SELENIUM_SERVER');
+            $server_root = "http://" . self::$selenium_server;
         }
         if (self::$port) {
             $server_root = $server_root . ":" . self::$port;
