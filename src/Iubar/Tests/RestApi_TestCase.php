@@ -1,5 +1,5 @@
 <?php
-namespace Iubar\Test;
+namespace Iubar\Tests;
 
 use GuzzleHttp\Psr7;
 use GuzzleHttp\Psr7\Request;

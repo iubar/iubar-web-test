@@ -1,5 +1,5 @@
 <?php
-namespace Iubar\Test;
+namespace Iubar\Tests;
 
 use Facebook\WebDriver\Remote\RemoteWebDriver;
 use Facebook\WebDriver\WebDriverBy;
