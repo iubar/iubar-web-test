@@ -117,14 +117,14 @@ class Web_TestCase extends Root_TestCase {
         echo "BROWSER:  " . getenv("BROWSER") . PHP_EOL;
         echo "APP_HOST: " . getenv("APP_HOST") . PHP_EOL;
         echo "APP_USERNAME: " . getenv("APP_USERNAME") . PHP_EOL;
-        echo "APP_PASSWORD: " . formatPassword(getenv("APP_PASSWORD")) . PHP_EOL;
+        echo "APP_PASSWORD: " . self::formatPassword(getenv("APP_PASSWORD")) . PHP_EOL;
         echo "TRAVIS: " . getenv("TRAVIS") . PHP_EOL;
         echo "TRAVIS_JOB_NUMBER: " . getenv("TRAVIS_JOB_NUMBER") . PHP_EOL;
         echo "BROWSER_TESTING_TOOL: " . getenv("BROWSER_TESTING_TOOL") . PHP_EOL;
         echo "SAUCE_USERNAME: " . getenv("SAUCE_USERNAME") . PHP_EOL;
-        echo "SAUCE_ACCESS_KEY: " . formatPassword(getenv("SAUCE_ACCESS_KEY")) . PHP_EOL;
+        echo "SAUCE_ACCESS_KEY: " . self::formatPassword(getenv("SAUCE_ACCESS_KEY")) . PHP_EOL;
         echo "BROWSERSTACK_USERNAME: " . getenv("BROWSERSTACK_USERNAME") . PHP_EOL;
-        echo "BROWSERSTACK_ACCESS_KEY: " . formatPassword(getenv("BROWSERSTACK_ACCESS_KEY")) . PHP_EOL;
+        echo "BROWSERSTACK_ACCESS_KEY: " . self::formatPassword(getenv("BROWSERSTACK_ACCESS_KEY")) . PHP_EOL;
     }  
 
     /**
@@ -557,9 +557,7 @@ class Web_TestCase extends Root_TestCase {
 
     protected function deleteAllCookies() {
         $arguments = array();
-        $js_file = __DIR__ . DIRECTORY_SEPARATOR . self::JS_DELETECOOKIES_SCRIPT;
-        $script = file_get_contents($js_file);
-        $this->getWd()->executeScript($script, $arguments);
+        $this->getWd()->executeScript($this->get_js_contents(self::JS_DELETECOOKIES_SCRIPT), $arguments);
     }
 
     /**
@@ -587,20 +585,10 @@ class Web_TestCase extends Root_TestCase {
         $wd = $this->getWd();
         
         $file = realpath($file);        
-        
-        // vedi anche: https://github.com/facebook/php-webdriver/blob/787e71db74e42cdf13a41d500f75ea43da84bc75/tests/functional/FileUploadTest.php
-        $js_file = __DIR__ . DIRECTORY_SEPARATOR . self::JS_DRAG_SCRIPT;
-        
-        // check the js script
-        if (!is_file($js_file)) {
-            $this->fail("File not found: " . $js_file . PHP_EOL);
-        }
-        $script = file_get_contents($js_file);
-                
-        // execute the js drag file script
-        $return = $wd->executeScript($script, array(
-            $drop_area
-        ));
+               
+        // Execute the js drag file script
+        // @see also: https://github.com/facebook/php-webdriver/blob/787e71db74e42cdf13a41d500f75ea43da84bc75/tests/functional/FileUploadTest.php        
+        $return = $wd->executeScript($this->get_js_contents(self::JS_DRAG_SCRIPT), array($drop_area));
         
         echo PHP_EOL . "Waiting the js script execution..." . PHP_EOL;
         $wd->manage()->timeouts()->implicitlyWait(2);
@@ -848,4 +836,28 @@ class Web_TestCase extends Root_TestCase {
         // tidy up
         imagedestroy($im);
     }
+    
+
+    private static function formatPassword($env) {
+        $str = '<not set>';
+        if ($env) {
+            $str = '**********';
+        }
+        return $str;
+    }
+    
+    private function getJsPath(){
+        return __DIR__ . "/../../..";    
+    }
+    
+    private function get_js_contents($js_file){
+        $js_file = $this->getJsPath() . DIRECTORY_SEPARATOR . $js_file;        
+        // check the js script
+        if (!is_file($js_file)) {
+            $this->fail("File not found: " . $js_file . PHP_EOL);
+        }
+        $script = file_get_contents($js_file);
+        return $script;
+    }
+    
 }

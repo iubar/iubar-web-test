@@ -7,7 +7,7 @@
 
 namespace Iubar\Build;
 
-use Iubar\Tests\Web_TestCase;
+use \Iubar\Tests\Web_TestCase;
 
 class RoboFile extends \Robo\Tasks {
 
@@ -189,14 +189,6 @@ class RoboFile extends \Robo\Tasks {
         }else{
             return 'false';
         }
-    }
-    
-    private function formatPassword($env) {
-        $str = '<not set>';
-        if ($env) {
-            $str = '**********';
-        }
-        return $str;
     }
 
     private function startSelenium() {
