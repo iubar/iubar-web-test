@@ -98,8 +98,6 @@ class Web_TestCase extends Root_TestCase {
     
     protected static $travis_job_number = null;
     
-    private static $browser_testing_tool = null;
-    
     protected static $browser_testing_tool = null;
     
     protected static $sauce_access_username = null;
