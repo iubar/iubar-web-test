@@ -123,10 +123,16 @@ class Web_TestCase extends Root_TestCase {
         echo "SAUCE_ACCESS_KEY: " . self::formatPassword(getenv("SAUCE_ACCESS_KEY")) . PHP_EOL;
         echo "BROWSERSTACK_USERNAME: " . getenv("BROWSERSTACK_USERNAME") . PHP_EOL;
         echo "BROWSERSTACK_ACCESS_KEY: " . self::formatPassword(getenv("BROWSERSTACK_ACCESS_KEY")) . PHP_EOL;
-        
-        self::checkPath(getenv("LOGS_PATH"));
-        self::checkPath(getenv("SCREENSHOTS_PATH"));
-    }  
+    }
+    
+    protected function checkPaths(){
+        self::isPathWritable(getenv("LOGS_PATH"));
+        if (self::TAKE_SCREENSHOTS) {
+            if (self::$browser != self::PHANTOMJS) {
+                self::isPathWritable(getenv("SCREENSHOTS_PATH"));
+            }
+        }
+    }
 
     /**
      * Start the WebDriver
@@ -134,6 +140,7 @@ class Web_TestCase extends Root_TestCase {
     public static function setUpBeforeClass() {
         
         self::printEnviroments();
+        self::checkPaths();
         
         self::$climate = new CLImate();
         
@@ -155,17 +162,7 @@ class Web_TestCase extends Root_TestCase {
         // Usage with SauceLabs:
         // set on Travis: SAUCE_USERNAME and SAUCE_ACCESS_KEY
         // set on .tavis.yml and env.bat: SELENIUM_SERVER (hostname + port, without protocol);
-        
-        // check if you can take screenshots and path exist
-        if (self::TAKE_SCREENSHOTS) {
-            if (self::$browser != self::PHANTOMJS) {
-                $screenshots_path = self::$screenshots_path;
-                if ($screenshots_path && !is_writable($screenshots_path)) {
-                    die("ERRORE percorso non scrivibile: " . $screenshots_path . PHP_EOL);
-                }
-            }
-        }
-        
+
         $capabilities = null;
         
         // set capabilities according to the browers
@@ -206,7 +203,7 @@ class Web_TestCase extends Root_TestCase {
             default:
                 $error = "Browser '" . self::$browser . "' not supported.";
                 $error .= PHP_EOL . "(you should set the BROWSER global var with a supported browser name)";
-                die("ERROR: " . $error . PHP_EOL);
+                throw new \PHPUnitException($error);
         }
         
         // create the WebDriver
@@ -249,7 +246,8 @@ class Web_TestCase extends Root_TestCase {
             self::$webDriver = RemoteWebDriver::create($server, $capabilities, $connection_timeout_in_ms, $request_timeout_in_ms); // This is the default
         } catch (\Exception $e) {
             $error = "Exception: " . $e->getMessage();
-            die($error . PHP_EOL);
+            echo $error . PHP_EOL;
+            throw new \PHPUnitException($error);
         }
         
         // set some timeouts
@@ -289,9 +287,7 @@ class Web_TestCase extends Root_TestCase {
         
         // if there is at least a screenshot show it in the browser
         if (self::$openLastScreenshot && count(self::$screenshots) > 0) {
-            if (self::$browser == self::PHANTOMJS) {
-                die("Assertion failed: There should be no screenshot for phantomjs headless browser." . PHP_EOL);
-            }
+            $this->assertNotEquals(self::$browser, self::PHANTOMJS);
             echo "Taken " . count(self::$screenshots) . " screenshots" . PHP_EOL;
             $first_screenshot = self::$screenshots[0];
             self::$climate->info('Opening the last screenshot...');
