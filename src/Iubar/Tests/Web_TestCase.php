@@ -15,7 +15,6 @@ use \League\CLImate\CLImate;
  * @author Matteo
  * @global env BROWSER
  * @global env SELENIUM_SERVER
- * @global env SELENIUM_PATH
  * @global env SCREENSHOTS_PATH
  * @global env APP_HOST
  * @global env APP_USERNAME
@@ -109,10 +108,9 @@ class Web_TestCase extends Root_TestCase {
     protected static $browserstack_acces_key = null;
     
     protected static function printEnviroments() {
-        echo PHP_EOL . "Enviroment variables for Phpunit" . PHP_EOL . PHP_EOL;
+        echo PHP_EOL . "Enviroment variables for PhpUnit" . PHP_EOL . PHP_EOL;
         echo "LOGS_PATH: " . getenv("LOGS_PATH") . PHP_EOL;
         echo "SCREENSHOTS_PATH: " . getenv("SCREENSHOTS_PATH") . PHP_EOL;
-        echo "SELENIUM PATH: " . getenv("SELENIUM_PATH") . PHP_EOL;
         echo "SELENIUM SERVER: " . getenv("SELENIUM_SERVER") . PHP_EOL;
         echo "BROWSER:  " . getenv("BROWSER") . PHP_EOL;
         echo "APP_HOST: " . getenv("APP_HOST") . PHP_EOL;
@@ -125,6 +123,10 @@ class Web_TestCase extends Root_TestCase {
         echo "SAUCE_ACCESS_KEY: " . self::formatPassword(getenv("SAUCE_ACCESS_KEY")) . PHP_EOL;
         echo "BROWSERSTACK_USERNAME: " . getenv("BROWSERSTACK_USERNAME") . PHP_EOL;
         echo "BROWSERSTACK_ACCESS_KEY: " . self::formatPassword(getenv("BROWSERSTACK_ACCESS_KEY")) . PHP_EOL;
+        
+        $this->checkPath(getenv("LOGS_PATH"));
+        $this->checkPath(getenv("SCREENSHOTS_PATH"));
+
     }  
 
     /**
@@ -138,7 +140,6 @@ class Web_TestCase extends Root_TestCase {
         
         self::$browser = getenv('BROWSER');
         self::$selenium_server = getenv('SELENIUM_SERVER');
-        self::$selenium_path = getenv('SELENIUM_PATH');
         self::$logs_path = getenv('LOGS_PATH');
         self::$screenshots_path = getenv('SCREENSHOTS_PATH');
         self::$app_host = getenv('APP_HOST');
@@ -173,7 +174,8 @@ class Web_TestCase extends Root_TestCase {
         switch (self::$browser) {
             case self::PHANTOMJS:
                 echo "Inizializing PhantomJs browser" . PHP_EOL;
-                $capabilities = DesiredCapabilities::phantomjs();
+                $capabilities = DesiredCapabilities::phantomjs();                
+                // $capabilities->setCapability("phantomjs.cli.args", "['--webdriver-logfile=" . $this->logs_path . "phantomjsdriver.log']");       // TODO: da verificare se svolge il suo compito           
                 break;
             case self::CHROME:
                 echo "Inizializing Chrome browser" . PHP_EOL;
@@ -200,7 +202,7 @@ class Web_TestCase extends Root_TestCase {
                 $capabilities = DesiredCapabilities::safari();
                 $capabilities->setCapability('platform', 'OS X 10.11');
                 $capabilities->setCapability('version', '9.0');
-                $capabilities->setCapability('cleanSession', 'true');  // inifluente !!!
+                $capabilities->setCapability('safari.options', '{cleanSession: true}'); // TODO: da verificare se svolge il suo compito
                 break;
             default:
                 $error = "Browser '" . self::$browser . "' not supported.";
@@ -219,6 +221,7 @@ class Web_TestCase extends Root_TestCase {
             if (self::$browser_testing_tool) {
                 if (self::$browser_testing_tool == self::SAUCELABS) {
                     $capabilities->setCapability('tunnel-identifier', self::$travis_job_number);
+                    $capabilities->setCapability('name', 'ANTANI');
                     $username = self::$sauce_access_username ;
                     $access_key = self::$sauce_access_key;
                 } else  if (self::$browser_testing_tool == self::BROWSERSTACK) {
@@ -566,7 +569,7 @@ class Web_TestCase extends Root_TestCase {
      * @param string $drop_area the area to click where upload the file
      * @param string $file the file to upload
      */
-    protected function clickByIdWithJs2($drop_area, $file) { //TODO: rename method: dragfileToUpload()
+    protected function dragfileToUpload($drop_area, $file) {
         
         // check the drop area
         if (!$drop_area) {
@@ -574,13 +577,7 @@ class Web_TestCase extends Root_TestCase {
         }
         
         // check the file
-        if (!is_file($file)) {
-            $this->fail("File not found: " . $file . PHP_EOL);
-        } else {
-            if (!is_readable($file)) {
-                $this->fail("File not readable: " . $file . PHP_EOL);
-            }
-        }
+        $this->checkFile($file);
         
         $wd = $this->getWd();
         
