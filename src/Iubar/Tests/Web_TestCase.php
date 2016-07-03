@@ -201,9 +201,9 @@ class Web_TestCase extends Root_TestCase {
                     $this->fail("Can't test with Safari on Windows Os" . PHP_EOL);
                 }
                 $capabilities = DesiredCapabilities::safari();
-                $capabilities->setCapability('platform', 'OS X 10.11');
+                //$capabilities->setCapability('platform', 'OS X 10.11');
                 $capabilities->setCapability('version', '9.0');
-                $capabilities->setCapability('safari.options', array("cleanSession"=>"true")); // see: https://github.com/SeleniumHQ/selenium/wiki/DesiredCapabilities#safari-specific
+                //$capabilities->setCapability('safari.options', array("cleanSession"=>"true")); // see: https://github.com/SeleniumHQ/selenium/wiki/DesiredCapabilities#safari-specific
                                                                                         // TODO: da verificare se svolge il suo compito (l'alternativa da provare è $capabilities->setCapability('safari.options', '[cleanSession: true]');
                 break;
             default:
