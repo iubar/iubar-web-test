@@ -292,7 +292,9 @@ class Web_TestCase extends Root_TestCase {
         
         // if there is at least a screenshot show it in the browser
         if (self::$openLastScreenshot && count(self::$screenshots) > 0) {
-            $this->assertNotEquals(self::$browser, self::PHANTOMJS);
+            if(self::$browser == self::PHANTOMJS){
+                die("Unexpected status: browser is phantomjs" . PHP_EOL); // here I can't call assertNotEqual() becasue it's a dynamic method
+            }
             echo "Taken " . count(self::$screenshots) . " screenshots" . PHP_EOL;
             $first_screenshot = self::$screenshots[0];
             self::$climate->info('Opening the last screenshot...');

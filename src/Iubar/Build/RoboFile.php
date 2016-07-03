@@ -37,6 +37,7 @@ class RoboFile extends \Robo\Tasks {
     
     function __construct($working_path) {
         $this->working_path = $working_path;
+        echo "Working path: " . $this->working_path . PHP_EOL;
     }
     
     public function start() {
@@ -91,7 +92,11 @@ class RoboFile extends \Robo\Tasks {
 
     private function isRelativePath($path) {
         $tmp = realpath($path);
-        if (!$tmp) { // then it's a relative path
+        echo "path:" . $path . PHP_EOL;
+        echo "real path:" . $tmp . PHP_EOL;
+        $path = str_replace('\\', '/', $path);
+        $tmp = str_replace('\\', '/', $tmp);
+        if ($path != $tmp) {
             return true;
         }
         return false;
@@ -100,7 +105,10 @@ class RoboFile extends \Robo\Tasks {
     private function putenv($var_name, $path){
         if (!getenv($var_name)) {
             if ($this->isRelativePath($path)) {
-              $path = $this->$working_path . DIRECTORY_SEPARATOR . $path;
+              $path = $this->working_path . DIRECTORY_SEPARATOR . $path;
+              echo $this->working_path;
+            }else{
+            die("NO=OOOOOOOOOOO");
             }
         }        
         if (!is_dir($path)) {

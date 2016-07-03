@@ -28,7 +28,7 @@ class Root_TestCase extends \PHPUnit_Framework_TestCase {
     }
     
     protected static function isPathWritable($path){
-        if (self::checkPath($path) || !is_writable($path)) {
+        if (self::checkPath($path) && !is_writable($path)) {
             $error = "Path not writable: " . $path;
             throw new \Exception($error);
         }
