@@ -273,9 +273,12 @@ class RoboFile extends \Robo\Tasks {
     private function browser($url) {
         // TODO: valutare se è meglio avviare il browser $this->browser piuttosto che quello di default di sistema
         $this->climate->info("opening browser at: " . $url);
-        $input = $this->climate->input('Invio per continuare');
-        $response = $input->prompt();
-        $this->taskOpenBrowser($url)->run();
+        // $input = $this->climate->input('Invio per continuare');
+        // $response = $input->prompt();
+        // NON VA: $this->taskOpenBrowser($url)->run();
+        $cmd = $url;
+        $output = shell_exec($cmd);
+        return $output;
     }    
     
     private function runPhpunit() {
