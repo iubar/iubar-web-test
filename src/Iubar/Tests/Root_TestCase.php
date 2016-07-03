@@ -14,7 +14,7 @@ class Root_TestCase extends \PHPUnit_Framework_TestCase {
         return true;
     }
     
-    protected function checkPath($path){
+    protected static function checkPath($path){
         if (!is_dir($path)) {
             $this->fail("Path not found: " . $path . PHP_EOL);
         } else {

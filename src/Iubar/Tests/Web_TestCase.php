@@ -124,9 +124,8 @@ class Web_TestCase extends Root_TestCase {
         echo "BROWSERSTACK_USERNAME: " . getenv("BROWSERSTACK_USERNAME") . PHP_EOL;
         echo "BROWSERSTACK_ACCESS_KEY: " . self::formatPassword(getenv("BROWSERSTACK_ACCESS_KEY")) . PHP_EOL;
         
-        $this->checkPath(getenv("LOGS_PATH"));
-        $this->checkPath(getenv("SCREENSHOTS_PATH"));
-
+        self::checkPath(getenv("LOGS_PATH"));
+        self::checkPath(getenv("SCREENSHOTS_PATH"));
     }  
 
     /**
@@ -577,14 +576,14 @@ class Web_TestCase extends Root_TestCase {
         }
         
         // check the file
-        $this->checkFile($file);
+        self::checkFile($file);
         
         $wd = $this->getWd();
         
         $file = realpath($file);        
                
         // Execute the js drag file script
-        // @see also: https://github.com/facebook/php-webdriver/blob/787e71db74e42cdf13a41d500f75ea43da84bc75/tests/functional/FileUploadTest.php        
+        // @see also: https://github.com/facebook/php-webdriver/blob/787e71db74e42cdf13a41d500f75ea43da84bc75/tests/functional/FileUploadTest.php
         $return = $wd->executeScript($this->get_js_contents(self::JS_DRAG_SCRIPT), array($drop_area));
         
         echo PHP_EOL . "Waiting the js script execution..." . PHP_EOL;
@@ -849,10 +848,7 @@ class Web_TestCase extends Root_TestCase {
     
     private function get_js_contents($js_file){
         $js_file = $this->getJsPath() . DIRECTORY_SEPARATOR . $js_file;        
-        // check the js script
-        if (!is_file($js_file)) {
-            $this->fail("File not found: " . $js_file . PHP_EOL);
-        }
+        self::checkFile($js_file);
         $script = file_get_contents($js_file);
         return $script;
     }
