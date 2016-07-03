@@ -127,10 +127,14 @@ class Web_TestCase extends Root_TestCase {
     }
     
     protected static function checkPaths(){
-        self::isPathWritable(getenv("LOGS_PATH"));
+        if (getenv("LOGS_PATH")) {
+            self::isPathWritable(getenv("LOGS_PATH"));
+        }
         if (self::TAKE_SCREENSHOTS) {
             if (self::$browser != self::PHANTOMJS) {
-                self::isPathWritable(getenv("SCREENSHOTS_PATH"));
+                if (getenv("SCREENSHOTS_PATH")) {
+                    self::isPathWritable(getenv("SCREENSHOTS_PATH"));
+                }
             }
         }
     }
