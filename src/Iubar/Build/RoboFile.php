@@ -106,9 +106,6 @@ class RoboFile extends \Robo\Tasks {
         if (!getenv($var_name)) {
             if ($this->isRelativePath($path)) {
               $path = $this->working_path . DIRECTORY_SEPARATOR . $path;
-              echo $this->working_path;
-            }else{
-            die("NO=OOOOOOOOOOO");
             }
         }        
         if (!is_dir($path)) {
@@ -221,15 +218,24 @@ class RoboFile extends \Robo\Tasks {
                 $cmd = $cmd_prefix . " -Dwebdriver.gecko.driver=" . $this->geko_driver; // per scegliere eseguibile: " -Dwebdriver.firefox.bin=" . "\"C:/Program Files (x86)/Firefox Developer Edition/firefox.exe\"";
                 break;
             case Web_TestCase::FIREFOX:
-                $this->checkFile($this->selenium_jar); 
+
                 $cmd = $cmd_prefix . '';
+                break;
+            case Web_TestCase::SAFARI:
+                $cmd = $cmd_prefix . '';    // SafariDriver now requires manual installation of the extension prior to automation. 
+                                            // (So I think no driver is required)
+                                            // see https://github.com/SeleniumHQ/selenium/wiki/SafariDriver
                 break;
             case Web_TestCase::PHANTOMJS:
                 $this->checkFile($this->phantomjs_binary);
-                //$cmd = $cmd_prefix . " -Dphantomjs.ghostdriver.cli.args=[\"--loglevel=DEBUG\"] -Dphantomjs.binary.path=" . $phantomjs_binary;
-                $cmd = $cmd_prefix . " -Dphantomjs.ghostdriver.cli.args=[\"--loglevel=DEBUG --logfile=" . $this->logs_path . "\phantomjsdriver.log\"] -Dphantomjs.binary.path=" . $this->phantomjs_binary;
-                // oppure sopra provare a sostituire --logfile con --webdriver-logfile
+                $phantomjs_log_file = realpath($this->logs_path) . DIRECTORY_SEPARATOR . 'phantomjsdriver.log';
+                // see: https://github.com/detro/ghostdriver
+                // OK: 
+                // $cmd = $cmd_prefix . " -Dphantomjs.ghostdriver.cli.args=[\"--loglevel=DEBUG\"] -Dphantomjs.binary.path=" . $this->phantomjs_binary;
+                // FIXME: non scrive il file di log:
+                $cmd = $cmd_prefix . " -Dphantomjs.ghostdriver.cli.args=[\"--loglevel=DEBUG\"] -Dphantomjs.cli.args=[\"--debug=true --webdrive --loglevel=DEBUG --webdriver-logfile=" . $phantomjs_log_file . "\"] -Dphantomjs.binary.path=" . $this->phantomjs_binary;
                 break;
+                
             case 'all':
                 $this->checkFile($this->chrome_driver);
                 $this->checkFile($this->geko_driver);
@@ -241,6 +247,7 @@ class RoboFile extends \Robo\Tasks {
         }
         
         if ($cmd) {
+            echo "Selenium cmd: " . $cmd . PHP_EOL;
             // launches Selenium server
             $this->taskExec($cmd)
                 ->background()
@@ -264,13 +271,11 @@ class RoboFile extends \Robo\Tasks {
     }
 
     private function browser($url) {
-        // TODO: valutare se è meglio avviare il browser $this->browser pittuosto che quello di default di sistema
+        // TODO: valutare se è meglio avviare il browser $this->browser piuttosto che quello di default di sistema
         $this->climate->info("opening browser at: " . $url);
         $input = $this->climate->input('Invio per continuare');
         $response = $input->prompt();
-        $this->taskOpenBrowser([
-            $url
-        ])->run();
+        $this->taskOpenBrowser($url)->run();
     }    
     
     private function runPhpunit() {

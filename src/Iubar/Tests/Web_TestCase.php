@@ -176,7 +176,7 @@ class Web_TestCase extends Root_TestCase {
             case self::PHANTOMJS:
                 echo "Inizializing PhantomJs browser" . PHP_EOL;
                 $capabilities = DesiredCapabilities::phantomjs();                
-                // $capabilities->setCapability("phantomjs.cli.args", "['--webdriver-logfile=" . $this->logs_path . "phantomjsdriver.log']");       // TODO: da verificare se svolge il suo compito           
+                // $capabilities->setCapability("phantomjs.cli.args", "['--webdriver-logfile=" . $this->logs_path . "/phantomjsdriver.log']");       // TODO: da verificare se svolge il suo compito           
                 break;
             case self::CHROME:
                 echo "Inizializing Chrome browser" . PHP_EOL;
@@ -203,7 +203,8 @@ class Web_TestCase extends Root_TestCase {
                 $capabilities = DesiredCapabilities::safari();
                 $capabilities->setCapability('platform', 'OS X 10.11');
                 $capabilities->setCapability('version', '9.0');
-                $capabilities->setCapability('safari.options', '{cleanSession: true}'); // TODO: da verificare se svolge il suo compito
+                $capabilities->setCapability('safari.options', '{cleanSession: true}'); // see: https://github.com/SeleniumHQ/selenium/wiki/DesiredCapabilities#safari-specific
+                                                                                        // TODO: da verificare se svolge il suo compito (l'alternativa da provare è $capabilities->setCapability('safari.options', '[cleanSession: true]');
                 break;
             default:
                 $error = "Browser '" . self::$browser . "' not supported.";
