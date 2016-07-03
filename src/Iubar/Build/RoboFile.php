@@ -279,11 +279,9 @@ class RoboFile extends \Robo\Tasks {
     
     private function checkFile($file){
         if (!is_file($file)) {
-            $this->fail("File not found: " . $file . PHP_EOL);
+            return \Robo\Result::error($this, "File not found: " . $file);
         } else {
-            if (!is_readable($file)) {
-                $this->fail("File not readable: " . $file . PHP_EOL);
-            }
+           return \Robo\Result::error($this, "File not readable: " . $file);
         }
         return true;
     }
