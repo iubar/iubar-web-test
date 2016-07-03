@@ -165,11 +165,11 @@ class RoboFile extends \Robo\Tasks {
         
         // Non uso variabili d'ambiente per i seguenti valori, perchè riguardano solo il testing con Robo
         $this->selenium_path = $ini_array['selenium_path'];
-        $this->selenium_jar = $ini_array['selenium_jar'];
-        $this->chrome_driver = $ini_array['chrome_driver'];
-        $this->geko_driver = $ini_array['geko_driver'];
-        $this->edge_driver = $ini_array['edge_driver'];
-        $this->phantomjs_binary = $ini_array['phantomjs_binary'];        
+        $this->selenium_jar = $this->selenium_path . DIRECTORY_SEPARATOR . $ini_array['selenium_jar'];
+        $this->chrome_driver = $this->selenium_path . DIRECTORY_SEPARATOR . $ini_array['chrome_driver'];
+        $this->geko_driver = $this->selenium_path . DIRECTORY_SEPARATOR .$ini_array['geko_driver'];
+        $this->edge_driver = $this->selenium_path . DIRECTORY_SEPARATOR .$ini_array['edge_driver'];
+        $this->phantomjs_binary = $this->selenium_path . DIRECTORY_SEPARATOR . $ini_array['phantomjs_binary'];        
         $this->update_vendor = $ini_array['update_vendor'];
         $this->open_slideshow = $ini_array['open_slideshow'];
         $this->start_selenium = $ini_array['start_selenium'];
@@ -179,16 +179,15 @@ class RoboFile extends \Robo\Tasks {
         echo "COMPOSER_JSON_PATH: " . getenv("COMPOSER_JSON_PATH") . PHP_EOL;
         
         echo PHP_EOL . "§Specific Robo (only) settings" . PHP_EOL . PHP_EOL;                   
-        echo "selenium path: " . $this->formatBoolean($this->selenium_path) . PHP_EOL;
-        echo "selenium jar: " . $this->formatBoolean($this->selenium_jar) . PHP_EOL;
-        echo "chrome driver: " . $this->formatBoolean($this->chrome_driver) . PHP_EOL;
-        echo "geko driver: " . $this->formatBoolean($this->geko_driver) . PHP_EOL;
-        echo "edge driver: " . $this->formatBoolean($this->edge_driver) . PHP_EOL;
-        echo "phantomjs binary: " . $this->formatBoolean($this->phantomjs_binary) . PHP_EOL;        
+        echo "selenium path: " . $this->selenium_path . PHP_EOL;
+        echo "selenium jar: " . $this->selenium_jar . PHP_EOL;
+        echo "chrome driver: " . $this->chrome_driver . PHP_EOL;
+        echo "geko driver: " . $this->geko_driver . PHP_EOL;
+        echo "edge driver: " . $this->edge_driver . PHP_EOL;
+        echo "phantomjs binary: " . $this->phantomjs_binary . PHP_EOL;        
         echo "update vendor: " . $this->formatBoolean($this->update_vendor) . PHP_EOL;
         echo "open slideshow: " . $this->formatBoolean($this->open_slideshow) . PHP_EOL;
         echo "start selenium: " . $this->formatBoolean($this->start_selenium) . PHP_EOL;  
-                
         echo PHP_EOL . PHP_EOL;
     }
 
@@ -207,26 +206,27 @@ class RoboFile extends \Robo\Tasks {
         switch ($this->browser) {
             case Web_TestCase::CHROME:
                 $this->checkFile($this->chrome_driver);
-                $cmd = $cmd_prefix . " -Dwebdriver.chrome.driver=" . $chrome_driver;
+                $cmd = $cmd_prefix . " -Dwebdriver.chrome.driver=" . $this->chrome_driver;
                 break;
             case Web_TestCase::MARIONETTE:
                 $this->checkFile($this->geko_driver);
-                $cmd = $cmd_prefix . " -Dwebdriver.gecko.driver=" . $geko_driver; // per scegliere eseguibile: " -Dwebdriver.firefox.bin=" . "\"C:/Program Files (x86)/Firefox Developer Edition/firefox.exe\"";
+                $cmd = $cmd_prefix . " -Dwebdriver.gecko.driver=" . $this->geko_driver; // per scegliere eseguibile: " -Dwebdriver.firefox.bin=" . "\"C:/Program Files (x86)/Firefox Developer Edition/firefox.exe\"";
                 break;
             case Web_TestCase::FIREFOX:
-                $this->checkFile($this->selenium_jar);  $cmd = $cmd_prefix . "";
+                $this->checkFile($this->selenium_jar); 
+                $cmd = $cmd_prefix . '';
                 break;
             case Web_TestCase::PHANTOMJS:
                 $this->checkFile($this->phantomjs_binary);
                 //$cmd = $cmd_prefix . " -Dphantomjs.ghostdriver.cli.args=[\"--loglevel=DEBUG\"] -Dphantomjs.binary.path=" . $phantomjs_binary;
-                $cmd = $cmd_prefix . " -Dphantomjs.ghostdriver.cli.args=[\"--loglevel=DEBUG --logfile=" . $this->logs_path . "\phantomjsdriver.log\"] -Dphantomjs.binary.path=" . $phantomjs_binary;
+                $cmd = $cmd_prefix . " -Dphantomjs.ghostdriver.cli.args=[\"--loglevel=DEBUG --logfile=" . $this->logs_path . "\phantomjsdriver.log\"] -Dphantomjs.binary.path=" . $this->phantomjs_binary;
                 // oppure sopra provare a sostituire --logfile con --webdriver-logfile
                 break;
             case 'all':
                 $this->checkFile($this->chrome_driver);
                 $this->checkFile($this->geko_driver);
                 $this->checkFile($this->phantomjs_binary);
-                $cmd = $cmd_prefix . " -Dwebdriver.chrome.driver=" . $chrome_driver . " -Dwebdriver.gecko.driver=" . $geko_driver . " -Dphantomjs.binary.path=" . $phantomjs_binary; 
+                $cmd = $cmd_prefix . " -Dwebdriver.chrome.driver=" . $this->chrome_driver . " -Dwebdriver.gecko.driver=" . $this->geko_driver . " -Dphantomjs.binary.path=" . $this->phantomjs_binary; 
                 break;
             default:
                 die("Browser '" . $this->browser . "' not supported" . PHP_EOL);

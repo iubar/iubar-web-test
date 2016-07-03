@@ -123,9 +123,10 @@ class Web_TestCase extends Root_TestCase {
         echo "SAUCE_ACCESS_KEY: " . self::formatPassword(getenv("SAUCE_ACCESS_KEY")) . PHP_EOL;
         echo "BROWSERSTACK_USERNAME: " . getenv("BROWSERSTACK_USERNAME") . PHP_EOL;
         echo "BROWSERSTACK_ACCESS_KEY: " . self::formatPassword(getenv("BROWSERSTACK_ACCESS_KEY")) . PHP_EOL;
+        echo PHP_EOL . PHP_EOL;
     }
     
-    protected function checkPaths(){
+    protected static function checkPaths(){
         self::isPathWritable(getenv("LOGS_PATH"));
         if (self::TAKE_SCREENSHOTS) {
             if (self::$browser != self::PHANTOMJS) {
@@ -203,7 +204,7 @@ class Web_TestCase extends Root_TestCase {
             default:
                 $error = "Browser '" . self::$browser . "' not supported.";
                 $error .= PHP_EOL . "(you should set the BROWSER global var with a supported browser name)";
-                throw new \PHPUnitException($error);
+                throw new \Exception($error);
         }
         
         // create the WebDriver
@@ -247,7 +248,7 @@ class Web_TestCase extends Root_TestCase {
         } catch (\Exception $e) {
             $error = "Exception: " . $e->getMessage();
             echo $error . PHP_EOL;
-            throw new \PHPUnitException($error);
+            throw new \Exception($error);
         }
         
         // set some timeouts
