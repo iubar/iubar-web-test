@@ -21,6 +21,8 @@ class RoboFile extends \Robo\Tasks {
 
     private $selenium_server = null;
 
+    private $selenium_port = null;
+    
     private $selenium_path = null;
 
     private $start_selenium = true;
@@ -148,6 +150,11 @@ class RoboFile extends \Robo\Tasks {
             $this->selenium_server = $ini_array['selenium_server'];
             putenv('SELENIUM_SERVER=' . $this->selenium_server);
         }
+        
+        if (!getenv('SELENIUM_PORT')) {
+            $this->selenium_port = $ini_array['selenium_port'];
+            putenv('SELENIUM_PORT=' . $this->selenium_port);
+        }        
         
         if (!getenv('APP_HOST')) {
             $app_host = $ini_array['app_host'];

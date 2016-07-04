@@ -58,9 +58,6 @@ class Web_TestCase extends Root_TestCase {
 
     const HIDDEN = '**********';
     
-    // default is 4444
-    public static $port = null;
-
     protected static $openLastScreenshot = true;
 
     protected static $openLastDumpFile = true;
@@ -87,6 +84,8 @@ class Web_TestCase extends Root_TestCase {
     protected static $os_version = null;
 
     protected static $selenium_server = null;
+    
+    protected static $selenium_port = null;
 
     protected static $selenium_path = null;
 
@@ -120,7 +119,11 @@ class Web_TestCase extends Root_TestCase {
         echo PHP_EOL;
         
         $padding = self::$climate->padding(10);
-        $padding->label('LOGS_PATH')->result(getenv("LOGS_PATH"));
+        $padding->label('LOGS_PATH')->result(getenv("LOGS_PATH"));        
+        // TODO: formattare con codclimate
+        
+        
+        
         
         // echo "LOGS_PATH: " . getenv("LOGS_PATH") . PHP_EOL;
         // echo "SCREENSHOTS_PATH: " . getenv("SCREENSHOTS_PATH") . PHP_EOL;
@@ -167,6 +170,7 @@ class Web_TestCase extends Root_TestCase {
         self::$browser_version = getenv('BROWSER_VERSION');
         self::$os_version = getenv('OS_VERSION');
         self::$selenium_server = getenv('SELENIUM_SERVER');
+        self::$selenium_port = getenv('SELENIUM_PORT');
         self::$logs_path = getenv('LOGS_PATH');
         self::$screenshots_path = getenv('SCREENSHOTS_PATH');
         self::$app_host = getenv('APP_HOST');
@@ -303,9 +307,9 @@ class Web_TestCase extends Root_TestCase {
             $server_root = "http://" . self::$selenium_server;
             $server_printable = $server_root;
         }
-        if (self::$port) {
-            $server_root = $server_root . ":" . self::$port;
-            $server_printable = $server_printable . ":" . self::$port;
+        if (self::$selenium_port) {
+            $server_root = $server_root . ":" . self::$selenium_port;
+            $server_printable = $server_printable . ":" . self::$selenium_port;
         }
         self::$selenium_server_shutdown = $server_root . '/selenium-server/driver/?cmd=shutDownSeleniumServer';
         self::$selenium_session_shutdown = $server_root . '/selenium-server/driver/?cmd=shutDown';
