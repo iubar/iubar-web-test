@@ -58,7 +58,7 @@ class Web_TestCase extends Root_TestCase {
 
     const HIDDEN = '**********';
     
-    protected static $openLastScreenshot = true;
+    protected static $openLastScreenshot = true; 
 
     protected static $openLastDumpFile = true;
 
@@ -429,14 +429,14 @@ class Web_TestCase extends Root_TestCase {
         
         // Warning: Windows specific code
         //NO: $cmd = "start '" . $browser . " " . $url . "'";
-        $cmd = "start '' " . $url . "'";
+        $cmd = "start \"\" \"" . $url . "\"";
         self::$climate->info('Command is : ' . $cmd);
         self::startShell($cmd);
     }
     
     protected static function openFile($file) {
         // Warning: Windows specific code
-        $cmd = "start '' " . $file . "'";
+        $cmd = "start \"\" \"" . $file . "\"";
         self::$climate->info('Command is : ' . $cmd);
         self::startShell($cmd);
     }    
