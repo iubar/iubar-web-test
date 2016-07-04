@@ -198,14 +198,14 @@ class Web_TestCase extends Root_TestCase {
                     "--webdrive" => "",
                     "--loglevel" => "DEBUG",
                     "--webdriver-logfile" => self::$logs_path . "/phantomjsdriver.log"
-                );
-                
-                $capabilities->setCapability("phantomjs.ghostdriver.cli.args", array(
+                );                
+                $ghostdriver_cli_args = array(
                     "--loglevel" => "DEBUG",
                     "--webdriver-loglevel" => "DEBUG"
-                ));
+                );
+                $capabilities->setCapability("phantomjs.ghostdriver.cli.args", $ghostdriver_cli_args);
                 $capabilities->setCapability("phantomjs.cli.args", $cli_args);
-                $capabilities->setCapability("phantomjs.binary.path", self::$phantomjs_binary);
+                // Not used, but configured on the Selenium startup script: $capabilities->setCapability("phantomjs.binary.path", self::$phantomjs_binary);
                 break;
             case self::CHROME:
                 echo "Inizializing Chrome browser" . PHP_EOL;
@@ -429,14 +429,14 @@ class Web_TestCase extends Root_TestCase {
         
         // Warning: Windows specific code
         //NO: $cmd = "start '" . $browser . " " . $url . "'";
-        $cmd = "start '" . $url . "'";
+        $cmd = "start '' " . $url . "'";
         self::$climate->info('Command is : ' . $cmd);
         self::startShell($cmd);
     }
     
     protected static function openFile($file) {
         // Warning: Windows specific code
-        $cmd = "start '" . $file . "'";
+        $cmd = "start '' " . $file . "'";
         self::$climate->info('Command is : ' . $cmd);
         self::startShell($cmd);
     }    
