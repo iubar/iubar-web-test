@@ -14,6 +14,10 @@ class RoboFile extends \Robo\Tasks {
     private $climate = null;
 
     private $browser = null;
+    
+    private $browser_version = null;
+    
+    private $os_version = null;
 
     private $selenium_server = null;
 
@@ -102,7 +106,7 @@ class RoboFile extends \Robo\Tasks {
         return false;
     }
 
-    private function putenv($var_name, $path){
+    private function putEnv($var_name, $path){
         if (!getenv($var_name)) {
             if ($this->isRelativePath($path)) {
               $path = $this->working_path . DIRECTORY_SEPARATOR . $path;
@@ -126,6 +130,16 @@ class RoboFile extends \Robo\Tasks {
         if(!getenv('BROWSER')){
             $this->browser = $ini_array['browser'];        
             putenv('BROWSER=' . $this->browser);
+        }
+        
+        if(!getenv('BROWSER_VERSION')){
+            $this->browser_version = $ini_array['browser_version'];
+            putenv('BROWSER_VERSION=' . $this->browser_version);
+        }
+        
+        if(!getenv('OS_VERSION')){
+            $this->os_version = $ini_array['os_version'];
+            putenv('OS_VERSION=' . $this->os_version);
         }
 
         if(!getenv('SELENIUM_SERVER')){
@@ -157,16 +171,16 @@ class RoboFile extends \Robo\Tasks {
         }
         
         $this->logs_path = $ini_array['logs_path'];
-        $this->putenv('LOGS_PATH', $this->logs_path);
+        $this->putEnv('LOGS_PATH', $this->logs_path);
         
         $this->screenshots_path = $ini_array['screenshots_path'];
-        $this->putenv('SCREENSHOTS_PATH', $this->screenshots_path);
+        $this->putEnv('SCREENSHOTS_PATH', $this->screenshots_path);
         
         $this->composer_json_path = $ini_array['composer_json_path'];
-        $this->putenv('COMPOSER_JSON_PATH', $this->composer_json_path);
+        $this->putEnv('COMPOSER_JSON_PATH', $this->composer_json_path);
         
         $this->phpunit_xml_path = $ini_array['phpunit_xml_path'];
-        $this->putenv('PHPUNIT_XML_PATH', $this->phpunit_xml_path);
+        $this->putEnv('PHPUNIT_XML_PATH', $this->phpunit_xml_path);
         
         // Non uso variabili d'ambiente per i seguenti valori, perchè riguardano solo il testing con Robo
         $this->selenium_path = $ini_array['selenium_path'];

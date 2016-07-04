@@ -26,7 +26,7 @@ use \League\CLImate\CLImate;
  */
 class Web_TestCase extends Root_TestCase {
 
-    const DEBUG = false;
+    const DEBUG = false;        
 
     const TAKE_SCREENSHOTS = true;
     
@@ -34,7 +34,7 @@ class Web_TestCase extends Root_TestCase {
     const DEFAULT_WAIT_TIMEOUT = 15;
     
     // the interval in miliseconds
-    const DEFAULT_WAIT_INTERVAL = 1000;
+    const DEFAULT_WAIT_INTERVAL = 1000;        
     
     // Browser
     const PHANTOMJS = 'phantomjs';
@@ -54,6 +54,8 @@ class Web_TestCase extends Root_TestCase {
     const SAUCELABS = 'saucelabs';
     
     const BROWSERSTACK = 'browserstack';
+    
+    const HIDDEN = '**********';
     
     // default is 4444
     public static $port = null;
@@ -78,6 +80,10 @@ class Web_TestCase extends Root_TestCase {
     protected static $files_to_del = array();
 
     protected static $browser = null;
+    
+    protected static $browser_version = null;
+    
+    protected static $os_version = null;
 
     protected static $selenium_server = null;
 
@@ -113,6 +119,8 @@ class Web_TestCase extends Root_TestCase {
         echo "SCREENSHOTS_PATH: " . getenv("SCREENSHOTS_PATH") . PHP_EOL;
         echo "SELENIUM SERVER: " . getenv("SELENIUM_SERVER") . PHP_EOL;
         echo "BROWSER:  " . getenv("BROWSER") . PHP_EOL;
+        echo "BROWSER VERSION:  " . getenv("BROWSER_VERSION") . PHP_EOL;
+        echo "OS VERSION:  " . getenv("OS_VERSION") . PHP_EOL;
         echo "APP_HOST: " . getenv("APP_HOST") . PHP_EOL;
         echo "APP_USERNAME: " . getenv("APP_USERNAME") . PHP_EOL;
         echo "APP_PASSWORD: " . self::formatPassword(getenv("APP_PASSWORD")) . PHP_EOL;
@@ -150,6 +158,8 @@ class Web_TestCase extends Root_TestCase {
         self::$climate = new CLImate();
         
         self::$browser = getenv('BROWSER');
+        self::$browser_version = getenv('BROWSER_VERSION');
+        self::$os_version = getenv('OS_VERSION');
         self::$selenium_server = getenv('SELENIUM_SERVER');
         self::$logs_path = getenv('LOGS_PATH');
         self::$screenshots_path = getenv('SCREENSHOTS_PATH');
@@ -176,19 +186,38 @@ class Web_TestCase extends Root_TestCase {
             case self::PHANTOMJS:
                 echo "Inizializing PhantomJs browser" . PHP_EOL;
                 $capabilities = DesiredCapabilities::phantomjs();                
-                // $capabilities->setCapability("phantomjs.cli.args", "['--webdriver-logfile=" . $this->logs_path . "/phantomjsdriver.log']");       // TODO: da verificare se svolge il suo compito           
+                $capabilities->setCapability("phantomjs.cli.args", 
+                    
+                    "['--webdriver-logfile=" . $this->logs_path . "/phantomjsdriver.log']"
+                    
+                    
+                    );
+                
+                $options = array( // TODO: da verificare se svolgono il loro compito
+                    "phantomjs.ghostdriver.cli.args"    =>  "--loglevel=DEBUG",
+                    "phantomjs.cli.args"                =>  "--debug=true --webdrive --loglevel=DEBUG --webdriver-logfile=" . $phantomjs_log_file,
+                    "phantomjs.binary.path"             =>  $this->phantomjs_binary
+                );
+                
+                $options = array( // TODO: da verificare se svolgono il loro compito
+                    "phantomjs.ghostdriver.cli.args"    =>  "--loglevel=DEBUG",
+                    "phantomjs.cli.args"                =>  "--debug=true --webdrive --loglevel=DEBUG --webdriver-logfile=" . $phantomjs_log_file,
+                    "phantomjs.binary.path"             =>  $this->phantomjs_binary
+                );
+                
+                $capabilities->setCapability("phantomjs.ghostdriver.cli.args", $options1);
+                $capabilities->setCapability("phantomjs.cli.args", $options2);
+                $capabilities->setCapability("phantomjs.binary.path", $options3);
+                
+                
                 break;
             case self::CHROME:
                 echo "Inizializing Chrome browser" . PHP_EOL;
                 $capabilities = DesiredCapabilities::chrome();
-                // $capabilities->setCapability("version", "51.0");
-                // $capabilities->setCapability("platform", "Windows 10");
                 break;
             case self::FIREFOX:
                 echo "Inizializing Firefox browser" . PHP_EOL;
                 $capabilities = DesiredCapabilities::firefox();
-                // $capabilities->setCapability("version", "46.0");
-                // $capabilities->setCapability("platform", "Windows 10");
                 break;
             case self::MARIONETTE:
                 echo "Inizializing Marionette browser" . PHP_EOL;
@@ -201,8 +230,6 @@ class Web_TestCase extends Root_TestCase {
                     $this->fail("Can't test with Safari on Windows Os" . PHP_EOL);
                 }
                 $capabilities = DesiredCapabilities::safari();
-                $capabilities->setCapability('platform', 'OS X 10.11');
-                $capabilities->setCapability('version', '9.0');
                 $capabilities->setCapability('safari.options', '[cleanSession: true]'); // see: https://github.com/SeleniumHQ/selenium/wiki/DesiredCapabilities#safari-specific
                                                                                         // TODO: da verificare se svolge il suo compito (l'alternativa da provare è $capabilities->setCapability('safari.options', '[cleanSession: true]');
                 break;
@@ -210,6 +237,14 @@ class Web_TestCase extends Root_TestCase {
                 $error = "Browser '" . self::$browser . "' not supported.";
                 $error .= PHP_EOL . "(you should set the BROWSER global var with a supported browser name)";
                 throw new \Exception($error);
+        }
+        
+        
+        if(self::$browser_version){            
+            $capabilities->setCapability("version", self::$browser_version);
+        }
+        if(self::$os_version){
+            $capabilities->setCapability("platform", self::$os_version)            
         }
         
         // create the WebDriver
@@ -221,32 +256,37 @@ class Web_TestCase extends Root_TestCase {
         if (self::$travis) {
             echo "Travis detected..." . PHP_EOL;
             if (self::$browser_testing_tool) {
+                $msg = "WebDriver test";
                 if (self::$browser_testing_tool == self::SAUCELABS) {
                     $capabilities->setCapability('tunnel-identifier', self::$travis_job_number);
-                    $capabilities->setCapability('name', 'ANTANI');
+                    $capabilities->setCapability('name', $msg);
                     $username = self::$sauce_access_username ;
                     $access_key = self::$sauce_access_key;
                 } else  if (self::$browser_testing_tool == self::BROWSERSTACK) {
                     $capabilities->setCapability('browserstack.debug', true);
                     $capabilities->setCapability('browserstack.local', true);
-                    $capabilities->setCapability('browserstack.localIdentifier', 'change me');
+                    $capabilities->setCapability('browserstack.localIdentifier', $msg);
                     $capabilities->setCapability('takesScreenshot', true);
                     $username = self::$browserstack_username;
                     $access_key = self::$browserstack_acces_key;
                 }
                 $server_root = "http://" . $username . ":" . $access_key . "@" . self::$selenium_server; // Attention: never print-out this string.
+                $server_printable  = "http://" . self::HIDDEN . ":" . self::HIDDEN  . "@" . self::$selenium_server; 
             }
             
         } else {
             $server_root = "http://" . self::$selenium_server;
+            $server_printable = $server_root;
         }
         if (self::$port) {
             $server_root = $server_root . ":" . self::$port;
+            $server_printable = $server_printable . ":" . self::$port;
         }
         self::$selenium_server_shutdown = $server_root . '/selenium-server/driver/?cmd=shutDownSeleniumServer';
         self::$selenium_session_shutdown = $server_root . '/selenium-server/driver/?cmd=shutDown';
-        $server = $server_root . "/wd/hub";
-        echo "Server: " . $server . PHP_EOL;
+        $server = $server_root . "/wd/hub"; // Attention: never print-out this string. 
+
+        echo "Server: " . $server_printable . PHP_EOL;
         
         try {
             self::$webDriver = RemoteWebDriver::create($server, $capabilities, $connection_timeout_in_ms, $request_timeout_in_ms); // This is the default
@@ -841,7 +881,7 @@ class Web_TestCase extends Root_TestCase {
     private static function formatPassword($env) {
         $str = '<not set>';
         if ($env) {
-            $str = '**********';
+            $str = self::HIDDEN;
         }
         return $str;
     }
