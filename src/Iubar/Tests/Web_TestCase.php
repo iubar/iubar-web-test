@@ -116,24 +116,31 @@ class Web_TestCase extends Root_TestCase {
     protected static $browserstack_acces_key = null;
     
     protected static function printEnviroments() {
-        echo PHP_EOL . "Enviroment variables for PhpUnit" . PHP_EOL . PHP_EOL;
-        echo "LOGS_PATH: " . getenv("LOGS_PATH") . PHP_EOL;
-        echo "SCREENSHOTS_PATH: " . getenv("SCREENSHOTS_PATH") . PHP_EOL;
-        echo "SELENIUM SERVER: " . getenv("SELENIUM_SERVER") . PHP_EOL;
-        echo "BROWSER:  " . getenv("BROWSER") . PHP_EOL;
-        echo "BROWSER VERSION:  " . getenv("BROWSER_VERSION") . PHP_EOL;
-        echo "OS VERSION:  " . getenv("OS_VERSION") . PHP_EOL;
-        echo "APP_HOST: " . getenv("APP_HOST") . PHP_EOL;
-        echo "APP_USERNAME: " . getenv("APP_USERNAME") . PHP_EOL;
-        echo "APP_PASSWORD: " . self::formatPassword(getenv("APP_PASSWORD")) . PHP_EOL;
-        echo "TRAVIS: " . getenv("TRAVIS") . PHP_EOL;
-        echo "TRAVIS_JOB_NUMBER: " . getenv("TRAVIS_JOB_NUMBER") . PHP_EOL;
-        echo "BROWSER_TESTING_TOOL: " . getenv("BROWSER_TESTING_TOOL") . PHP_EOL;
-        echo "SAUCE_USERNAME: " . getenv("SAUCE_USERNAME") . PHP_EOL;
-        echo "SAUCE_ACCESS_KEY: " . self::formatPassword(getenv("SAUCE_ACCESS_KEY")) . PHP_EOL;
-        echo "BROWSERSTACK_USERNAME: " . getenv("BROWSERSTACK_USERNAME") . PHP_EOL;
-        echo "BROWSERSTACK_ACCESS_KEY: " . self::formatPassword(getenv("BROWSERSTACK_ACCESS_KEY")) . PHP_EOL;
-        echo PHP_EOL . PHP_EOL;
+        echo PHP_EOL;
+        echo "Enviroment variables for PhpUnit" . PHP_EOL;
+        echo PHP_EOL;
+        
+        $padding = self::$climate->padding(10);
+        $padding->label('LOGS_PATH')->result(getenv("LOGS_PATH"));
+             
+        
+//         echo "LOGS_PATH: " . getenv("LOGS_PATH") . PHP_EOL;
+//         echo "SCREENSHOTS_PATH: " . getenv("SCREENSHOTS_PATH") . PHP_EOL;
+//         echo "SELENIUM SERVER: " . getenv("SELENIUM_SERVER") . PHP_EOL;
+//         echo "BROWSER:  " . getenv("BROWSER") . PHP_EOL;
+//         echo "BROWSER VERSION:  " . getenv("BROWSER_VERSION") . PHP_EOL;
+//         echo "OS VERSION:  " . getenv("OS_VERSION") . PHP_EOL;
+//         echo "APP_HOST: " . getenv("APP_HOST") . PHP_EOL;
+//         echo "APP_USERNAME: " . getenv("APP_USERNAME") . PHP_EOL;
+//         echo "APP_PASSWORD: " . self::formatPassword(getenv("APP_PASSWORD")) . PHP_EOL;
+//         echo "TRAVIS: " . getenv("TRAVIS") . PHP_EOL;
+//         echo "TRAVIS_JOB_NUMBER: " . getenv("TRAVIS_JOB_NUMBER") . PHP_EOL;
+//         echo "BROWSER_TESTING_TOOL: " . getenv("BROWSER_TESTING_TOOL") . PHP_EOL;
+//         echo "SAUCE_USERNAME: " . getenv("SAUCE_USERNAME") . PHP_EOL;
+//         echo "SAUCE_ACCESS_KEY: " . self::formatPassword(getenv("SAUCE_ACCESS_KEY")) . PHP_EOL;
+//         echo "BROWSERSTACK_USERNAME: " . getenv("BROWSERSTACK_USERNAME") . PHP_EOL;
+//         echo "BROWSERSTACK_ACCESS_KEY: " . self::formatPassword(getenv("BROWSERSTACK_ACCESS_KEY")) . PHP_EOL;
+        echo PHP_EOL;
     }
     
     protected static function checkPaths(){
@@ -154,11 +161,11 @@ class Web_TestCase extends Root_TestCase {
      */
     public static function setUpBeforeClass() {
         
-        self::printEnviroments();
-        self::checkPaths();
-        
         self::$climate = new CLImate();
         
+        self::printEnviroments();
+        self::checkPaths();
+                
         self::$browser = getenv('BROWSER');
         self::$browser_version = getenv('BROWSER_VERSION');
         self::$os_version = getenv('OS_VERSION');
@@ -176,10 +183,6 @@ class Web_TestCase extends Root_TestCase {
         self::$browserstack_username = getenv('BROWSERSTACK_USERNAME');
         self::$browserstack_acces_key = getenv('BROWSERSTACK_ACCESS_KEY');
         
-        // Usage with SauceLabs:
-        // set on Travis: SAUCE_USERNAME and SAUCE_ACCESS_KEY
-        // set on .tavis.yml and env.bat: SELENIUM_SERVER (hostname + port, without protocol);
-
         $capabilities = null;
         
         // set capabilities according to the browers
@@ -218,7 +221,7 @@ class Web_TestCase extends Root_TestCase {
                     $this->fail("Can't test with Safari on Windows Os" . PHP_EOL);
                 }
                 $capabilities = DesiredCapabilities::safari();
-                $capabilities->setCapability('options', array("cleanSession"=>"true")); // see: https://github.com/SeleniumHQ/selenium/wiki/DesiredCapabilities#safari-specific
+                //DOESN'T WORK: $capabilities->setCapability('options', array("cleanSession"=>"true")); // see: https://github.com/SeleniumHQ/selenium/wiki/DesiredCapabilities#safari-specific
                 break;
             default:
                 $error = "Browser '" . self::$browser . "' not supported.";
