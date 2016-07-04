@@ -23,6 +23,8 @@ use \League\CLImate\CLImate;
  * @see : https://gist.github.com/huangzhichong/3284966 Cheat sheet for using php webdriver
  * @see : https://gist.github.com/aczietlow/7c4834f79a7afd920d8f Cheat sheet for using php webdriver
  * @see : https://github.com/facebook/php-webdriver/wiki
+ * @see : https://docs.travis-ci.com/user/gui-and-headless-browsers/
+ * 
  */
 class Web_TestCase extends Root_TestCase {
 
@@ -186,28 +188,14 @@ class Web_TestCase extends Root_TestCase {
             case self::PHANTOMJS:
                 echo "Inizializing PhantomJs browser" . PHP_EOL;
                 $capabilities = DesiredCapabilities::phantomjs();                
-                $capabilities->setCapability("phantomjs.cli.args", 
-                    
-                    "['--webdriver-logfile=" . $this->logs_path . "/phantomjsdriver.log']"
-                    
-                    
-                    );
-                
-                $options = array( // TODO: da verificare se svolgono il loro compito
-                    "phantomjs.ghostdriver.cli.args"    =>  "--loglevel=DEBUG",
-                    "phantomjs.cli.args"                =>  "--debug=true --webdrive --loglevel=DEBUG --webdriver-logfile=" . $phantomjs_log_file,
-                    "phantomjs.binary.path"             =>  $this->phantomjs_binary
+                 
+                $cli_args = array( // TODO: da verificare se svolgono il loro compito
+                   "--debug"=>"true", "--webdrive"=>"", "--loglevel"=>"DEBUG", "--webdriver-logfile"=>$this->logs_path . "/phantomjsdriver.log"
                 );
                 
-                $options = array( // TODO: da verificare se svolgono il loro compito
-                    "phantomjs.ghostdriver.cli.args"    =>  "--loglevel=DEBUG",
-                    "phantomjs.cli.args"                =>  "--debug=true --webdrive --loglevel=DEBUG --webdriver-logfile=" . $phantomjs_log_file,
-                    "phantomjs.binary.path"             =>  $this->phantomjs_binary
-                );
-                
-                $capabilities->setCapability("phantomjs.ghostdriver.cli.args", $options1);
-                $capabilities->setCapability("phantomjs.cli.args", $options2);
-                $capabilities->setCapability("phantomjs.binary.path", $options3);
+                $capabilities->setCapability("phantomjs.ghostdriver.cli.args", array("--loglevel" => "DEBUG", "--webdriver-loglevel" => "DEBUG"));
+                $capabilities->setCapability("phantomjs.cli.args", $cli_args);
+                $capabilities->setCapability("phantomjs.binary.path", $this->phantomjs_binary); // 
                 
                 
                 break;
@@ -230,8 +218,8 @@ class Web_TestCase extends Root_TestCase {
                     $this->fail("Can't test with Safari on Windows Os" . PHP_EOL);
                 }
                 $capabilities = DesiredCapabilities::safari();
-                $capabilities->setCapability('safari.options', '[cleanSession: true]'); // see: https://github.com/SeleniumHQ/selenium/wiki/DesiredCapabilities#safari-specific
-                                                                                        // TODO: da verificare se svolge il suo compito (l'alternativa da provare è $capabilities->setCapability('safari.options', '[cleanSession: true]');
+                $capabilities->setCapability('safari.options', array("cleanSession"=>"true")); // see: https://github.com/SeleniumHQ/selenium/wiki/DesiredCapabilities#safari-specific
+                                                                                                // TODO: da verificare se svolge il suo compito (l'alternativa da provare è $capabilities->setCapability('safari.options', '[cleanSession: true]');
                 break;
             default:
                 $error = "Browser '" . self::$browser . "' not supported.";
@@ -244,7 +232,7 @@ class Web_TestCase extends Root_TestCase {
             $capabilities->setCapability("version", self::$browser_version);
         }
         if(self::$os_version){
-            $capabilities->setCapability("platform", self::$os_version)            
+            $capabilities->setCapability("platform", self::$os_version);            
         }
         
         // create the WebDriver
