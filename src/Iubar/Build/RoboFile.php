@@ -100,8 +100,8 @@ class RoboFile extends \Robo\Tasks {
 
     private function isRelativePath($path) {
         $tmp = realpath($path);
-        echo "path:" . $path . PHP_EOL;
-        echo "real path:" . $tmp . PHP_EOL;
+        // echo "path:" . $path . PHP_EOL;
+        // echo "real path:" . $tmp . PHP_EOL;
         $path = str_replace('\\', '/', $path);
         $tmp = str_replace('\\', '/', $tmp);
         if ($path != $tmp) {
@@ -137,12 +137,12 @@ class RoboFile extends \Robo\Tasks {
         }
         
         if (!getenv('BROWSER_VERSION')) {
-            $this->browser_version = $ini_array['browser_version'];
+            $this->browser_version = $ini_array['browser_version'][$this->browser];
             putenv('BROWSER_VERSION=' . $this->browser_version);
         }
         
         if (!getenv('OS_VERSION')) {
-            $this->os_version = $ini_array['os_version'];
+            $this->os_version = $ini_array['os_version'][$this->browser];
             putenv('OS_VERSION=' . $this->os_version);
         }
         
@@ -217,6 +217,7 @@ class RoboFile extends \Robo\Tasks {
         echo "open slideshow: " . $this->formatBoolean($this->open_slideshow) . PHP_EOL;
         echo "start selenium: " . $this->formatBoolean($this->start_selenium) . PHP_EOL;
         echo PHP_EOL . PHP_EOL;
+ 
     }
 
     protected function formatBoolean($b) {

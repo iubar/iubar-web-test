@@ -125,22 +125,22 @@ class Web_TestCase extends Root_TestCase {
         
         
         
-        // echo "LOGS_PATH: " . getenv("LOGS_PATH") . PHP_EOL;
-        // echo "SCREENSHOTS_PATH: " . getenv("SCREENSHOTS_PATH") . PHP_EOL;
-        // echo "SELENIUM SERVER: " . getenv("SELENIUM_SERVER") . PHP_EOL;
-        // echo "BROWSER: " . getenv("BROWSER") . PHP_EOL;
-        // echo "BROWSER VERSION: " . getenv("BROWSER_VERSION") . PHP_EOL;
-        // echo "OS VERSION: " . getenv("OS_VERSION") . PHP_EOL;
-        // echo "APP_HOST: " . getenv("APP_HOST") . PHP_EOL;
-        // echo "APP_USERNAME: " . getenv("APP_USERNAME") . PHP_EOL;
-        // echo "APP_PASSWORD: " . self::formatPassword(getenv("APP_PASSWORD")) . PHP_EOL;
-        // echo "TRAVIS: " . getenv("TRAVIS") . PHP_EOL;
-        // echo "TRAVIS_JOB_NUMBER: " . getenv("TRAVIS_JOB_NUMBER") . PHP_EOL;
-        // echo "BROWSER_TESTING_TOOL: " . getenv("BROWSER_TESTING_TOOL") . PHP_EOL;
-        // echo "SAUCE_USERNAME: " . getenv("SAUCE_USERNAME") . PHP_EOL;
-        // echo "SAUCE_ACCESS_KEY: " . self::formatPassword(getenv("SAUCE_ACCESS_KEY")) . PHP_EOL;
-        // echo "BROWSERSTACK_USERNAME: " . getenv("BROWSERSTACK_USERNAME") . PHP_EOL;
-        // echo "BROWSERSTACK_ACCESS_KEY: " . self::formatPassword(getenv("BROWSERSTACK_ACCESS_KEY")) . PHP_EOL;
+        echo "LOGS_PATH: " . getenv("LOGS_PATH") . PHP_EOL;
+        echo "SCREENSHOTS_PATH: " . getenv("SCREENSHOTS_PATH") . PHP_EOL;
+        echo "SELENIUM SERVER: " . getenv("SELENIUM_SERVER") . PHP_EOL;
+        echo "BROWSER: " . getenv("BROWSER") . PHP_EOL;
+        echo "BROWSER VERSION: " . getenv("BROWSER_VERSION") . PHP_EOL;
+        echo "OS VERSION: " . getenv("OS_VERSION") . PHP_EOL;
+        echo "APP_HOST: " . getenv("APP_HOST") . PHP_EOL;
+        echo "APP_USERNAME: " . getenv("APP_USERNAME") . PHP_EOL;
+        echo "APP_PASSWORD: " . self::formatPassword(getenv("APP_PASSWORD")) . PHP_EOL;
+        echo "TRAVIS: " . getenv("TRAVIS") . PHP_EOL;
+        echo "TRAVIS_JOB_NUMBER: " . getenv("TRAVIS_JOB_NUMBER") . PHP_EOL;
+        echo "BROWSER_TESTING_TOOL: " . getenv("BROWSER_TESTING_TOOL") . PHP_EOL;
+        echo "SAUCE_USERNAME: " . getenv("SAUCE_USERNAME") . PHP_EOL;
+        echo "SAUCE_ACCESS_KEY: " . self::formatPassword(getenv("SAUCE_ACCESS_KEY")) . PHP_EOL;
+        echo "BROWSERSTACK_USERNAME: " . getenv("BROWSERSTACK_USERNAME") . PHP_EOL;
+        echo "BROWSERSTACK_ACCESS_KEY: " . self::formatPassword(getenv("BROWSERSTACK_ACCESS_KEY")) . PHP_EOL;
         echo PHP_EOL;
     }
 
@@ -253,7 +253,9 @@ class Web_TestCase extends Root_TestCase {
                     break;
             }
         }
-        $capabilities->setCapability("version", self::$browser_version);
+        if (self::$browser_version) {
+            $capabilities->setCapability("version", self::$browser_version);
+        }
         
         if (!self::$os_version) {
             switch (self::$browser) {
@@ -274,7 +276,9 @@ class Web_TestCase extends Root_TestCase {
                     break;
             }
         }
-        $capabilities->setCapability("platform", self::$os_version);
+        if (self::$os_version) {
+            $capabilities->setCapability("platform", self::$os_version);
+        }
         
         // create the WebDriver
         $connection_timeout_in_ms = 10 * 1000; // Set the maximum time of a request
@@ -368,7 +372,7 @@ class Web_TestCase extends Root_TestCase {
             echo "Taken " . count(self::$screenshots) . " screenshots" . PHP_EOL;
             $first_screenshot = self::$screenshots[0];
             self::$climate->info('Opening the last screenshot...');
-            self::openBrowser($first_screenshot);
+            self::openFile($first_screenshot);
         }
         
         if (self::$openLastDumpFile && count(self::$dump_files) > 0) {
@@ -424,10 +428,18 @@ class Web_TestCase extends Root_TestCase {
         self::$climate->info('Opening browser at: ' . $url);
         
         // Warning: Windows specific code
-        $cmd = "start '" . $browser . " " . $url . "'";
+        //NO: $cmd = "start '" . $browser . " " . $url . "'";
+        $cmd = "start '" . $url . "'";
         self::$climate->info('Command is : ' . $cmd);
         self::startShell($cmd);
     }
+    
+    protected static function openFile($file) {
+        // Warning: Windows specific code
+        $cmd = "start '" . $file . "'";
+        self::$climate->info('Command is : ' . $cmd);
+        self::startShell($cmd);
+    }    
 
     /**
      * Return if the Os is Windows
