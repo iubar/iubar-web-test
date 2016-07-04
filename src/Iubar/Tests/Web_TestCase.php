@@ -424,7 +424,8 @@ class Web_TestCase extends Root_TestCase {
         self::$climate->info('Opening browser at: ' . $url);
         
         // Warning: Windows specific code
-        $cmd = "start " . $browser . " " . $url;
+        $cmd = "start '" . $browser . " " . $url . "'";
+        self::$climate->info('Command is : ' . $cmd);
         self::startShell($cmd);
     }
 
