@@ -24,11 +24,10 @@ use \League\CLImate\CLImate;
  * @see : https://gist.github.com/aczietlow/7c4834f79a7afd920d8f Cheat sheet for using php webdriver
  * @see : https://github.com/facebook/php-webdriver/wiki
  * @see : https://docs.travis-ci.com/user/gui-and-headless-browsers/
- * 
  */
 class Web_TestCase extends Root_TestCase {
 
-    const DEBUG = false;        
+    const DEBUG = false;
 
     const TAKE_SCREENSHOTS = true;
     
@@ -36,7 +35,7 @@ class Web_TestCase extends Root_TestCase {
     const DEFAULT_WAIT_TIMEOUT = 15;
     
     // the interval in miliseconds
-    const DEFAULT_WAIT_INTERVAL = 1000;        
+    const DEFAULT_WAIT_INTERVAL = 1000;
     
     // Browser
     const PHANTOMJS = 'phantomjs';
@@ -50,13 +49,13 @@ class Web_TestCase extends Root_TestCase {
     const SAFARI = 'safari';
 
     const JS_DRAG_SCRIPT = 'js/drag.js';
-    
+
     const JS_DELETECOOKIES_SCRIPT = 'js/delete_cookies2.js';
-    
+
     const SAUCELABS = 'saucelabs';
-    
+
     const BROWSERSTACK = 'browserstack';
-    
+
     const HIDDEN = '**********';
     
     // default is 4444
@@ -82,9 +81,9 @@ class Web_TestCase extends Root_TestCase {
     protected static $files_to_del = array();
 
     protected static $browser = null;
-    
+
     protected static $browser_version = null;
-    
+
     protected static $os_version = null;
 
     protected static $selenium_server = null;
@@ -92,7 +91,7 @@ class Web_TestCase extends Root_TestCase {
     protected static $selenium_path = null;
 
     protected static $logs_path = null;
-    
+
     protected static $screenshots_path = null;
 
     protected static $app_host = null;
@@ -102,19 +101,19 @@ class Web_TestCase extends Root_TestCase {
     protected static $app_password = null;
 
     private static $travis = null;
-    
+
     protected static $travis_job_number = null;
-    
+
     protected static $browser_testing_tool = null;
-    
+
     protected static $sauce_access_username = null;
-    
+
     protected static $sauce_access_key = null;
-    
+
     protected static $browserstack_username = null;
-    
+
     protected static $browserstack_acces_key = null;
-    
+
     protected static function printEnviroments() {
         echo PHP_EOL;
         echo "Enviroment variables for PhpUnit" . PHP_EOL;
@@ -122,28 +121,27 @@ class Web_TestCase extends Root_TestCase {
         
         $padding = self::$climate->padding(10);
         $padding->label('LOGS_PATH')->result(getenv("LOGS_PATH"));
-             
         
-//         echo "LOGS_PATH: " . getenv("LOGS_PATH") . PHP_EOL;
-//         echo "SCREENSHOTS_PATH: " . getenv("SCREENSHOTS_PATH") . PHP_EOL;
-//         echo "SELENIUM SERVER: " . getenv("SELENIUM_SERVER") . PHP_EOL;
-//         echo "BROWSER:  " . getenv("BROWSER") . PHP_EOL;
-//         echo "BROWSER VERSION:  " . getenv("BROWSER_VERSION") . PHP_EOL;
-//         echo "OS VERSION:  " . getenv("OS_VERSION") . PHP_EOL;
-//         echo "APP_HOST: " . getenv("APP_HOST") . PHP_EOL;
-//         echo "APP_USERNAME: " . getenv("APP_USERNAME") . PHP_EOL;
-//         echo "APP_PASSWORD: " . self::formatPassword(getenv("APP_PASSWORD")) . PHP_EOL;
-//         echo "TRAVIS: " . getenv("TRAVIS") . PHP_EOL;
-//         echo "TRAVIS_JOB_NUMBER: " . getenv("TRAVIS_JOB_NUMBER") . PHP_EOL;
-//         echo "BROWSER_TESTING_TOOL: " . getenv("BROWSER_TESTING_TOOL") . PHP_EOL;
-//         echo "SAUCE_USERNAME: " . getenv("SAUCE_USERNAME") . PHP_EOL;
-//         echo "SAUCE_ACCESS_KEY: " . self::formatPassword(getenv("SAUCE_ACCESS_KEY")) . PHP_EOL;
-//         echo "BROWSERSTACK_USERNAME: " . getenv("BROWSERSTACK_USERNAME") . PHP_EOL;
-//         echo "BROWSERSTACK_ACCESS_KEY: " . self::formatPassword(getenv("BROWSERSTACK_ACCESS_KEY")) . PHP_EOL;
+        // echo "LOGS_PATH: " . getenv("LOGS_PATH") . PHP_EOL;
+        // echo "SCREENSHOTS_PATH: " . getenv("SCREENSHOTS_PATH") . PHP_EOL;
+        // echo "SELENIUM SERVER: " . getenv("SELENIUM_SERVER") . PHP_EOL;
+        // echo "BROWSER: " . getenv("BROWSER") . PHP_EOL;
+        // echo "BROWSER VERSION: " . getenv("BROWSER_VERSION") . PHP_EOL;
+        // echo "OS VERSION: " . getenv("OS_VERSION") . PHP_EOL;
+        // echo "APP_HOST: " . getenv("APP_HOST") . PHP_EOL;
+        // echo "APP_USERNAME: " . getenv("APP_USERNAME") . PHP_EOL;
+        // echo "APP_PASSWORD: " . self::formatPassword(getenv("APP_PASSWORD")) . PHP_EOL;
+        // echo "TRAVIS: " . getenv("TRAVIS") . PHP_EOL;
+        // echo "TRAVIS_JOB_NUMBER: " . getenv("TRAVIS_JOB_NUMBER") . PHP_EOL;
+        // echo "BROWSER_TESTING_TOOL: " . getenv("BROWSER_TESTING_TOOL") . PHP_EOL;
+        // echo "SAUCE_USERNAME: " . getenv("SAUCE_USERNAME") . PHP_EOL;
+        // echo "SAUCE_ACCESS_KEY: " . self::formatPassword(getenv("SAUCE_ACCESS_KEY")) . PHP_EOL;
+        // echo "BROWSERSTACK_USERNAME: " . getenv("BROWSERSTACK_USERNAME") . PHP_EOL;
+        // echo "BROWSERSTACK_ACCESS_KEY: " . self::formatPassword(getenv("BROWSERSTACK_ACCESS_KEY")) . PHP_EOL;
         echo PHP_EOL;
     }
-    
-    protected static function checkPaths(){
+
+    protected static function checkPaths() {
         if (getenv("LOGS_PATH")) {
             self::isPathWritable(getenv("LOGS_PATH"));
         }
@@ -160,12 +158,11 @@ class Web_TestCase extends Root_TestCase {
      * Start the WebDriver
      */
     public static function setUpBeforeClass() {
-        
         self::$climate = new CLImate();
         
         self::printEnviroments();
         self::checkPaths();
-                
+        
         self::$browser = getenv('BROWSER');
         self::$browser_version = getenv('BROWSER_VERSION');
         self::$os_version = getenv('OS_VERSION');
@@ -190,17 +187,21 @@ class Web_TestCase extends Root_TestCase {
         switch (self::$browser) {
             case self::PHANTOMJS:
                 echo "Inizializing PhantomJs browser" . PHP_EOL;
-                $capabilities = DesiredCapabilities::phantomjs();                
-                 
+                $capabilities = DesiredCapabilities::phantomjs();
+                
                 $cli_args = array( // TODO: da verificare se svolgono il loro compito
-                   "--debug"=>"true", "--webdrive"=>"", "--loglevel"=>"DEBUG", "--webdriver-logfile"=>$this->logs_path . "/phantomjsdriver.log"
+                    "--debug" => "true",
+                    "--webdrive" => "",
+                    "--loglevel" => "DEBUG",
+                    "--webdriver-logfile" => self::$logs_path . "/phantomjsdriver.log"
                 );
                 
-                $capabilities->setCapability("phantomjs.ghostdriver.cli.args", array("--loglevel" => "DEBUG", "--webdriver-loglevel" => "DEBUG"));
+                $capabilities->setCapability("phantomjs.ghostdriver.cli.args", array(
+                    "--loglevel" => "DEBUG",
+                    "--webdriver-loglevel" => "DEBUG"
+                ));
                 $capabilities->setCapability("phantomjs.cli.args", $cli_args);
-                $capabilities->setCapability("phantomjs.binary.path", $this->phantomjs_binary); // 
-                
-                
+                // $capabilities->setCapability("phantomjs.binary.path", self::$phantomjs_binary);
                 break;
             case self::CHROME:
                 echo "Inizializing Chrome browser" . PHP_EOL;
@@ -218,10 +219,10 @@ class Web_TestCase extends Root_TestCase {
                 break;
             case self::SAFARI:
                 if (self::isWindows()) {
-                    $this->fail("Can't test with Safari on Windows Os" . PHP_EOL);
+                    die("Can't test with Safari on Windows Os" . PHP_EOL);
                 }
                 $capabilities = DesiredCapabilities::safari();
-                //DOESN'T WORK: $capabilities->setCapability('options', array("cleanSession"=>"true")); // see: https://github.com/SeleniumHQ/selenium/wiki/DesiredCapabilities#safari-specific
+                // DOESN'T WORK: $capabilities->setCapability('options', array("cleanSession"=>"true")); // see: https://github.com/SeleniumHQ/selenium/wiki/DesiredCapabilities#safari-specific
                 break;
             default:
                 $error = "Browser '" . self::$browser . "' not supported.";
@@ -229,13 +230,47 @@ class Web_TestCase extends Root_TestCase {
                 throw new \Exception($error);
         }
         
+        if (!self::$browser_version) {
+            switch (self::$browser) {
+                case self::PHANTOMJS:
+                    self::$browser_version = "";
+                    break;
+                case self::CHROME:
+                    self::$browser_version = "46.0";
+                    break;
+                case self::FIREFOX:
+                    self::$browser_version = "31.0";
+                    break;
+                case self::MARIONETTE:
+                    self::$browser_version = "31.0";
+                    break;
+                case self::SAFARI:
+                    self::$browser_version = "9.0";
+                    break;
+            }
+        }
+        $capabilities->setCapability("version", self::$browser_version);
         
-        if(self::$browser_version){            
-            $capabilities->setCapability("version", self::$browser_version);
+        if (!self::$os_version) {
+            switch (self::$browser) {
+                case self::PHANTOMJS:
+                    self::$os_version = "Windows 10";
+                    break;
+                case self::CHROME:
+                    self::$os_version = "Windows 10";
+                    break;
+                case self::FIREFOX:
+                    self::$os_version = "Linux";
+                    break;
+                case self::MARIONETTE:
+                    self::$os_version = "Windows 10";
+                    break;
+                case self::SAFARI:
+                    self::$os_version = "OS X 10.11";
+                    break;
+            }
         }
-        if(self::$os_version){
-            $capabilities->setCapability("platform", self::$os_version);            
-        }
+        $capabilities->setCapability("platform", self::$os_version);
         
         // create the WebDriver
         $connection_timeout_in_ms = 10 * 1000; // Set the maximum time of a request
@@ -250,20 +285,20 @@ class Web_TestCase extends Root_TestCase {
                 if (self::$browser_testing_tool == self::SAUCELABS) {
                     $capabilities->setCapability('tunnel-identifier', self::$travis_job_number);
                     $capabilities->setCapability('name', $msg);
-                    $username = self::$sauce_access_username ;
+                    $username = self::$sauce_access_username;
                     $access_key = self::$sauce_access_key;
-                } else  if (self::$browser_testing_tool == self::BROWSERSTACK) {
-                    $capabilities->setCapability('browserstack.debug', true);
-                    $capabilities->setCapability('browserstack.local', true);
-                    $capabilities->setCapability('browserstack.localIdentifier', $msg);
-                    $capabilities->setCapability('takesScreenshot', true);
-                    $username = self::$browserstack_username;
-                    $access_key = self::$browserstack_acces_key;
-                }
+                } else 
+                    if (self::$browser_testing_tool == self::BROWSERSTACK) {
+                        $capabilities->setCapability('browserstack.debug', true);
+                        $capabilities->setCapability('browserstack.local', true);
+                        $capabilities->setCapability('browserstack.localIdentifier', $msg);
+                        $capabilities->setCapability('takesScreenshot', true);
+                        $username = self::$browserstack_username;
+                        $access_key = self::$browserstack_acces_key;
+                    }
                 $server_root = "http://" . $username . ":" . $access_key . "@" . self::$selenium_server; // Attention: never print-out this string.
-                $server_printable  = "http://" . self::HIDDEN . ":" . self::HIDDEN  . "@" . self::$selenium_server; 
+                $server_printable = "http://" . self::HIDDEN . ":" . self::HIDDEN . "@" . self::$selenium_server;
             }
-            
         } else {
             $server_root = "http://" . self::$selenium_server;
             $server_printable = $server_root;
@@ -274,8 +309,8 @@ class Web_TestCase extends Root_TestCase {
         }
         self::$selenium_server_shutdown = $server_root . '/selenium-server/driver/?cmd=shutDownSeleniumServer';
         self::$selenium_session_shutdown = $server_root . '/selenium-server/driver/?cmd=shutDown';
-        $server = $server_root . "/wd/hub"; // Attention: never print-out this string. 
-
+        $server = $server_root . "/wd/hub"; // Attention: never print-out this string.
+        
         echo "Server: " . $server_printable . PHP_EOL;
         
         try {
@@ -323,7 +358,7 @@ class Web_TestCase extends Root_TestCase {
         
         // if there is at least a screenshot show it in the browser
         if (self::$openLastScreenshot && count(self::$screenshots) > 0) {
-            if(self::$browser == self::PHANTOMJS){
+            if (self::$browser == self::PHANTOMJS) {
                 die("Unexpected status: browser is phantomjs" . PHP_EOL); // here I can't call assertNotEqual() becasue it's a dynamic method
             }
             echo "Taken " . count(self::$screenshots) . " screenshots" . PHP_EOL;
@@ -590,7 +625,6 @@ class Web_TestCase extends Root_TestCase {
             return;
     }
 
-
     protected function deleteAllCookies() {
         $arguments = array();
         $this->getWd()->executeScript($this->get_js_contents(self::JS_DELETECOOKIES_SCRIPT), $arguments);
@@ -614,14 +648,18 @@ class Web_TestCase extends Root_TestCase {
         
         $wd = $this->getWd();
         
-        $file = realpath($file);        
-               
+        $file = realpath($file);
+        
         // Execute the js drag file script
         // @see also: https://github.com/facebook/php-webdriver/blob/787e71db74e42cdf13a41d500f75ea43da84bc75/tests/functional/FileUploadTest.php
-        $return = $wd->executeScript($this->get_js_contents(self::JS_DRAG_SCRIPT), array($drop_area));
+        $return = $wd->executeScript($this->get_js_contents(self::JS_DRAG_SCRIPT), array(
+            $drop_area
+        ));
         
         echo PHP_EOL . "Waiting the js script execution..." . PHP_EOL;
-        $wd->manage()->timeouts()->implicitlyWait(2);
+        $wd->manage()
+            ->timeouts()
+            ->implicitlyWait(2);
         
         $file_input = $wd->findElement(WebDriverBy::id("upload")); // RemoteWebElement obj
         if (!$file_input) {
@@ -866,7 +904,6 @@ class Web_TestCase extends Root_TestCase {
         // tidy up
         imagedestroy($im);
     }
-    
 
     private static function formatPassword($env) {
         $str = '<not set>';
@@ -875,16 +912,15 @@ class Web_TestCase extends Root_TestCase {
         }
         return $str;
     }
-    
-    private function getJsPath(){
-        return __DIR__ . "/../../..";    
+
+    private function getJsPath() {
+        return __DIR__ . "/../../..";
     }
-    
-    private function get_js_contents($js_file){
-        $js_file = $this->getJsPath() . DIRECTORY_SEPARATOR . $js_file;        
+
+    private function get_js_contents($js_file) {
+        $js_file = $this->getJsPath() . DIRECTORY_SEPARATOR . $js_file;
         self::checkFile($js_file);
         $script = file_get_contents($js_file);
         return $script;
     }
-    
 }
