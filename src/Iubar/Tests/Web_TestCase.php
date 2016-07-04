@@ -205,7 +205,7 @@ class Web_TestCase extends Root_TestCase {
                     "--webdriver-loglevel" => "DEBUG"
                 ));
                 $capabilities->setCapability("phantomjs.cli.args", $cli_args);
-                // $capabilities->setCapability("phantomjs.binary.path", self::$phantomjs_binary);
+                $capabilities->setCapability("phantomjs.binary.path", self::$phantomjs_binary);
                 break;
             case self::CHROME:
                 echo "Inizializing Chrome browser" . PHP_EOL;
@@ -246,7 +246,7 @@ class Web_TestCase extends Root_TestCase {
                     self::$browser_version = "31.0";
                     break;
                 case self::MARIONETTE:
-                    self::$browser_version = "31.0";
+                    self::$browser_version = "";
                     break;
                 case self::SAFARI:
                     self::$browser_version = "9.0";
@@ -267,7 +267,7 @@ class Web_TestCase extends Root_TestCase {
                     self::$os_version = "Linux";
                     break;
                 case self::MARIONETTE:
-                    self::$os_version = "Windows 10";
+                    self::$os_version = "";
                     break;
                 case self::SAFARI:
                     self::$os_version = "OS X 10.11";
@@ -607,6 +607,12 @@ class Web_TestCase extends Root_TestCase {
         $this->getWd()
             ->wait($timeout, self::DEFAULT_WAIT_INTERVAL)
             ->until(WebDriverExpectedCondition::textToBePresentInElement(WebDriverBy::tagName($tag), $substr));
+    }
+    
+    protected function waitForPartialLinkText($id, $timeout = self::DEFAULT_WAIT_TIMEOUT) {
+        $this->getWd()
+        ->wait($timeout, self::DEFAULT_WAIT_INTERVAL)
+        ->until(WebDriverExpectedCondition::visibilityOfElementLocated(WebDriverBy::partialLinkText($id)));
     }
 
     /**
