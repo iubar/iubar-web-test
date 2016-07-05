@@ -88,13 +88,14 @@ class RoboFile extends \Robo\Tasks {
                     $this->climate->info("Running slideshow on $host:$port...");
                     $this->startHttpServer();
                     $url = 'http://' . $host . ':' . $port . '/slideshow/index.php';
-                    $this->browser($url);
-                    $input = $this->climate->password('Press Enter to quit the slideshow:');
-                    $dummy = $input->prompt();                
-                }
-                
-            }
+                    $this->browser($url);     
+                    // $input = $this->climate->password('Press Enter to quit the slideshow:');
+                    // $dummy = $input->prompt();                    
+                }                
+            }    
         }
+            $input = $this->climate->password('Press Enter to quit:');
+            $dummy = $input->prompt();
         $this->climate->info("Done.");
     }
 
