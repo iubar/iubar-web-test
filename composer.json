@@ -2,17 +2,17 @@
 
 	"name" : "iubar/iubar-web-test",
 	
-    "require": {
+    "require" : {
         "php": ">=5.5.0",
-        "facebook/webdriver": "*",
-        "guzzlehttp/guzzle": "~6.0",
-        "league/climate":"*",
+        "facebook/webdriver" : "*",
+        "guzzlehttp/guzzle" : "~6.0",
+        "league/climate" : "*",
         "digitalnature/php-ref": "*"
     },
      
     "autoload": {
     	"psr-4": {
-            "Iubar\\": "src/Iubar/"
+            "Iubar\\" : "src/Iubar/"
         }
      }     
 }

@@ -347,7 +347,9 @@ class Web_TestCase extends Root_TestCase {
     protected static function printEnviroments() {
         self::$climate->info("Enviroment variables for PhpUnit");
         
-        $padding = self::$climate->padding(10);
+        //@see https://github.com/thephpleague/climate/issues/9 (search for: yparisien)
+        
+        $padding = self::$climate->padding(15);
         $padding->label('LOGS_PATH: ')->result(getenv("LOGS_PATH"));
         $padding->label('SCREENSHOTS_PATH: ')->result(getenv("SCREENSHOTS_PATH"));
         $padding->label('SELENIUM SERVER: ')->result(getenv("SELENIUM_SERVER"));
