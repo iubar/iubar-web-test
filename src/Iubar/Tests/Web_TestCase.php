@@ -318,12 +318,15 @@ class Web_TestCase extends Root_TestCase {
         self::$climate->info('Quitting webdriver...');
         self::$webDriver->quit();
         
+        $screenshots_count = count(self::$screenshots);
+        putenv("SCREENSHOTS_COUNT=" . $screenshots_count);
+        
         // if there is at least a screenshot show it in the browser
-        if (self::$openLastScreenshot && count(self::$screenshots) > 0) {
+        if (self::$openLastScreenshot && $screenshots_count) {
             if (self::$browser == self::PHANTOMJS) {
                 die("Unexpected status: browser is phantomjs" . PHP_EOL); // here I can't call assertNotEqual() becasue it's a dynamic method
             }
-            self::$climate->error("Taken " . count(self::$screenshots) . " screenshots");
+            self::$climate->error("Taken " . $screenshots_count . " screenshots");
             $first_screenshot = self::$screenshots[0];
             self::$climate->info('Opening the last screenshot...');
             self::openFile($first_screenshot);
@@ -569,6 +572,12 @@ class Web_TestCase extends Root_TestCase {
             ->wait($timeout, self::DEFAULT_WAIT_INTERVAL)
             ->until(WebDriverExpectedCondition::visibilityOfElementLocated(WebDriverBy::cssSelector($css)));
     }
+    
+    protected function waitForCssToBeClickable($css, $timeout = self::DEFAULT_WAIT_TIMEOUT) {
+        $this->getWd()
+        ->wait($timeout, self::DEFAULT_WAIT_INTERVAL)
+        ->until(WebDriverExpectedCondition::elementToBeClickable(WebDriverBy::cssSelector($css)));
+    }    
 
     /**
      * Wait at most $timeout seconds until at least one result is shown

@@ -77,7 +77,7 @@ class RoboFile extends \Robo\Tasks {
             // echo PHP_EOL;
         }
         if ($this->browser != Web_TestCase::PHANTOMJS) {
-            if ($this->open_slideshow) {
+            if ($this->open_slideshow && getenv("SCREENSHOTS_COUNT") ) {
                 $host = 'localhost';
                 $port = '8000';
                 $this->climate->info("Running slideshow on $host:$port...");
@@ -344,9 +344,7 @@ class RoboFile extends \Robo\Tasks {
      */
     private function runPhpunit() {
         $cfg_file = $this->phpunit_xml_path . "\phpunit.xml";
-        if (!is_file($cfg_file)) {
-            die("File not found: " . $cfg_file . PHP_EOL);
-        }
+        $this->checkFile($cfg_file);
         // runs PHPUnit tests
         $this->taskPHPUnit('phpunit')
             ->configFile($cfg_file)
