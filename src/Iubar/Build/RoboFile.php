@@ -78,14 +78,21 @@ class RoboFile extends \Robo\Tasks {
         }
         if ($this->browser != Web_TestCase::PHANTOMJS) {
             if ($this->open_slideshow && getenv("SCREENSHOTS_COUNT") ) {
-                $host = 'localhost';
-                $port = '8000';
-                $this->climate->info("Running slideshow on $host:$port...");
-                $this->startHttpServer();
-                $url = 'http://' . $host . ':' . $port . '/slideshow/index.php';
-                $this->browser($url);
-                $input = $this->climate->password('Press Enter to stop the slideshow:');
-                $dummy = $input->prompt();
+                
+                
+                $input = $climate->confirm('Do you want to see the slideshow ?');
+                if ($input->confirmed()) {                
+                    $this->climate->info("Screenshots taken: " . getenv("SCREENSHOTS_COUNT")); 
+                    $host = 'localhost';
+                    $port = '8000';
+                    $this->climate->info("Running slideshow on $host:$port...");
+                    $this->startHttpServer();
+                    $url = 'http://' . $host . ':' . $port . '/slideshow/index.php';
+                    $this->browser($url);
+                    $input = $this->climate->password('Press Enter to quit the slideshow:');
+                    $dummy = $input->prompt();                
+                }
+                
             }
         }
         $this->climate->info("Done.");
@@ -237,10 +244,11 @@ class RoboFile extends \Robo\Tasks {
         $this->open_slideshow = $ini_array['open_slideshow'];
         $this->start_selenium = $ini_array['start_selenium'];
         
-        $this->climate->info("Enviroment variables for the generic building tool");
+        $this->climate->underline()->bold("Enviroment variables for the generic building tool");
         $this->climate->info("PHPUNIT_XML_PATH: " . getenv("PHPUNIT_XML_PATH"));
         $this->climate->info("COMPOSER_JSON_PATH: " . getenv("COMPOSER_JSON_PATH"));
-        $this->climate->info("§Specific Robo (only) settings");
+        
+        $this->climate->info("Specific Robo (only) settings");
         $this->climate->info("selenium path: " . $this->selenium_path);
         $this->climate->info("selenium jar: " . $this->selenium_jar);
         $this->climate->info("chrome driver: " . $this->chrome_driver);

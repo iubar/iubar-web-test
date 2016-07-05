@@ -319,6 +319,7 @@ class Web_TestCase extends Root_TestCase {
         self::$webDriver->quit();
         
         $screenshots_count = count(self::$screenshots);
+        echo "putenv SCREENSHOTS_COUNT=" . $screenshots_count . PHP_EOL;
         putenv("SCREENSHOTS_COUNT=" . $screenshots_count);
         
         // if there is at least a screenshot show it in the browser
@@ -348,11 +349,11 @@ class Web_TestCase extends Root_TestCase {
     /**
      */
     protected static function printEnviroments() {
-        self::$climate->info("Enviroment variables for PhpUnit");
+        self::$climate->underline()->bold("Enviroment variables for PhpUnit");
         
         // @see https://github.com/thephpleague/climate/issues/9 (search for: yparisien)
         
-        $padding = self::$climate->padding(15);
+        $padding = self::$climate->padding(25);
         $padding->label('LOGS_PATH: ')->result(getenv("LOGS_PATH"));
         $padding->label('SCREENSHOTS_PATH: ')->result(getenv("SCREENSHOTS_PATH"));
         $padding->label('SELENIUM SERVER: ')->result(getenv("SELENIUM_SERVER"));
@@ -715,8 +716,8 @@ class Web_TestCase extends Root_TestCase {
             ->timeouts()
             ->implicitlyWait(3);
         
-        $file_input = $wd->findElement(WebDriverBy::id("fileupload")); // return an RemoteWebElement obj
-                                                                       // upload is the id added by the js script
+        $file_input = $wd->findElement(WebDriverBy::id("upload")); // return an RemoteWebElement obj
+                                                                   // "upload" is the id of the input tag added by the js script
         
         if (!$file_input) {
             $this->fail("\$file_input is null" . PHP_EOL);
@@ -988,4 +989,13 @@ class Web_TestCase extends Root_TestCase {
         $script = file_get_contents($js_file);
         return $script;
     }
+    
+    protected function isFirefoxOnSaucelabs(){
+        return (self::$browser == self::FIREFOX && self::$sauce_access_key);
+    }
+    
+    protected function isChromeOnSaucelabs(){
+        return (self::$browser == self::CHROME && self::$sauce_access_key);
+    }    
+    
 }
