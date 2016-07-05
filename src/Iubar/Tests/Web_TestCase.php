@@ -202,7 +202,7 @@ class Web_TestCase extends Root_TestCase {
                     self::$browser_version = "31.0";
                     break;
                 case self::MARIONETTE:
-                    self::$browser_version = "";
+                    self::$browser_version = "31.0";
                     break;
                 case self::SAFARI:
                     self::$browser_version = "9.0";
@@ -225,7 +225,7 @@ class Web_TestCase extends Root_TestCase {
                     self::$os_version = "Linux";
                     break;
                 case self::MARIONETTE:
-                    self::$os_version = "";
+                    self::$os_version = "Windows 10";
                     break;
                 case self::SAFARI:
                     self::$os_version = "OS X 10.11";
