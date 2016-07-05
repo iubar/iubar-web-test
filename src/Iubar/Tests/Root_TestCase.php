@@ -8,7 +8,7 @@ namespace Iubar\Tests;
 class Root_TestCase extends \PHPUnit_Framework_TestCase {
 
     /**
-     *Check if the path is a directory and is readable
+     * Check if the path is a directory and is readable
      *
      * @param string $path
      * @throws \Exception the exception
@@ -27,7 +27,8 @@ class Root_TestCase extends \PHPUnit_Framework_TestCase {
     }
 
     /**
-     *Check if the path is writable
+     * Check if the path is writable
+     *
      * @param string $path
      * @throws \Exception the exception
      */

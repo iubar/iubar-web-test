@@ -57,8 +57,8 @@ class Web_TestCase extends Root_TestCase {
     const BROWSERSTACK = 'browserstack';
 
     const HIDDEN = '**********';
-    
-    protected static $openLastScreenshot = true; 
+
+    protected static $openLastScreenshot = true;
 
     protected static $openLastDumpFile = true;
 
@@ -84,10 +84,12 @@ class Web_TestCase extends Root_TestCase {
     protected static $os_version = null;
 
     protected static $selenium_server = null;
-    
+
     protected static $selenium_port = null;
 
     protected static $selenium_path = null;
+
+    protected static $phantomjs_binary = null;
 
     protected static $logs_path = null;
 
@@ -119,15 +121,13 @@ class Web_TestCase extends Root_TestCase {
         echo PHP_EOL;
         
         $padding = self::$climate->padding(10);
-        $padding->label('LOGS_PATH')->result(getenv("LOGS_PATH"));        
+        $padding->label('LOGS_PATH')->result(getenv("LOGS_PATH"));
         // TODO: formattare con codclimate
-        
-        
-        
         
         echo "LOGS_PATH: " . getenv("LOGS_PATH") . PHP_EOL;
         echo "SCREENSHOTS_PATH: " . getenv("SCREENSHOTS_PATH") . PHP_EOL;
         echo "SELENIUM SERVER: " . getenv("SELENIUM_SERVER") . PHP_EOL;
+        phantom binary
         echo "BROWSER: " . getenv("BROWSER") . PHP_EOL;
         echo "BROWSER VERSION: " . getenv("BROWSER_VERSION") . PHP_EOL;
         echo "OS VERSION: " . getenv("OS_VERSION") . PHP_EOL;
@@ -145,13 +145,16 @@ class Web_TestCase extends Root_TestCase {
     }
 
     protected static function checkPaths() {
-        if (getenv("LOGS_PATH")) {
-            self::isPathWritable(getenv("LOGS_PATH"));
+        if (self::$browser == self::PHANTOMJS) {
+            self::checkFile(self::$phantomjs_binary);
+        }
+        if (self::$logs_path) {
+            self::isPathWritable(self::$logs_path);
         }
         if (self::TAKE_SCREENSHOTS) {
             if (self::$browser != self::PHANTOMJS) {
-                if (getenv("SCREENSHOTS_PATH")) {
-                    self::isPathWritable(getenv("SCREENSHOTS_PATH"));
+                if (self::$screenshots_path) {
+                    self::isPathWritable(self::$screenshots_path);
                 }
             }
         }
@@ -164,13 +167,13 @@ class Web_TestCase extends Root_TestCase {
         self::$climate = new CLImate();
         
         self::printEnviroments();
-        self::checkPaths();
         
         self::$browser = getenv('BROWSER');
         self::$browser_version = getenv('BROWSER_VERSION');
         self::$os_version = getenv('OS_VERSION');
         self::$selenium_server = getenv('SELENIUM_SERVER');
         self::$selenium_port = getenv('SELENIUM_PORT');
+        self::$phantomjs_binary = getenv('PHANTOMJS_BINARY');
         self::$logs_path = getenv('LOGS_PATH');
         self::$screenshots_path = getenv('SCREENSHOTS_PATH');
         self::$app_host = getenv('APP_HOST');
@@ -183,6 +186,8 @@ class Web_TestCase extends Root_TestCase {
         self::$sauce_access_key = getenv('SAUCE_ACCESS_KEY');
         self::$browserstack_username = getenv('BROWSERSTACK_USERNAME');
         self::$browserstack_acces_key = getenv('BROWSERSTACK_ACCESS_KEY');
+        
+        self::checkPaths();
         
         $capabilities = null;
         
@@ -198,14 +203,14 @@ class Web_TestCase extends Root_TestCase {
                     "--webdrive" => "",
                     "--loglevel" => "DEBUG",
                     "--webdriver-logfile" => self::$logs_path . "/phantomjsdriver.log"
-                );                
+                );
                 $ghostdriver_cli_args = array(
                     "--loglevel" => "DEBUG",
                     "--webdriver-loglevel" => "DEBUG"
                 );
                 $capabilities->setCapability("phantomjs.ghostdriver.cli.args", $ghostdriver_cli_args);
                 $capabilities->setCapability("phantomjs.cli.args", $cli_args);
-                // Not used, but configured on the Selenium startup script: $capabilities->setCapability("phantomjs.binary.path", self::$phantomjs_binary);
+                $capabilities->setCapability("phantomjs.binary.path", self::$phantomjs_binary);
                 break;
             case self::CHROME:
                 echo "Inizializing Chrome browser" . PHP_EOL;
@@ -277,6 +282,7 @@ class Web_TestCase extends Root_TestCase {
             }
         }
         if (self::$os_version) {
+            
             $capabilities->setCapability("platform", self::$os_version);
         }
         
@@ -428,18 +434,18 @@ class Web_TestCase extends Root_TestCase {
         self::$climate->info('Opening browser at: ' . $url);
         
         // Warning: Windows specific code
-        //NO: $cmd = "start '" . $browser . " " . $url . "'";
+        // NO: $cmd = "start '" . $browser . " " . $url . "'";
         $cmd = "start \"\" \"" . $url . "\"";
         self::$climate->info('Command is : ' . $cmd);
         self::startShell($cmd);
     }
-    
+
     protected static function openFile($file) {
         // Warning: Windows specific code
         $cmd = "start \"\" \"" . $file . "\"";
         self::$climate->info('Command is : ' . $cmd);
         self::startShell($cmd);
-    }    
+    }
 
     /**
      * Return if the Os is Windows
@@ -620,11 +626,11 @@ class Web_TestCase extends Root_TestCase {
             ->wait($timeout, self::DEFAULT_WAIT_INTERVAL)
             ->until(WebDriverExpectedCondition::textToBePresentInElement(WebDriverBy::tagName($tag), $substr));
     }
-    
+
     protected function waitForPartialLinkText($id, $timeout = self::DEFAULT_WAIT_TIMEOUT) {
         $this->getWd()
-        ->wait($timeout, self::DEFAULT_WAIT_INTERVAL)
-        ->until(WebDriverExpectedCondition::visibilityOfElementLocated(WebDriverBy::partialLinkText($id)));
+            ->wait($timeout, self::DEFAULT_WAIT_INTERVAL)
+            ->until(WebDriverExpectedCondition::visibilityOfElementLocated(WebDriverBy::partialLinkText($id)));
     }
 
     /**
@@ -682,16 +688,22 @@ class Web_TestCase extends Root_TestCase {
         echo PHP_EOL . "Waiting the js script execution..." . PHP_EOL;
         $wd->manage()
             ->timeouts()
-            ->implicitlyWait(2);
+            ->implicitlyWait(3);
         
-        $file_input = $wd->findElement(WebDriverBy::id("upload")); // RemoteWebElement obj
+        $file_input = $wd->findElement(WebDriverBy::id("fileupload")); // return an RemoteWebElement obj
+                                                                       // upload is the id added by the js script
+        
         if (!$file_input) {
             $this->fail("\$file_input is null" . PHP_EOL);
         } else {
             // upload the file
-            echo "Uploading file: " . $file . PHP_EOL;
-            // $file_input->sendKeys($file);
-            $file_input->setFileDetector(new LocalFileDetector())->sendKeys($file);
+            echo "Uploading file: " . $file . "..." . PHP_EOL;
+            if (self::$browser == self::MARIONETTE) {
+                // https://bugzilla.mozilla.org/show_bug.cgi?id=941085
+                $file_input->sendKeys($file);
+            } else {
+                $file_input->setFileDetector(new LocalFileDetector())->sendKeys($file);
+            }
             // echo "Attribute is: " . $file_input->getAttribute('value') . PHP_EOL; // Facebook\WebDriver\Exception\StaleElementReferenceException: stale element reference: element is not attached to the page document
         }
     }
@@ -708,9 +720,13 @@ class Web_TestCase extends Root_TestCase {
      * Clear the log buffer of the browser, log buffer is reset after each request
      */
     protected function clearBrowserConsole() {
-        $this->getWd()
-            ->manage()
-            ->getLog('browser');
+        if (self::$browser != self::MARIONETTE) {
+            $this->getWd()
+                ->manage()
+                ->getLog('browser');
+        } else {
+            echo "Warning: can't use clearBrowserConsole() with " . self::$browser . PHP_EOL;
+        }
     }
 
     /**
@@ -738,34 +754,33 @@ class Web_TestCase extends Root_TestCase {
     /**
      * Search if the browser's console has error
      *
-     * @throws \InvalidArgumentException if the read of the browser's console isn't support from the browser
-     * @return number
+     * @return number $console_error
      */
     private function countErrorsOnConsole() {
         $console_error = 0;
-        
-        // marionette doesn't have the console
-        if (self::$browser == self::MARIONETTE) {
-            throw new \InvalidArgumentException('Browser ' . self::$browser . ' non supportato dal metodo');
-        }
-        
-        $wd = $this->getWd();
-        $records = $wd->manage()->getLog('browser');
-        $severe_records = array();
-        
-        // search for the error in the console
-        foreach ($records as $record) {
-            if ($record['level'] == 'SEVERE') {
-                if (!self::shouldSkip($record['message'])) {
-                    $severe_records[] = $record;
+        if (self::$browser != self::MARIONETTE) {
+            
+            $wd = $this->getWd();
+            $records = $wd->manage()->getLog('browser');
+            
+            $severe_records = array();
+            
+            // search for the error in the console
+            foreach ($records as $record) {
+                if ($record['level'] == 'SEVERE') {
+                    if (!self::shouldSkip($record['message'])) {
+                        $severe_records[] = $record;
+                    }
                 }
             }
-        }
-        $console_error = count($severe_records);
-        
-        // write the console error in log file
-        if (self::DEBUG && !self::$travis) {
-            $this->dumpConsoleError($severe_records);
+            $console_error = count($severe_records);
+            
+            // write the console error in log file
+            if (self::DEBUG && !self::$travis) {
+                $this->dumpConsoleError($severe_records);
+            }
+        } else {
+            echo "Warning: can't use countErrorsOnConsole() with " . self::$browser . PHP_EOL;
         }
         return $console_error;
     }

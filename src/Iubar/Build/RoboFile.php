@@ -22,10 +22,12 @@ class RoboFile extends \Robo\Tasks {
     private $selenium_server = null;
 
     private $selenium_port = null;
-    
+
     private $selenium_path = null;
 
     private $start_selenium = true;
+
+    private $phantomjs_binary = null;
 
     private $open_slideshow = true;
 
@@ -48,7 +50,7 @@ class RoboFile extends \Robo\Tasks {
 
     public function start() {
         $this->climate = new CLImate();
-        echo "Iinitializing..." . PHP_EOL;
+        $this->climate->info("Initializing...");
         $this->init();
         
         if ($this->update_vendor) {
@@ -68,9 +70,11 @@ class RoboFile extends \Robo\Tasks {
         $this->runPhpunit();
         echo PHP_EOL;
         if ($this->start_selenium) {
-            echo "Shutting down Selenium..." . PHP_EOL;
-            $this->stopSelenium(); // TODO: verificare se necessario o se ci pensa Robo
-            echo PHP_EOL;
+            
+            // Don't need to explicitly close selenium when usign Robo
+            // echo "Shutting down Selenium..." . PHP_EOL;
+            // $this->stopSelenium(); // TODO: verificare se necessario o se ci pensa Robo
+            // echo PHP_EOL;
         }
         if ($this->browser != Web_TestCase::PHANTOMJS) {
             if ($this->open_slideshow) {
@@ -100,8 +104,6 @@ class RoboFile extends \Robo\Tasks {
 
     private function isRelativePath($path) {
         $tmp = realpath($path);
-        // echo "path:" . $path . PHP_EOL;
-        // echo "real path:" . $tmp . PHP_EOL;
         $path = str_replace('\\', '/', $path);
         $tmp = str_replace('\\', '/', $tmp);
         if ($path != $tmp) {
@@ -154,7 +156,12 @@ class RoboFile extends \Robo\Tasks {
         if (!getenv('SELENIUM_PORT')) {
             $this->selenium_port = $ini_array['selenium_port'];
             putenv('SELENIUM_PORT=' . $this->selenium_port);
-        }        
+        }
+        
+        if (!getenv('PHANTOMJS_BINARY')) {
+            $this->phantomjs_binary = $ini_array['selenium_path'] . DIRECTORY_SEPARATOR . $ini_array['phantomjs_binary'];
+            putenv('PHANTOMJS_BINARY=' . $this->phantomjs_binary);
+        }
         
         if (!getenv('APP_HOST')) {
             $app_host = $ini_array['app_host'];
@@ -217,7 +224,6 @@ class RoboFile extends \Robo\Tasks {
         echo "open slideshow: " . $this->formatBoolean($this->open_slideshow) . PHP_EOL;
         echo "start selenium: " . $this->formatBoolean($this->start_selenium) . PHP_EOL;
         echo PHP_EOL . PHP_EOL;
- 
     }
 
     protected function formatBoolean($b) {
@@ -280,6 +286,7 @@ class RoboFile extends \Robo\Tasks {
     }
 
     private function startHttpServer() {
+        $dir = realpath($this->screenshots_path);
         if (!is_dir($dir)) {
             die("Path not found: " . $dir . PHP_EOL);
         }
@@ -300,7 +307,7 @@ class RoboFile extends \Robo\Tasks {
         // $input = $this->climate->input('Invio per continuare');
         // $response = $input->prompt();
         // NON VA: $this->taskOpenBrowser($url)->run();
-        $cmd = $url;
+        $cmd = "start \"\" \"" . $url . "\"";
         $output = shell_exec($cmd);
         return $output;
     }
