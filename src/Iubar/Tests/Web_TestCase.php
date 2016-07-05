@@ -165,6 +165,7 @@ class Web_TestCase extends Root_TestCase {
                 $capabilities->setCapability("phantomjs.ghostdriver.cli.args", $ghostdriver_cli_args);
                 $capabilities->setCapability("phantomjs.cli.args", $cli_args);
                 $capabilities->setCapability("phantomjs.binary.path", self::$phantomjs_binary);
+                $capabilities->setCapability("screenResolution", "1024x768");
                 break;
             case self::CHROME:
                 $capabilities = DesiredCapabilities::chrome();
