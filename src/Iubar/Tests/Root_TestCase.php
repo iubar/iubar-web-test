@@ -45,7 +45,7 @@ class Root_TestCase extends \PHPUnit_Framework_TestCase {
      * @throws \Exception
      * @return boolean
      */
-    protected function checkFile($file) {
+    protected static function checkFile($file) {
         if (!is_file($file)) {
             $error = "File not found: " . $file;
             throw new \Exception($error);

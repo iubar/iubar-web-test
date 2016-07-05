@@ -347,7 +347,7 @@ class Web_TestCase extends Root_TestCase {
     protected static function printEnviroments() {
         self::$climate->info("Enviroment variables for PhpUnit");
         
-        //@see https://github.com/thephpleague/climate/issues/9 (search for: yparisien)
+        // @see https://github.com/thephpleague/climate/issues/9 (search for: yparisien)
         
         $padding = self::$climate->padding(15);
         $padding->label('LOGS_PATH: ')->result(getenv("LOGS_PATH"));
