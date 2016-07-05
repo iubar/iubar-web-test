@@ -48,27 +48,27 @@ class RoboFile extends \Robo\Tasks {
         echo "Working path: " . $this->working_path . PHP_EOL;
     }
 
+    /**
+     */
     public function start() {
         $this->climate = new CLImate();
         $this->climate->info("Initializing...");
         $this->init();
         
         if ($this->update_vendor) {
-            echo "Updating vendor..." . PHP_EOL;
+            $this->climate->info("Updating vendor...");
             $this->taskComposerUpdate()
                 ->dir($this->composer_json_path)
                 ->run();
         }
         
         if ($this->start_selenium) {
-            echo "Starting Selenium..." . PHP_EOL;
+            $this->climate->info("Starting Selenium...");
             $this->startSelenium();
-            echo PHP_EOL;
         }
         
-        echo "Running php unit tests..." . PHP_EOL;
+        $this->climate->info("Running php unit tests...");
         $this->runPhpunit();
-        echo PHP_EOL;
         if ($this->start_selenium) {
             
             // Don't need to explicitly close selenium when usign Robo
@@ -80,28 +80,49 @@ class RoboFile extends \Robo\Tasks {
             if ($this->open_slideshow) {
                 $host = 'localhost';
                 $port = '8000';
-                echo "Running slideshow on $host:$port..." . PHP_EOL;
+                $this->climate->info("Running slideshow on $host:$port...");
                 $this->startHttpServer();
                 $url = 'http://' . $host . ':' . $port . '/slideshow/index.php';
                 $this->browser($url);
-                echo PHP_EOL;
                 $input = $this->climate->password('Press Enter to stop the slideshow:');
                 $dummy = $input->prompt();
             }
         }
-        echo "Done." . PHP_EOL;
+        $this->climate->info("Done.");
     }
 
+    /**
+     *
+     * @param unknown $b
+     * @return string
+     */
+    protected function formatBoolean($b) {
+        if ($b) {
+            return 'true';
+        } else {
+            return 'false';
+        }
+    }
+
+    /**
+     */
     private function stopSelenium() {
         $url = 'http://' . $this->selenium_server . '/selenium-server/driver/?cmd=shutDownSeleniumServer';
         $this->browser($url);
     }
 
+    /**
+     */
     private function closeSeleniumSession() {
         $url = 'http://' . $this->selenium_server . '/selenium-server/driver/?cmd=shutDown';
         $this->browser($url);
     }
 
+    /**
+     *
+     * @param unknown $path
+     * @return boolean
+     */
     private function isRelativePath($path) {
         $tmp = realpath($path);
         $path = str_replace('\\', '/', $path);
@@ -112,6 +133,11 @@ class RoboFile extends \Robo\Tasks {
         return false;
     }
 
+    /**
+     *
+     * @param unknown $var_name
+     * @param unknown $path
+     */
     private function putEnv($var_name, $path) {
         if (!getenv($var_name)) {
             if ($this->isRelativePath($path)) {
@@ -126,6 +152,8 @@ class RoboFile extends \Robo\Tasks {
         }
     }
 
+    /**
+     */
     private function init() {
         $ini_file = "config.ini";
         if (!is_file($ini_file)) {
@@ -209,31 +237,23 @@ class RoboFile extends \Robo\Tasks {
         $this->open_slideshow = $ini_array['open_slideshow'];
         $this->start_selenium = $ini_array['start_selenium'];
         
-        echo PHP_EOL . "Enviroment variables for the generic building tool" . PHP_EOL . PHP_EOL;
-        echo "PHPUNIT_XML_PATH: " . getenv("PHPUNIT_XML_PATH") . PHP_EOL;
-        echo "COMPOSER_JSON_PATH: " . getenv("COMPOSER_JSON_PATH") . PHP_EOL;
-        
-        echo PHP_EOL . "§Specific Robo (only) settings" . PHP_EOL . PHP_EOL;
-        echo "selenium path: " . $this->selenium_path . PHP_EOL;
-        echo "selenium jar: " . $this->selenium_jar . PHP_EOL;
-        echo "chrome driver: " . $this->chrome_driver . PHP_EOL;
-        echo "geko driver: " . $this->geko_driver . PHP_EOL;
-        echo "edge driver: " . $this->edge_driver . PHP_EOL;
-        echo "phantomjs binary: " . $this->phantomjs_binary . PHP_EOL;
-        echo "update vendor: " . $this->formatBoolean($this->update_vendor) . PHP_EOL;
-        echo "open slideshow: " . $this->formatBoolean($this->open_slideshow) . PHP_EOL;
-        echo "start selenium: " . $this->formatBoolean($this->start_selenium) . PHP_EOL;
-        echo PHP_EOL . PHP_EOL;
+        $this->climate->info("Enviroment variables for the generic building tool");
+        $this->climate->info("PHPUNIT_XML_PATH: " . getenv("PHPUNIT_XML_PATH"));
+        $this->climate->info("COMPOSER_JSON_PATH: " . getenv("COMPOSER_JSON_PATH"));
+        $this->climate->info("§Specific Robo (only) settings");
+        $this->climate->info("selenium path: " . $this->selenium_path);
+        $this->climate->info("selenium jar: " . $this->selenium_jar);
+        $this->climate->info("chrome driver: " . $this->chrome_driver);
+        $this->climate->info("geko driver: " . $this->geko_driver);
+        $this->climate->info("edge driver: " . $this->edge_driver);
+        $this->climate->info("phantomjs binary: " . $this->phantomjs_binary);
+        $this->climate->info("update vendor: " . $this->formatBoolean($this->update_vendor));
+        $this->climate->info("open slideshow: " . $this->formatBoolean($this->open_slideshow));
+        $this->climate->info("start selenium: " . $this->formatBoolean($this->start_selenium));
     }
 
-    protected function formatBoolean($b) {
-        if ($b) {
-            return 'true';
-        } else {
-            return 'false';
-        }
-    }
-
+    /**
+     */
     private function startSelenium() {
         $cmd = null;
         $this->checkFile($this->selenium_jar);
@@ -245,7 +265,8 @@ class RoboFile extends \Robo\Tasks {
                 break;
             case Web_TestCase::MARIONETTE:
                 $this->checkFile($this->geko_driver);
-                $cmd = $cmd_prefix . " -Dwebdriver.gecko.driver=" . $this->geko_driver; // per scegliere eseguibile: " -Dwebdriver.firefox.bin=" . "\"C:/Program Files (x86)/Firefox Developer Edition/firefox.exe\"";
+                // per scegliere eseguibile: " -Dwebdriver.firefox.bin=" . "\"C:/Program Files (x86)/Firefox Developer Edition/firefox.exe\"";
+                $cmd = $cmd_prefix . " -Dwebdriver.gecko.driver=" . $this->geko_driver;
                 break;
             case Web_TestCase::FIREFOX:
                 
@@ -277,7 +298,7 @@ class RoboFile extends \Robo\Tasks {
         }
         
         if ($cmd) {
-            echo "Selenium cmd: " . $cmd . PHP_EOL;
+            $this->climate->info("Selenium cmd: " . $cmd);
             // launches Selenium server
             $this->taskExec($cmd)
                 ->background()
@@ -285,6 +306,8 @@ class RoboFile extends \Robo\Tasks {
         }
     }
 
+    /**
+     */
     private function startHttpServer() {
         $dir = realpath($this->screenshots_path);
         if (!is_dir($dir)) {
@@ -301,6 +324,11 @@ class RoboFile extends \Robo\Tasks {
         run();
     }
 
+    /**
+     *
+     * @param unknown $url
+     * @return string
+     */
     private function browser($url) {
         // TODO: valutare se è meglio avviare il browser $this->browser piuttosto che quello di default di sistema
         $this->climate->info("opening browser at: " . $url);
@@ -312,6 +340,8 @@ class RoboFile extends \Robo\Tasks {
         return $output;
     }
 
+    /**
+     */
     private function runPhpunit() {
         $cfg_file = $this->phpunit_xml_path . "\phpunit.xml";
         if (!is_file($cfg_file)) {
@@ -325,6 +355,11 @@ class RoboFile extends \Robo\Tasks {
         run();
     }
 
+    /**
+     *
+     * @param unknown $file
+     * @return \Exception|boolean
+     */
     private function checkFile($file) {
         if (!is_file($file)) {
             $error = "File not found: " . $file;
