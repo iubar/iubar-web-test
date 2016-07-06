@@ -807,12 +807,8 @@ class Web_TestCase extends Root_TestCase {
      */
     protected function assertErrorsOnConsole($n = 0) {
         $console_error = $this->countErrorsOnConsole();
-        self::$climate->info('Errori sulla console: ' . $console_error);
-        if ($n) {
-            $this->assertEquals($n, $console_error);
-        } else {
-            $this->assertLessThan(5, $console_error);
-        }
+        self::$climate->info('Errors on console: ' . $console_error);
+        $this->assertEquals($n, $console_error);
     }
 
     /**
