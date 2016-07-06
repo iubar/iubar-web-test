@@ -562,6 +562,10 @@ class Web_TestCase extends Root_TestCase {
         $this->getWd()
         ->wait($timeout, self::DEFAULT_WAIT_INTERVAL)
         ->until(WebDriverExpectedCondition::elementToBeClickable(WebDriverBy::xpath($xpath)));
+        
+        // TODO: Verificare differenze con 
+        // $wait = new WebDriverWait($wd, $timeout, self::DEFAULT_WAIT_INTERVAL);
+        // $wait->until(WebDriverExpectedCondition::elementToBeClickable(WebDriverBy::xpath($xpath)));
     }
     
     /**
