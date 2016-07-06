@@ -1014,6 +1014,10 @@ class Web_TestCase extends Root_TestCase {
     
     protected function isChromeOnSaucelabs(){
         return (self::$browser == self::CHROME && self::$sauce_access_key);
+    }
+    
+    protected function isOnSaucelabs(){
+        return (self::$sauce_access_key);
     }    
     
 }
