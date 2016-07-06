@@ -32,10 +32,10 @@ class Web_TestCase extends Root_TestCase {
     const TAKE_SCREENSHOTS = true;
     
     // seconds
-    const DEFAULT_WAIT_TIMEOUT = 15;
+    const DEFAULT_WAIT_TIMEOUT = 30;
     
     // the interval in miliseconds
-    const DEFAULT_WAIT_INTERVAL = 1000;
+    const DEFAULT_WAIT_INTERVAL = 250;
     
     // Browser
     const PHANTOMJS = 'phantomjs';
