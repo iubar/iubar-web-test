@@ -121,9 +121,11 @@ class Web_TestCase extends Root_TestCase {
     public static function setUpBeforeClass() {
         self::$climate = new CLImate();
                 
+        self::$browser = getenv('BROWSER');
+        
         // Setting the default value
         
-        if (!self::$browser_version) {
+        if (!getenv('BROWSER_VERSION')) {
             // On Soucelabs the selenium version depends on the browser verions.
             // See https://wiki.saucelabs.com/display/DOCS/Test+Configuration+Options#TestConfigurationOptions-ChromeDriverVersion
             $def_browser_version = "";
@@ -146,7 +148,7 @@ class Web_TestCase extends Root_TestCase {
             }
             putenv('BROWSER_VERSION=' . $def_browser_version);
         }
-        if (!self::$os_version) {
+        if (!getenv('OS_VERSION')) {
             $def_os_version = "";
             switch (self::$browser) {
                 case self::PHANTOMJS:
@@ -170,7 +172,6 @@ class Web_TestCase extends Root_TestCase {
         
         self::printEnviroments();
         
-        self::$browser = getenv('BROWSER');
         self::$browser_version = getenv('BROWSER_VERSION');
         self::$os_version = getenv('OS_VERSION');
         self::$selenium_server = getenv('SELENIUM_SERVER');
