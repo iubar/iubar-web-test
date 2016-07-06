@@ -771,14 +771,11 @@ class Web_TestCase extends Root_TestCase {
         } else {
             // upload the file
             self::$climate->info("Uploading file: " . $file);
-           if (self::$browser == self::MARIONETTE || self::$browser == self::SAFARI) {
-                // https://bugzilla.mozilla.org/show_bug.cgi?id=941085
-                $file_input->sendKeys($file); // Soluzione incompatibile con i browser MARIONETTE e SAFARI
-            } else {
-                $file_input->setFileDetector(new LocalFileDetector())->sendKeys($file);
-            }
-            // echo "Attribute is: " . $file_input->getAttribute('value') . PHP_EOL;
-            // Facebook\WebDriver\Exception\StaleElementReferenceException: stale element reference: element is not attached to the page document
+            
+            $file_input->setFileDetector(new LocalFileDetector())->sendKeys($file); // Soluzione incompatibile con i browser MARIONETTE e SAFARI
+                                                                                    // https://bugzilla.mozilla.org/show_bug.cgi?id=941085
+                                                                                     // equivalente:   $file_input->sendKeys($file);
+
         }
     }
 
