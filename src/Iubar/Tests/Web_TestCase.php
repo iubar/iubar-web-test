@@ -120,6 +120,53 @@ class Web_TestCase extends Root_TestCase {
      */
     public static function setUpBeforeClass() {
         self::$climate = new CLImate();
+                
+        // Setting the default value
+        
+        if (!self::$browser_version) {
+            // On Soucelabs the selenium version depends on the browser verions.
+            // See https://wiki.saucelabs.com/display/DOCS/Test+Configuration+Options#TestConfigurationOptions-ChromeDriverVersion
+            $def_browser_version = "";
+            switch (self::$browser) {
+                case self::PHANTOMJS:
+                    $def_browser_version = "";
+                    break;
+                case self::CHROME:
+                    $def_browser_version = "46.0";
+                    break;
+                case self::FIREFOX:
+                    $def_browser_version = "39.0";
+                    break;
+                case self::MARIONETTE:
+                    $def_browser_version = "39.0";
+                    break;
+                case self::SAFARI:
+                    $def_browser_version = "9.0";
+                    break;
+            }
+            putenv('BROWSER_VERSION=' . $def_browser_version);
+        }
+        if (!self::$os_version) {
+            $def_os_version = "";
+            switch (self::$browser) {
+                case self::PHANTOMJS:
+                    $def_os_version = "Windows 10";
+                    break;
+                case self::CHROME:
+                    $def_os_version = "Windows 10";
+                    break;
+                case self::FIREFOX:
+                   $def_os_version = "Linux";
+                    break;
+                case self::MARIONETTE:
+                    $def_os_version = "Windows 10";
+                    break;
+                case self::SAFARI:
+                    $def_os_version = "OS X 10.11";
+                    break;
+            }
+            putenv('OS_VERSION=' . $def_os_version);
+        }
         
         self::printEnviroments();
         
@@ -191,50 +238,10 @@ class Web_TestCase extends Root_TestCase {
                 throw new \Exception();
         }
         
-        if (!self::$browser_version) {
-            // On Soucelabs the selenium version depends on the browser verions. 
-            // See https://wiki.saucelabs.com/display/DOCS/Test+Configuration+Options#TestConfigurationOptions-ChromeDriverVersion
-            switch (self::$browser) {
-                case self::PHANTOMJS:
-                    self::$browser_version = "";
-                    break;
-                case self::CHROME:
-                    self::$browser_version = "46.0";
-                    break;
-                case self::FIREFOX:
-                    self::$browser_version = "39.0";
-                    break;
-                case self::MARIONETTE:
-                    self::$browser_version = "39.0";
-                    break;
-                case self::SAFARI:
-                    self::$browser_version = "9.0";
-                    break;
-            }
-        }
+
         if (self::$browser_version) {
             $capabilities->setCapability("version", self::$browser_version);
-        }
-        
-        if (!self::$os_version) {
-            switch (self::$browser) {
-                case self::PHANTOMJS:
-                    self::$os_version = "Windows 10";
-                    break;
-                case self::CHROME:
-                    self::$os_version = "Windows 10";
-                    break;
-                case self::FIREFOX:
-                    self::$os_version = "Linux";
-                    break;
-                case self::MARIONETTE:
-                    self::$os_version = "Windows 10";
-                    break;
-                case self::SAFARI:
-                    self::$os_version = "OS X 10.11";
-                    break;
-            }
-        }
+        }        
         if (self::$os_version) {
             $capabilities->setCapability("platform", self::$os_version);
         }
@@ -671,11 +678,18 @@ class Web_TestCase extends Root_TestCase {
      * @param unknown $id
      * @param unknown $timeout
      */
-    protected function waitForPartialLinkText($id, $timeout = self::DEFAULT_WAIT_TIMEOUT) {
+    protected function waitForPartialLinkText($txt, $timeout = self::DEFAULT_WAIT_TIMEOUT) {
         $this->getWd()
             ->wait($timeout, self::DEFAULT_WAIT_INTERVAL)
-            ->until(WebDriverExpectedCondition::visibilityOfElementLocated(WebDriverBy::partialLinkText($id)));
+            ->until(WebDriverExpectedCondition::visibilityOfElementLocated(WebDriverBy::partialLinkText($txt)));
     }
+    
+    protected function waitForPartialLinkTextToBeClickable($txt, $timeout = self::DEFAULT_WAIT_TIMEOUT) {
+        $this->getWd()
+        ->wait($timeout, self::DEFAULT_WAIT_INTERVAL)
+        ->until(WebDriverExpectedCondition::elementToBeClickable(WebDriverBy::partialLinkText($txt)));
+    }
+    
 
     /**
      * Assert that an element was not found
