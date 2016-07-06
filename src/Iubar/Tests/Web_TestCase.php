@@ -847,7 +847,7 @@ class Web_TestCase extends Root_TestCase {
      *
      * @return number $console_error
      */
-    private function countErrorsOnConsole() {
+    protected function countErrorsOnConsole() {
         $console_error = 0;
         if (self::$browser != self::MARIONETTE) {
             
