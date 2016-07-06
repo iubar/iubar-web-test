@@ -126,7 +126,7 @@ class Web_TestCase extends Root_TestCase {
         // Setting the default enviroment variables when not set
         
         if (!getenv('BROWSER_VERSION')) {
-            // On Soucelabs the selenium version depends on the browser verions.
+            // On Saucelabs the selenium version depends on the browser verions.
             // See https://wiki.saucelabs.com/display/DOCS/Test+Configuration+Options#TestConfigurationOptions-ChromeDriverVersion
             $def_browser_version = "";
             switch (self::$browser) {
@@ -566,6 +566,11 @@ class Web_TestCase extends Root_TestCase {
             ->until(WebDriverExpectedCondition::visibilityOfElementLocated(WebDriverBy::xpath($xpath)));
     }
 
+    /**
+     *
+     * @param unknown $xpath
+     * @param unknown $timeout
+     */
     protected function waitForXpathToBeClickable($xpath, $timeout = self::DEFAULT_WAIT_TIMEOUT) {
         $this->getWd()
             ->wait($timeout, self::DEFAULT_WAIT_INTERVAL)
@@ -600,6 +605,11 @@ class Web_TestCase extends Root_TestCase {
             ->until(WebDriverExpectedCondition::visibilityOfElementLocated(WebDriverBy::cssSelector($css)));
     }
 
+    /**
+     *
+     * @param unknown $css
+     * @param unknown $timeout
+     */
     protected function waitForCssToBeClickable($css, $timeout = self::DEFAULT_WAIT_TIMEOUT) {
         $this->getWd()
             ->wait($timeout, self::DEFAULT_WAIT_INTERVAL)
@@ -683,6 +693,11 @@ class Web_TestCase extends Root_TestCase {
             ->until(WebDriverExpectedCondition::visibilityOfElementLocated(WebDriverBy::partialLinkText($txt)));
     }
 
+    /**
+     *
+     * @param unknown $txt
+     * @param unknown $timeout
+     */
     protected function waitForPartialLinkTextToBeClickable($txt, $timeout = self::DEFAULT_WAIT_TIMEOUT) {
         $this->getWd()
             ->wait($timeout, self::DEFAULT_WAIT_INTERVAL)
@@ -808,6 +823,30 @@ class Web_TestCase extends Root_TestCase {
      */
     protected function assertNoErrorsOnConsole() {
         return $this->assertErrorsOnConsole(0);
+    }
+
+    /**
+     *
+     * @return boolean
+     */
+    protected function isFirefoxOnSaucelabs() {
+        return (self::$browser == self::FIREFOX && self::$sauce_access_key);
+    }
+
+    /**
+     *
+     * @return boolean
+     */
+    protected function isChromeOnSaucelabs() {
+        return (self::$browser == self::CHROME && self::$sauce_access_key);
+    }
+
+    /**
+     *
+     * @return string
+     */
+    protected function isOnSaucelabs() {
+        return (self::$sauce_access_key);
     }
 
     /**
@@ -1020,17 +1059,5 @@ class Web_TestCase extends Root_TestCase {
         self::checkFile($js_file);
         $script = file_get_contents($js_file);
         return $script;
-    }
-
-    protected function isFirefoxOnSaucelabs() {
-        return (self::$browser == self::FIREFOX && self::$sauce_access_key);
-    }
-
-    protected function isChromeOnSaucelabs() {
-        return (self::$browser == self::CHROME && self::$sauce_access_key);
-    }
-
-    protected function isOnSaucelabs() {
-        return (self::$sauce_access_key);
     }
 }
