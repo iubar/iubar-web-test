@@ -192,6 +192,8 @@ class Web_TestCase extends Root_TestCase {
         }
         
         if (!self::$browser_version) {
+            // On Soucelabs the selenium version depends on the browser verions. 
+            // See https://wiki.saucelabs.com/display/DOCS/Test+Configuration+Options#TestConfigurationOptions-ChromeDriverVersion
             switch (self::$browser) {
                 case self::PHANTOMJS:
                     self::$browser_version = "";
@@ -200,10 +202,10 @@ class Web_TestCase extends Root_TestCase {
                     self::$browser_version = "46.0";
                     break;
                 case self::FIREFOX:
-                    self::$browser_version = "31.0";
+                    self::$browser_version = "39.0";
                     break;
                 case self::MARIONETTE:
-                    self::$browser_version = "31.0";
+                    self::$browser_version = "39.0";
                     break;
                 case self::SAFARI:
                     self::$browser_version = "9.0";
