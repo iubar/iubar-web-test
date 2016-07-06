@@ -120,10 +120,10 @@ class Web_TestCase extends Root_TestCase {
      */
     public static function setUpBeforeClass() {
         self::$climate = new CLImate();
-                
+        
         self::$browser = getenv('BROWSER');
         
-        // Setting the default value
+        // Setting the default enviroment variables when not set
         
         if (!getenv('BROWSER_VERSION')) {
             // On Soucelabs the selenium version depends on the browser verions.
@@ -158,7 +158,7 @@ class Web_TestCase extends Root_TestCase {
                     $def_os_version = "Windows 10";
                     break;
                 case self::FIREFOX:
-                   $def_os_version = "Linux";
+                    $def_os_version = "Linux";
                     break;
                 case self::MARIONETTE:
                     $def_os_version = "Windows 10";
@@ -239,10 +239,9 @@ class Web_TestCase extends Root_TestCase {
                 throw new \Exception();
         }
         
-
         if (self::$browser_version) {
             $capabilities->setCapability("version", self::$browser_version);
-        }        
+        }
         if (self::$os_version) {
             $capabilities->setCapability("platform", self::$os_version);
         }
@@ -344,14 +343,13 @@ class Web_TestCase extends Root_TestCase {
             self::openFile($first_screenshot);
         }
         
-        
         $dumpfile_count = count(self::$dump_files);
         if ($dumpfile_count) {
             $first_dumpfile = self::$dump_files[0];
             echo "putenv DUMPFILE=" . $first_dumpfile . PHP_EOL;
             putenv("DUMPFILE=" . $first_dumpfile);
             self::$climate->info("Dump files count " . count(self::$dump_files));
-            if (self::$openLastDumpFile) {                
+            if (self::$openLastDumpFile) {
                 self::$climate->info('Opening the last console dump...');
                 self::openBrowser($first_dumpfile);
             }
@@ -570,14 +568,14 @@ class Web_TestCase extends Root_TestCase {
 
     protected function waitForXpathToBeClickable($xpath, $timeout = self::DEFAULT_WAIT_TIMEOUT) {
         $this->getWd()
-        ->wait($timeout, self::DEFAULT_WAIT_INTERVAL)
-        ->until(WebDriverExpectedCondition::elementToBeClickable(WebDriverBy::xpath($xpath)));
+            ->wait($timeout, self::DEFAULT_WAIT_INTERVAL)
+            ->until(WebDriverExpectedCondition::elementToBeClickable(WebDriverBy::xpath($xpath)));
         
-        // TODO: Verificare differenze con 
+        // TODO: Verificare differenze con
         // $wait = new WebDriverWait($wd, $timeout, self::DEFAULT_WAIT_INTERVAL);
         // $wait->until(WebDriverExpectedCondition::elementToBeClickable(WebDriverBy::xpath($xpath)));
     }
-    
+
     /**
      * Wait at most $timeout seconds until at least one result is shown
      *
@@ -601,12 +599,12 @@ class Web_TestCase extends Root_TestCase {
             ->wait($timeout, self::DEFAULT_WAIT_INTERVAL)
             ->until(WebDriverExpectedCondition::visibilityOfElementLocated(WebDriverBy::cssSelector($css)));
     }
-    
+
     protected function waitForCssToBeClickable($css, $timeout = self::DEFAULT_WAIT_TIMEOUT) {
         $this->getWd()
-        ->wait($timeout, self::DEFAULT_WAIT_INTERVAL)
-        ->until(WebDriverExpectedCondition::elementToBeClickable(WebDriverBy::cssSelector($css)));
-    }    
+            ->wait($timeout, self::DEFAULT_WAIT_INTERVAL)
+            ->until(WebDriverExpectedCondition::elementToBeClickable(WebDriverBy::cssSelector($css)));
+    }
 
     /**
      * Wait at most $timeout seconds until at least one result is shown
@@ -684,13 +682,12 @@ class Web_TestCase extends Root_TestCase {
             ->wait($timeout, self::DEFAULT_WAIT_INTERVAL)
             ->until(WebDriverExpectedCondition::visibilityOfElementLocated(WebDriverBy::partialLinkText($txt)));
     }
-    
+
     protected function waitForPartialLinkTextToBeClickable($txt, $timeout = self::DEFAULT_WAIT_TIMEOUT) {
         $this->getWd()
-        ->wait($timeout, self::DEFAULT_WAIT_INTERVAL)
-        ->until(WebDriverExpectedCondition::elementToBeClickable(WebDriverBy::partialLinkText($txt)));
+            ->wait($timeout, self::DEFAULT_WAIT_INTERVAL)
+            ->until(WebDriverExpectedCondition::elementToBeClickable(WebDriverBy::partialLinkText($txt)));
     }
-    
 
     /**
      * Assert that an element was not found
@@ -1024,17 +1021,16 @@ class Web_TestCase extends Root_TestCase {
         $script = file_get_contents($js_file);
         return $script;
     }
-    
-    protected function isFirefoxOnSaucelabs(){
+
+    protected function isFirefoxOnSaucelabs() {
         return (self::$browser == self::FIREFOX && self::$sauce_access_key);
     }
-    
-    protected function isChromeOnSaucelabs(){
+
+    protected function isChromeOnSaucelabs() {
         return (self::$browser == self::CHROME && self::$sauce_access_key);
     }
-    
-    protected function isOnSaucelabs(){
+
+    protected function isOnSaucelabs() {
         return (self::$sauce_access_key);
-    }    
-    
+    }
 }

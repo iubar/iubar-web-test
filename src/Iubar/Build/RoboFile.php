@@ -30,7 +30,7 @@ class RoboFile extends \Robo\Tasks {
     private $phantomjs_binary = null;
 
     private $open_slideshow = true;
-    
+
     private $open_dumpfile = true;
 
     private $update_vendor = false;
@@ -79,32 +79,31 @@ class RoboFile extends \Robo\Tasks {
             // echo PHP_EOL;
         }
         if ($this->browser != Web_TestCase::PHANTOMJS) {
-            if ($this->open_slideshow && getenv("SCREENSHOTS_COUNT") ) {
-                
+            if ($this->open_slideshow && getenv("SCREENSHOTS_COUNT")) {
                 
                 $input = $climate->confirm('Do you want to see the slideshow ?');
-                if ($input->confirmed()) {                
-                    $this->climate->info("Screenshots taken: " . getenv("SCREENSHOTS_COUNT")); 
+                if ($input->confirmed()) {
+                    $this->climate->info("Screenshots taken: " . getenv("SCREENSHOTS_COUNT"));
                     $host = 'localhost';
                     $port = '8000';
                     $this->climate->info("Running slideshow on $host:$port...");
                     $this->startHttpServer();
                     $url = 'http://' . $host . ':' . $port . '/slideshow/index.php';
-                    $this->browser($url);     
+                    $this->browser($url);
                     // $input = $this->climate->password('Press Enter to quit the slideshow:');
-                    // $dummy = $input->prompt();                    
-                }             
-            }            
+                    // $dummy = $input->prompt();
+                }
+            }
         }
         
         $dump_file = getenv("DUMPFILE");
-        if ($this->open_dumpfile && $dump_file ) {   
-            self::$climate->info('Opening the last console dump: ' .  $dump_file);
+        if ($this->open_dumpfile && $dump_file) {
+            self::$climate->info('Opening the last console dump: ' . $dump_file);
             self::openBrowser($dump_file);
         }
         
-            $input = $this->climate->password('Press Enter to quit:');
-            $dummy = $input->prompt();
+        $input = $this->climate->password('Press Enter to quit:');
+        $dummy = $input->prompt();
         $this->climate->info("Done.");
     }
 
