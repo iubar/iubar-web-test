@@ -30,6 +30,8 @@ class RoboFile extends \Robo\Tasks {
     private $phantomjs_binary = null;
 
     private $open_slideshow = true;
+    
+    private $open_dumpfile = true;
 
     private $update_vendor = false;
 
@@ -91,9 +93,16 @@ class RoboFile extends \Robo\Tasks {
                     $this->browser($url);     
                     // $input = $this->climate->password('Press Enter to quit the slideshow:');
                     // $dummy = $input->prompt();                    
-                }                
-            }    
+                }             
+            }            
         }
+        
+        $dump_file = getenv("DUMPFILE");
+        if ($this->open_dumpfile && $dump_file ) {   
+            self::$climate->info('Opening the last console dump: ' .  $dump_file);
+            self::openBrowser($dump_file);
+        }
+        
             $input = $this->climate->password('Press Enter to quit:');
             $dummy = $input->prompt();
         $this->climate->info("Done.");
@@ -340,7 +349,7 @@ class RoboFile extends \Robo\Tasks {
      */
     private function browser($url) {
         // TODO: valutare se è meglio avviare il browser $this->browser piuttosto che quello di default di sistema
-        $this->climate->info("opening browser at: " . $url);
+        $this->climate->info("Opening browser at: " . $url);
         // $input = $this->climate->input('Invio per continuare');
         // $response = $input->prompt();
         // NON VA: $this->taskOpenBrowser($url)->run();

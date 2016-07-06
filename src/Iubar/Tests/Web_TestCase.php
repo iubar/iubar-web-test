@@ -58,9 +58,9 @@ class Web_TestCase extends Root_TestCase {
 
     const HIDDEN = '**********';
 
-    protected static $openLastScreenshot = true;
+    protected static $openLastScreenshot = false;
 
-    protected static $openLastDumpFile = true;
+    protected static $openLastDumpFile = false;
 
     protected static $screenshots = array();
 
@@ -334,15 +334,22 @@ class Web_TestCase extends Root_TestCase {
             self::openFile($first_screenshot);
         }
         
-        if (self::$openLastDumpFile && count(self::$dump_files) > 0) {
-            self::$climate->error("Dump " . count(self::$dump_files) . " files");
-            $first_dump = self::$dump_files[0];
-            self::$climate->info('Opening the last console dump...');
-            self::openBrowser($first_dump);
+        
+        $dumpfile_count = count(self::$dump_files);
+        if ($dumpfile_count) {
+            $first_dumpfile = self::$dump_files[0];
+            echo "putenv DUMPFILE=" . $first_dumpfile . PHP_EOL;
+            putenv("DUMPFILE=" . $first_dumpfile);
+            self::$climate->info("Dump files count " . count(self::$dump_files));
+            if (self::$openLastDumpFile) {                
+                self::$climate->info('Opening the last console dump...');
+                self::openBrowser($first_dumpfile);
+            }
         }
         
         // delete all temp files
         foreach (self::$files_to_del as $file) {
+            echo "Deleting file " . $file . PHP_EOL;
             unlink($file);
         }
     }
@@ -551,6 +558,12 @@ class Web_TestCase extends Root_TestCase {
             ->until(WebDriverExpectedCondition::visibilityOfElementLocated(WebDriverBy::xpath($xpath)));
     }
 
+    protected function waitForXpathToBeClickable($xpath, $timeout = self::DEFAULT_WAIT_TIMEOUT) {
+        $this->getWd()
+        ->wait($timeout, self::DEFAULT_WAIT_INTERVAL)
+        ->until(WebDriverExpectedCondition::elementToBeClickable(WebDriverBy::xpath($xpath)));
+    }
+    
     /**
      * Wait at most $timeout seconds until at least one result is shown
      *
