@@ -238,7 +238,7 @@ class Web_TestCase extends Root_TestCase {
                 break;
             default:
                 self::$climate->error("Browser '" . self::$browser . "' not supported. (you should set the BROWSER global var with a supported browser name)");
-                throw new \Exception();
+                exit(1);
         }
         
         if (self::$browser_version) {
@@ -292,7 +292,7 @@ class Web_TestCase extends Root_TestCase {
             self::$webDriver = RemoteWebDriver::create($server, $capabilities, $connection_timeout_in_ms, $request_timeout_in_ms); // This is the default
         } catch (\Exception $e) {
             self::$climate->error("Exception: " . $e->getMessage());
-            throw new \Exception();
+            exit(1);
         }
         
         // set some timeouts
@@ -954,7 +954,6 @@ class Web_TestCase extends Root_TestCase {
      * Take a screenshot of the webpage
      *
      * @param string $element the element to capture
-     * @throws Exception if the screenshot or the directory where to save doesn't exist
      */
     private function takeScreenshot($msg, $element = null) {
         $screenshots_path = self::$screenshots_path;
@@ -967,7 +966,9 @@ class Web_TestCase extends Root_TestCase {
             $this->takeScreenshot2($msg, $element, $save_as);
             
             if (!file_exists($save_as)) {
-                throw new Exception('Could not save screenshot: ' . $save_as);
+                $error = 'Error saving the screenshot file: ' . $save_as;
+                self::$climate->error($error);
+                exit(1); 
             }
             self::$screenshots[] = $save_as;
         }
