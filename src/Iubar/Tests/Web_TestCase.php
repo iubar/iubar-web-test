@@ -58,9 +58,9 @@ class Web_TestCase extends Root_TestCase {
 
     const HIDDEN = '**********';
 
-    protected static $openLastScreenshot = false;
+//     protected static $openLastScreenshot = false;
 
-    protected static $openLastDumpFile = false;
+//     protected static $openLastDumpFile = false;
 
     protected static $screenshots = array();
 
@@ -224,11 +224,13 @@ class Web_TestCase extends Root_TestCase {
             case self::MARIONETTE:
                 $capabilities = DesiredCapabilities::firefox();
                 $capabilities->setCapability(self::MARIONETTE, true);
-                // $capabilities->setCapability('firefox_binary', 'C:/Program Files (x86)/Firefox Developer Edition/firefox.exe');
+                // OPZIONALE: $capabilities->setCapability('firefox_binary', 'C:/Program Files (x86)/Firefox Developer Edition/firefox.exe');
                 break;
             case self::SAFARI:
                 if (self::isWindows()) {
-                    die("Can't test with Safari on Windows Os" . PHP_EOL);
+                    $error = 'Can\'t test with Safari on Windows Os';
+                    self::$climate->error($error);
+                    exit(1);                    
                 }
                 $capabilities = DesiredCapabilities::safari();
                 // DOESN'T WORK: $capabilities->setCapability('options', array("cleanSession"=>"true"));
@@ -261,15 +263,14 @@ class Web_TestCase extends Root_TestCase {
                     $capabilities->setCapability('name', $msg);
                     $username = self::$sauce_access_username;
                     $access_key = self::$sauce_access_key;
-                } else 
-                    if (self::$browser_testing_tool == self::BROWSERSTACK) {
-                        $capabilities->setCapability('browserstack.debug', true);
-                        $capabilities->setCapability('browserstack.local', true);
-                        $capabilities->setCapability('browserstack.localIdentifier', $msg);
-                        $capabilities->setCapability('takesScreenshot', true);
-                        $username = self::$browserstack_username;
-                        $access_key = self::$browserstack_acces_key;
-                    }
+                } else if (self::$browser_testing_tool == self::BROWSERSTACK) {
+                    $capabilities->setCapability('browserstack.debug', true);
+                    $capabilities->setCapability('browserstack.local', true);
+                    $capabilities->setCapability('browserstack.localIdentifier', $msg);
+                    $capabilities->setCapability('takesScreenshot', true);
+                    $username = self::$browserstack_username;
+                    $access_key = self::$browserstack_acces_key;                 
+                }
                 $server_root = "http://" . $username . ":" . $access_key . "@" . self::$selenium_server; // Attention: never print-out this string.
                 $server_printable = "http://" . self::HIDDEN . ":" . self::HIDDEN . "@" . self::$selenium_server;
             }
@@ -285,7 +286,7 @@ class Web_TestCase extends Root_TestCase {
         self::$selenium_session_shutdown = $server_root . '/selenium-server/driver/?cmd=shutDown';
         $server = $server_root . "/wd/hub"; // Attention: never print-out this string.
         
-        echo "Server: " . $server_printable . PHP_EOL;
+        self::$climate->info("Server: " . $server_printable);
         
         try {
             self::$webDriver = RemoteWebDriver::create($server, $capabilities, $connection_timeout_in_ms, $request_timeout_in_ms); // This is the default
@@ -329,35 +330,39 @@ class Web_TestCase extends Root_TestCase {
         self::$webDriver->quit();
         
         $screenshots_count = count(self::$screenshots);
-        echo "putenv SCREENSHOTS_COUNT=" . $screenshots_count . PHP_EOL;
-        putenv("SCREENSHOTS_COUNT=" . $screenshots_count);
+        self::$climate->comment('putenv SCREENSHOTS_COUNT=' . $screenshots_count);
+        putenv('SCREENSHOTS_COUNT=' . $screenshots_count);
         
-        // if there is at least a screenshot show it in the browser
-        if (self::$openLastScreenshot && $screenshots_count) {
-            if (self::$browser == self::PHANTOMJS) {
-                die("Unexpected status: browser is phantomjs" . PHP_EOL); // here I can't call assertNotEqual() becasue it's a dynamic method
-            }
-            self::$climate->error("Taken " . $screenshots_count . " screenshots");
-            $first_screenshot = self::$screenshots[0];
-            self::$climate->info('Opening the last screenshot...');
-            self::openFile($first_screenshot);
-        }
+// La seguente funzionalità è stata rimossa e trasferita sullo script Robo collegato        
+        // if there is at least a screenshot show it in the browser     
+//         if (self::$openLastScreenshot && $screenshots_count) {
+//             if (self::$browser == self::PHANTOMJS) {
+//                 self::$climate->info('Unexpected status: browser is phantomjs'); // here I can't call assertNotEqual() becasue it's a dynamic method
+//                 exit(1);
+//             }
+//             self::$climate->error("Taken " . $screenshots_count . " screenshots");
+//             $first_screenshot = self::$screenshots[0];
+//             self::$climate->info('Opening the last screenshot...');
+//             self::openFile($first_screenshot);
+//         }
         
         $dumpfile_count = count(self::$dump_files);
         if ($dumpfile_count) {
             $first_dumpfile = self::$dump_files[0];
-            echo "putenv DUMPFILE=" . $first_dumpfile . PHP_EOL;
-            putenv("DUMPFILE=" . $first_dumpfile);
-            self::$climate->info("Dump files count " . count(self::$dump_files));
-            if (self::$openLastDumpFile) {
-                self::$climate->info('Opening the last console dump...');
-                self::openBrowser($first_dumpfile);
-            }
+            self::$climate->comment('putenv DUMP_FILE=' . $first_dumpfile);
+            putenv("DUMP_FILE=" . $first_dumpfile);
+            
+// La seguente funzionalità è stata rimossa e trassferita sullo script Robo collegato            
+//             self::$climate->info("Dump files count " . count(self::$dump_files));
+//             if (self::$openLastDumpFile) {
+//                 self::$climate->info('Opening the last console dump...');
+//                 self::openBrowser($first_dumpfile);
+//             }
         }
         
         // delete all temp files
         foreach (self::$files_to_del as $file) {
-            echo "Deleting file " . $file . PHP_EOL;
+            self::$climate->comment('Deleting file ' . $file);
             unlink($file);
         }
     }
@@ -438,18 +443,27 @@ class Web_TestCase extends Root_TestCase {
      */
     protected static function openBrowser($url) {
         $browser = self::$browser;
+        self::$climate->info('Opening browser at: ' . $url);                
         if (self::$browser == self::PHANTOMJS) {
-            $browser = "chrome";
-        } else 
+            $browser = null;
+        } else {
             if (self::$browser == self::MARIONETTE) {
-                $browser = "firefox";
+                $browser = null;
             }
-        self::$climate->info('Opening browser at: ' . $url);
+        }                
+        if (self::isWindows()){
+            if($browser){
+                $cmd = "start \"\" \"$browser $url\"";;  // opening the same browser that was choosen for the test
+            }else{
+                $cmd = "start \"\" $url"; // opening the default system browser
+            }
+        }else{
+            $error = 'TODO: linux os not supported';
+            self::$climate->error($error);
+            exit(1);
+        }
         
-        // Warning: Windows specific code
-        // NO: $cmd = "start '" . $browser . " " . $url . "'";
-        $cmd = "start \"\" \"" . $url . "\"";
-        self::$climate->info('Command is : ' . $cmd);
+        self::$climate->comment('Command is : ' . $cmd);
         self::startShell($cmd);
     }
 
@@ -458,10 +472,16 @@ class Web_TestCase extends Root_TestCase {
      * @param unknown $file
      */
     protected static function openFile($file) {
-        // Warning: Windows specific code
-        $cmd = "start \"\" \"" . $file . "\"";
-        self::$climate->info('Command is : ' . $cmd);
-        self::startShell($cmd);
+        if (self::isWindows()){       
+            $cmd = "start \"\" \"$file\"";
+            self::$climate->info('Command is : ' . $cmd);
+        }else{
+            $error = 'TODO: linux os not supported';
+            self::$climate->error($error);
+            exit(1);
+        }
+        self::$climate->comment('Command is : ' . $cmd);
+        self::startShell($cmd);        
     }
 
     /**
@@ -727,7 +747,7 @@ class Web_TestCase extends Root_TestCase {
 
     /**
      */
-    protected function deleteAllCookies() {
+    protected function deleteAllCookies() { // TODO: metodo da testare
         $arguments = array();
         $this->getWd()->executeScript($this->get_js_contents(self::JS_DELETECOOKIES_SCRIPT), $arguments);
     }
@@ -738,7 +758,7 @@ class Web_TestCase extends Root_TestCase {
      * @param string $drop_area the area to click where upload the file
      * @param string $file the file to upload
      */
-    protected function dragfileToUpload($drop_area, $file) {
+    protected function dragFileToUpload($drop_area, $file) {
         
         // check the drop area
         if (!$drop_area) {
@@ -964,6 +984,36 @@ class Web_TestCase extends Root_TestCase {
         $screenshot = base64_decode($this->getWd()->execute(DriverCommand::SCREENSHOT));
         $im = imagecreatefromstring($screenshot);
         
+        
+        if ($element) { // Cut the element from the image            
+            $element_width = $element->getSize()->getWidth();
+            $element_height = $element->getSize()->getHeight();
+            $element_src_x = $element->getLocation()->getX();
+            $element_src_y = $element->getLocation()->getY();
+            
+            // Create image instances
+            $dest = imagecreatetruecolor($element_width, $element_height);
+            
+            // Copy
+            imagecopy($dest, $im, 0, 0, $element_src_x, $element_src_y, $element_width, $element_height);
+            imagedestroy($im);
+            $im = $dest;
+            
+        }
+        
+        // Add the text message to the image
+        $im = $this->addTextToimage($im, $msg);
+        
+        if ($save_as) {
+            // output the image to file
+            imagepng($im, $save_as);
+        }
+        
+        // tidy up
+        imagedestroy($im);
+    }
+    
+    private function addTextToimage($im, $msg){
         // define some colours to use with the image
         $yellow = imagecolorallocate($im, 255, 255, 0);
         $black = imagecolorallocate($im, 0, 0, 0);
@@ -993,7 +1043,7 @@ class Web_TestCase extends Root_TestCase {
         
         // now we want to write in the centre of the rectangle:
         $font = 24; // store the int ID of the system font we're using in $font
-                    
+        
         // calculate the left position of the text:
         $leftTextPos1 = ($width - imagefontwidth($font) * strlen($first)) / 2;
         if ($second) {
@@ -1004,34 +1054,9 @@ class Web_TestCase extends Root_TestCase {
         imagestring($im, $font, $leftTextPos1, $height - $box_inner_height, $first, $yellow);
         if ($second) {
             imagestring($im, $font, $leftTextPos2, $height - ($box_inner_height / 2), $second, $yellow);
-        }
+        } 
         
-        if ($element) {
-            $element_width = $element->getSize()->getWidth();
-            $element_height = $element->getSize()->getHeight();
-            $element_src_x = $element->getLocation()->getX();
-            $element_src_y = $element->getLocation()->getY();
-            
-            // Create image instances
-            $dest = imagecreatetruecolor($element_width, $element_height);
-            
-            // Copy
-            imagecopy($dest, $im, 0, 0, $element_src_x, $element_src_y, $element_width, $element_height);
-            
-            if ($save_as) {
-                // output the image to file
-                imagepng($dest, $save_as);
-            }
-        } else {
-            
-            if ($save_as) {
-                // output the image to file
-                imagepng($im, $save_as);
-            }
-        }
-        
-        // tidy up
-        imagedestroy($im);
+        return $im;
     }
 
     /**
@@ -1053,4 +1078,6 @@ class Web_TestCase extends Root_TestCase {
         $script = file_get_contents($js_file);
         return $script;
     }
+        
+    
 }
