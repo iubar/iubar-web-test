@@ -6,13 +6,12 @@
  */
 namespace Iubar\Build;
 
-use \Iubar\Tests\Web_TestCase;
-use \League\CLImate\CLImate;
-use \Robo\Tasks;
-use \Robo\Result;
-use \Robo\Contract\TaskInterface;
+use Iubar\Tests\Web_TestCase;
+use League\CLImate\CLImate;
+use Robo\Tasks;
+use Robo\Result;
 
-class RoboFile extends Tasks implements TaskInterface {
+class RoboFile extends Tasks {
 
     private $climate = null;
 
@@ -56,11 +55,7 @@ class RoboFile extends Tasks implements TaskInterface {
         $this->climate->info('Working path: ' . $this->working_path);
     }
 
-       /**
-     * @return \Robo\Result
-     */
     public function run() {
-        $result = Result::error($this, 'Unknow error');
         $this->climate->info('Initializing...');
         $this->init();
         
@@ -73,29 +68,28 @@ class RoboFile extends Tasks implements TaskInterface {
         
         if ($this->start_selenium) {
             $this->climate->info('Starting Selenium...');
-            $result = $this->startSelenium();
+            $result1 = $this->startSelenium();
         }
         
-        if($result->wasSuccessful()){
+        if($result1->wasSuccessful()){
             $this->climate->info('Running php unit tests...');
-            $result = $this->runPhpunit();
+            $result2 = $this->runPhpunit();
         }else{
             $this->climate->error('Can\'t start Selenium');
         }
         
-        if($result->wasSuccessful()){
+        if($result2->wasSuccessful()){
             $this->climate->info('Done without errors.');
         }else{
             $this->climate->error('Done with errors.');
         }        
-       
+        
         $this->afterTestRun();
                 
         if(!$this->batch_mode){
-            $input = $this->climate->password('Press Enter to quit:');
+            $input = $this->climate->input('Press Enter to quit:');
             $dummy = $input->prompt();
         }        
-        return $result;
     }
     
     private function afterTestRun(){
@@ -303,27 +297,22 @@ class RoboFile extends Tasks implements TaskInterface {
         $this->climate->info('start selenium: ' . $this->formatBoolean($this->start_selenium));
         
     }
-
     
     private function startSeleniumAllDrivers() {
-        $result = Result::error($this, 'Unknow error');
+        $result = null;
         $cmd = $this->getSeleniumAllCmd();
-        if ($cmd) {
-            $this->climate->info('Selenium cmd: ' . $cmd);
-            // launches Selenium server
-            $result = $this->taskExec($cmd)->background()->run();
-        }
+        $this->climate->info('Selenium cmd: ' . $cmd);
+        // launches Selenium server
+        $result = $this->taskExec($cmd)->background()->run();
         return $result;
     }
     
     private function startSelenium() {
-        $result = Result::error($this, 'Unknow error');
+        $result = null;
         $cmd = $this->getSeleniumCmd();               
-        if ($cmd) {
-            $this->climate->info('Selenium cmd: ' . $cmd);
-            // launches Selenium server
-            $result = $this->taskExec($cmd)->background()->run();
-        }
+        $this->climate->info('Selenium cmd: ' . $cmd);
+        // launches Selenium server
+        $result = $this->taskExec($cmd)->background()->run();
         return $result;
     }
 
@@ -431,7 +420,8 @@ class RoboFile extends Tasks implements TaskInterface {
     /**
      */
     private function runPhpunit() {
-        $cfg_file = $this->phpunit_xml_path . '\phpunit.xml';
+        $result = null;
+        $cfg_file = $this->phpunit_xml_path . DIRECTORY_SEPARATOR . 'phpunit.xml';
         $this->checkFile($cfg_file);
         // runs PHPUnit tests
         $result = $this->taskPHPUnit('phpunit')->configFile($cfg_file)->run();
