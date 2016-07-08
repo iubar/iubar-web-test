@@ -103,8 +103,6 @@ class Web_TestCase extends Root_TestCase {
 
     protected static $travis_job_number = null;
 
-    protected static $browser_testing_tool = null;
-
     protected static $sauce_access_username = null;
 
     protected static $sauce_access_key = null;
@@ -184,7 +182,6 @@ class Web_TestCase extends Root_TestCase {
         self::$app_password = getenv('APP_PASSWORD');
         self::$travis = getenv('TRAVIS');
         self::$travis_job_number = getenv('TRAVIS_JOB_NUMBER');
-        self::$browser_testing_tool = getenv('BROWSER_TESTING_TOOL');
         self::$sauce_access_username = getenv('SAUCE_USERNAME');
         self::$sauce_access_key = getenv('SAUCE_ACCESS_KEY');
         self::$browserstack_username = getenv('BROWSERSTACK_USERNAME');
@@ -256,24 +253,22 @@ class Web_TestCase extends Root_TestCase {
         // set Travis params
         if (self::$travis) {
             self::$climate->info("Travis detected...");
-            if (self::$browser_testing_tool) {
-                $msg = "WebDriver test";
-                if (self::$browser_testing_tool == self::SAUCELABS) {
-                    $capabilities->setCapability('tunnel-identifier', self::$travis_job_number);
-                    $capabilities->setCapability('name', $msg);
-                    $username = self::$sauce_access_username;
-                    $access_key = self::$sauce_access_key;
-                } else if (self::$browser_testing_tool == self::BROWSERSTACK) {
-                    $capabilities->setCapability('browserstack.debug', true);
-                    $capabilities->setCapability('browserstack.local', true);
-                    $capabilities->setCapability('browserstack.localIdentifier', $msg);
-                    $capabilities->setCapability('takesScreenshot', true);
-                    $username = self::$browserstack_username;
-                    $access_key = self::$browserstack_acces_key;                 
-                }
-                $server_root = "http://" . $username . ":" . $access_key . "@" . self::$selenium_server; // Attention: never print-out this string.
-                $server_printable = "http://" . self::HIDDEN . ":" . self::HIDDEN . "@" . self::$selenium_server;
+            $msg = "WebDriver test";
+            if (self::isSaucelabs()) {
+                $capabilities->setCapability('tunnel-identifier', self::$travis_job_number);
+                $capabilities->setCapability('name', $msg);
+                $username = self::$sauce_access_username;
+                $access_key = self::$sauce_access_key;
+            } else if (self::isBrowserstack()) {
+                $capabilities->setCapability('browserstack.debug', true);
+                $capabilities->setCapability('browserstack.local', true);
+                $capabilities->setCapability('browserstack.localIdentifier', $msg);
+                $capabilities->setCapability('takesScreenshot', true);
+                $username = self::$browserstack_username;
+                $access_key = self::$browserstack_acces_key;                 
             }
+            $server_root = "http://" . $username . ":" . $access_key . "@" . self::$selenium_server; // Attention: never print-out this string.
+            $server_printable = "http://" . self::HIDDEN . ":" . self::HIDDEN . "@" . self::$selenium_server;
         } else {
             $server_root = "http://" . self::$selenium_server;
             $server_printable = $server_root;
@@ -318,6 +313,26 @@ class Web_TestCase extends Root_TestCase {
         }
     }
 
+    protected static function isSaucelabs(){
+        $b = false;
+        $findme   = 'saucelabs';
+        $pos = strpos(self::$selenium_server, $findme);
+        if ($pos !== false) {
+            $b = true;
+        }
+        return $b;
+    }
+    
+    protected static function isBrowserstack(){
+        $b = false;
+        $findme   = 'browserstack';
+        $pos = strpos(self::$selenium_server, $findme);
+        if ($pos !== false) {
+            $b = true;
+        }
+        return $b;
+    }
+    
     /**
      * Close the WebDriver and show the screenshot in the browser
      */
@@ -386,7 +401,6 @@ class Web_TestCase extends Root_TestCase {
         $padding->label('APP_PASSWORD: ')->result(self::formatPassword(getenv("APP_PASSWORD")));
         $padding->label('TRAVIS: ')->result(getenv("TRAVIS"));
         $padding->label('TRAVIS_JOB_NUMBER: ')->result(getenv("TRAVIS_JOB_NUMBER"));
-        $padding->label('BROWSER_TESTING_TOOL: ')->result(getenv("BROWSER_TESTING_TOOL"));
         $padding->label('SAUCE_USERNAME: ')->result(getenv("SAUCE_USERNAME"));
         $padding->label('SAUCE_ACCESS_KEY: ')->result(self::formatPassword(getenv("SAUCE_ACCESS_KEY")));
         $padding->label('BROWSERSTACK_USERNAME: ')->result(getenv("BROWSERSTACK_USERNAME"));
@@ -852,14 +866,6 @@ class Web_TestCase extends Root_TestCase {
      */
     protected function isChromeOnSaucelabs() {
         return (self::$browser == self::CHROME && self::$sauce_access_key);
-    }
-
-    /**
-     *
-     * @return string
-     */
-    protected function isOnSaucelabs() {
-        return (self::$sauce_access_key);
     }
 
     /**

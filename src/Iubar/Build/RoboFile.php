@@ -142,6 +142,20 @@ class RoboFile extends Tasks {
             return 'false';
         }
     }
+    
+    /**
+     * 
+     * @param string $str
+     * 
+     * Returns TRUE for "1", "true", "on" and "yes". 
+     * Returns FALSE otherwise.
+     * (If FILTER_NULL_ON_FAILURE is set, FALSE is returned only for "0", "false", "off", "no", and "", 
+     * and NULL is returned for all non-boolean values)
+     */
+    protected function parseBoolean($str) {        
+        $b = filter_var($value, FILTER_VALIDATE_BOOLEAN);;
+        return $b;
+    }    
 
     /**
      */
@@ -283,11 +297,12 @@ class RoboFile extends Tasks {
         $this->geko_driver = $this->selenium_path . DIRECTORY_SEPARATOR . $ini_array['geko_driver'];
         $this->edge_driver = $this->selenium_path . DIRECTORY_SEPARATOR . $ini_array['edge_driver'];
         $this->phantomjs_binary = $this->selenium_path . DIRECTORY_SEPARATOR . $ini_array['phantomjs_binary'];
-        $this->update_vendor = $ini_array['update_vendor'];
-        $this->open_slideshow = $ini_array['open_slideshow'];
-        $open_dump_file = 
-        $batch_mode = 
-        $this->start_selenium = $ini_array['start_selenium'];
+        
+        $this->update_vendor = $this->parseBoolean($ini_array['update_vendor']);
+        $this->open_slideshow = $this->parseBoolean($ini_array['open_slideshow']);
+        $open_dump_file = $this->parseBoolean($ini_array['open_dumpfile']);
+        $batch_mode = $this->parseBoolean($ini_array['batch_mode']);
+        $this->start_selenium = $this->parseBoolean($ini_array['start_selenium']);
         
         $this->say('--------------------------------------------------');
         $this->say('Enviroment variables');
@@ -302,7 +317,7 @@ class RoboFile extends Tasks {
         $this->say('edge driver: ' . $this->edge_driver);
         $this->say('phantomjs binary: ' . $this->phantomjs_binary);
         $this->say('update vendor: ' . $this->formatBoolean($this->update_vendor));
-        $this->say('open slideshow: ' . $this->formatBoolean($this->open_slideshow));        
+        $this->say('open slideshow: ' . $this->formatBoolean($this->open_slideshow));      
         $this->say('open dumpfile: ' . $this->formatBoolean($this->open_dump_file));
         $this->say('batch mode: ' . $this->formatBoolean($this->batch_mode));
         $this->say('start selenium: ' . $this->formatBoolean($this->start_selenium));
@@ -399,26 +414,27 @@ class RoboFile extends Tasks {
      * @param unknown $url
      * @return string
      */
-    private function browser($url) {
-        // TODO: valutare se è meglio avviare il browser $this->browser piuttosto che quello di default di sistema
-            
+    private function browser($url, $default=false) {
         $browser = self::$browser;
-        $this->say('Opening browser at: ' . $url);
+        
         if (self::$browser == self::PHANTOMJS) {
-            $browser = null;
+            $default = true;
         } else {
             if (self::$browser == self::MARIONETTE) {
-                $browser = null;
+                $default = true;
             }
         }
+
+        $this->say('Opening browser at: ' . $url);
+
         if (self::isWindows()){
-            if($browser){
+            if(!$default){
                 $cmd = "start \"\" \"$browser $url\""; // opening the same browser that was choosen for the test 
             }else{
                 $cmd = "start \"\" $url"; // opening the default system browser
             }
         }else{
-            $error = 'TODO: linux os not supported';
+            $error = 'TODO: Linux Os not yet supported'; // FIXME: 
             $this->yell($error);
             exit(1);
         }
@@ -448,12 +464,12 @@ class RoboFile extends Tasks {
         // In alternativa si potrebbe utilizzare https://github.com/consolidation-org/Robo/blob/master/src/Common/ResourceExistenceChecker.php
         if (!is_file($file)) {
             $error = 'File not found: ' . $file;
-            $this->yell('File not found: ' . $file);
+            $this->yell($error);
             exit(1);
         }
         if (!is_readable($file)) {
             $error = 'File not found: ' . $file;
-            $this->yell('File not readable: ' . $file);
+            $this->yell($error);
             exit(1);
         }
         return true;
