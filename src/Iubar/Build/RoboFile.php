@@ -10,11 +10,14 @@ use Iubar\Tests\Web_TestCase;
 use League\CLImate\CLImate;
 use Robo\Tasks;
 use Robo\Result;
+use Robo\Common\IO;
+use Robo\Common\Timer;
 
 class RoboFile extends Tasks {
 
-    private $climate = null;
-
+    use IO;
+    use Timer;
+    
     private $browser = null;
 
     private $browser_version = null;
@@ -51,45 +54,50 @@ class RoboFile extends Tasks {
 
     function __construct($working_path) {
         $this->working_path = $working_path;
-        $this->climate = new CLImate();
-        $this->climate->info('Working path: ' . $this->working_path);
+        $this->say('Working path: ' . $this->working_path);
     }
 
     public function run() {
-        $this->climate->info('Initializing...');
+       
+        $this->startTimer();        
+        $this->say('Initializing...');
         $this->init();
         
         if ($this->update_vendor) {
-            $this->climate->info('Updating vendor...');
+            $this->say('Updating vendor...');
             $this->taskComposerUpdate()
                 ->dir($this->composer_json_path)
                 ->run();
         }
         
         if ($this->start_selenium) {
-            $this->climate->info('Starting Selenium...');
+            $this->say('Starting Selenium...');
             $result1 = $this->startSelenium();
         }
         
         if($result1->wasSuccessful()){
-            $this->climate->info('Running php unit tests...');
+            $this->say('Running php unit tests...');
             $result2 = $this->runPhpunit();
         }else{
-            $this->climate->error('Can\'t start Selenium');
+            $this->yell('Can\'t start Selenium');
         }
         
         if($result2->wasSuccessful()){
-            $this->climate->info('Done without errors.');
+            $this->say('Done without errors.');
         }else{
-            $this->climate->error('Done with errors.');
+            $this->yell('Done with errors.');
         }        
         
         $this->afterTestRun();
-                
+                        
+        $this->stopTimer();
+        
+        $this->say('Total execution time: ' . $this->getExecutionTime());
+        
         if(!$this->batch_mode){
-            $input = $this->climate->input('Press Enter to quit:');
-            $dummy = $input->prompt();
-        }        
+            $dummy = $this->ask('Press Enter to quit:');
+        }
+        
     }
     
     private function afterTestRun(){
@@ -102,12 +110,12 @@ class RoboFile extends Tasks {
             // Screenshots
             $screenshots_count = getenv('SCREENSHOTS_COUNT');
             if ($this->open_slideshow && $screenshots_count) {
-                $input = $climate->confirm('Do you want to see the slideshow ?');
-                if ($input->confirmed()) {
-                    $this->climate->info('Screenshots taken: ' . $screenshots_count);
+                $confirmed = $this->confirm('Do you want to see the slideshow ?');
+                if ($confirmed) {
+                    $this->say('Screenshots taken: ' . $screenshots_count);
                     $host = 'localhost';
                     $port = '8000';
-                    $this->climate->info("Running slideshow on local php integrated webserver at $host:$port...");
+                    $this->say("Running slideshow on local php integrated webserver at $host:$port...");
                     $this->startHttpServer();
                     $url = 'http://' . $host . ':' . $port . '/slideshow/index.php';
                     $this->browser($url);
@@ -116,7 +124,7 @@ class RoboFile extends Tasks {
             // Console output
             $dump_file = getenv('DUMP_FILE');
             if ($this->open_dump_file && $dump_file) {
-                $this->climate->info('Opening the last console dump: ' . $dump_file);
+                $this->say('Opening the last console dump: ' . $dump_file);
                 $this->browser($dump_file);
             }              
         }        
@@ -177,7 +185,7 @@ class RoboFile extends Tasks {
         }
         if (!is_dir($path)) {
             $error = 'Path not found: ' . $path;
-            $this->climate->error($error);
+            $this->yell($error);
             exit(1);
         }
         if (!getenv($var_name)) {
@@ -191,7 +199,7 @@ class RoboFile extends Tasks {
         $ini_file = 'config.ini';
         if (!is_file($ini_file)) {            
             $error = 'File not found: ' . $ini_file;
-            $this->climate->error($error);
+            $this->yell($error);
             exit(1);
         }
         $ini_array = parse_ini_file($ini_file);
@@ -244,11 +252,12 @@ class RoboFile extends Tasks {
             }
             if (!$app_password) {
                 if(!$this->batch_mode){
-                    $input = $this->climate->password('Please enter password for ' . $app_username . ':');
-                    $app_password = $input->prompt();
+                    $app_password = $this->ask('Please enter password for ' . $app_username . ':'); // Change in askHidden();
+                                                                                                    // FIXME: https://github.com/consolidation-org/Robo/issues/376
+                                                                                                    // see https://github.com/symfony/console/blob/master/Resources/bin/hiddeninput.exe
                 }else{
                     $error = 'Enviroment var not set: APP_PASSWORD';
-                    $this->climate->error($error);
+                    $this->yell($error);
                     exit(1);
                 }
             }
@@ -280,28 +289,30 @@ class RoboFile extends Tasks {
         $batch_mode = 
         $this->start_selenium = $ini_array['start_selenium'];
         
-        $this->climate->underline()->bold('Enviroment variables for the generic building tool');
-        $this->climate->info('PHPUNIT_XML_PATH: ' . getenv('PHPUNIT_XML_PATH'));
-        $this->climate->info('COMPOSER_JSON_PATH: ' . getenv('COMPOSER_JSON_PATH'));        
-        $this->climate->info('Specific Robo (only) settings');
-        $this->climate->info('\$selenium path: ' . $this->selenium_path);
-        $this->climate->info('\$selenium jar: ' . $this->selenium_jar);
-        $this->climate->info('\$chrome driver: ' . $this->chrome_driver);
-        $this->climate->info('\$geko driver: ' . $this->geko_driver);
-        $this->climate->info('\$edge driver: ' . $this->edge_driver);
-        $this->climate->info('\$phantomjs binary: ' . $this->phantomjs_binary);
-        $this->climate->info('\$update vendor: ' . $this->formatBoolean($this->update_vendor));
-        $this->climate->info('\$open slideshow: ' . $this->formatBoolean($this->open_slideshow));        
-        $this->climate->info('\$open dumpfile: ' . $this->formatBoolean($this->open_dump_file));
-        $this->climate->info('\$batch mode: ' . $this->formatBoolean($this->batch_mode));
-        $this->climate->info('start selenium: ' . $this->formatBoolean($this->start_selenium));
+        $this->say('--------------------------------------------------');
+        $this->say('Enviroment variables');
+        $this->say('--------------------------------------------------');
+        $this->say('PHPUNIT_XML_PATH: ' . getenv('PHPUNIT_XML_PATH'));
+        $this->say('COMPOSER_JSON_PATH: ' . getenv('COMPOSER_JSON_PATH'));        
+        $this->say('Specific Robo (only) settings');
+        $this->say('selenium path: ' . $this->selenium_path);
+        $this->say('selenium jar: ' . $this->selenium_jar);
+        $this->say('chrome driver: ' . $this->chrome_driver);
+        $this->say('geko driver: ' . $this->geko_driver);
+        $this->say('edge driver: ' . $this->edge_driver);
+        $this->say('phantomjs binary: ' . $this->phantomjs_binary);
+        $this->say('update vendor: ' . $this->formatBoolean($this->update_vendor));
+        $this->say('open slideshow: ' . $this->formatBoolean($this->open_slideshow));        
+        $this->say('open dumpfile: ' . $this->formatBoolean($this->open_dump_file));
+        $this->say('batch mode: ' . $this->formatBoolean($this->batch_mode));
+        $this->say('start selenium: ' . $this->formatBoolean($this->start_selenium));
         
     }
     
     private function startSeleniumAllDrivers() {
         $result = null;
         $cmd = $this->getSeleniumAllCmd();
-        $this->climate->info('Selenium cmd: ' . $cmd);
+        $this->say('Selenium cmd: ' . $cmd);
         // launches Selenium server
         $result = $this->taskExec($cmd)->background()->run();
         return $result;
@@ -310,7 +321,7 @@ class RoboFile extends Tasks {
     private function startSelenium() {
         $result = null;
         $cmd = $this->getSeleniumCmd();               
-        $this->climate->info('Selenium cmd: ' . $cmd);
+        $this->say('Selenium cmd: ' . $cmd);
         // launches Selenium server
         $result = $this->taskExec($cmd)->background()->run();
         return $result;
@@ -361,7 +372,7 @@ class RoboFile extends Tasks {
                 break;
             default:
                 $error = 'Browser ' . $this->browser . ' not supported';
-                $this->climate->error($error);
+                $this->yell($error);
                 exit(1);
         }
         return $cmd;
@@ -373,7 +384,7 @@ class RoboFile extends Tasks {
         $dir = realpath($this->screenshots_path);
         if (!is_dir($dir)) {
             $error = 'Path not found: ' . $dir;
-            $this->climate->error($error);
+            $this->yell($error);
             exit(1);            
         }
         // starts PHP built-in server in background
@@ -392,7 +403,7 @@ class RoboFile extends Tasks {
         // TODO: valutare se è meglio avviare il browser $this->browser piuttosto che quello di default di sistema
             
         $browser = self::$browser;
-        $this->climate->info('Opening browser at: ' . $url);
+        $this->say('Opening browser at: ' . $url);
         if (self::$browser == self::PHANTOMJS) {
             $browser = null;
         } else {
@@ -408,11 +419,11 @@ class RoboFile extends Tasks {
             }
         }else{
             $error = 'TODO: linux os not supported';
-            $this->climate->error($error);
+            $this->yell($error);
             exit(1);
         }
         
-        $this->climate->comment('Command is : ' . $cmd);
+        $this->say('Command is : ' . $cmd);
         self::startShell($cmd);
         return $output;
     }
@@ -434,14 +445,15 @@ class RoboFile extends Tasks {
      * @return \Exception|boolean
      */
     private function checkFile($file) {
+        // In alternativa si potrebbe utilizzare https://github.com/consolidation-org/Robo/blob/master/src/Common/ResourceExistenceChecker.php
         if (!is_file($file)) {
             $error = 'File not found: ' . $file;
-            $this->climate->error("Can\'t start Selenium");
+            $this->yell('File not found: ' . $file);
             exit(1);
         }
         if (!is_readable($file)) {
             $error = 'File not found: ' . $file;
-            $this->climate->error("Can\'t start Selenium");
+            $this->yell('File not readable: ' . $file);
             exit(1);
         }
         return true;
