@@ -70,26 +70,28 @@ class RoboFile extends Tasks {
                 ->run();
         }
         
+        $result1 = null;
         if ($this->start_selenium) {
             $this->say('Starting Selenium...');
             $result1 = $this->startSelenium();
         }
         
-        if($result1->wasSuccessful()){
+        if(!$result1 || !$result1->wasSuccessful()){
+            $this->yell('Can\'t start Selenium');
+        }else{
             $this->say('Running php unit tests...');
             $result2 = $this->runPhpunit();
-        }else{
-            $this->yell('Can\'t start Selenium');
+                
+            if(!$result2 || !$result2->wasSuccessful()){
+                $this->yell('Done with errors.');                
+            }else{
+                $this->say('Done without errors.');
+            }        
+            
+            $this->afterTestRun();
+         
         }
         
-        if($result2->wasSuccessful()){
-            $this->say('Done without errors.');
-        }else{
-            $this->yell('Done with errors.');
-        }        
-        
-        $this->afterTestRun();
-                        
         $this->stopTimer();
         
         $this->say('Total execution time: ' . $this->getExecutionTime());
@@ -153,7 +155,7 @@ class RoboFile extends Tasks {
      * and NULL is returned for all non-boolean values)
      */
     protected function parseBoolean($str) {        
-        $b = filter_var($value, FILTER_VALIDATE_BOOLEAN);;
+        $b = filter_var($str, FILTER_VALIDATE_BOOLEAN);;
         return $b;
     }    
 
@@ -300,8 +302,8 @@ class RoboFile extends Tasks {
         
         $this->update_vendor = $this->parseBoolean($ini_array['update_vendor']);
         $this->open_slideshow = $this->parseBoolean($ini_array['open_slideshow']);
-        $open_dump_file = $this->parseBoolean($ini_array['open_dumpfile']);
-        $batch_mode = $this->parseBoolean($ini_array['batch_mode']);
+        $this->open_dump_file = $this->parseBoolean($ini_array['open_dumpfile']);
+        $this->batch_mode = $this->parseBoolean($ini_array['batch_mode']);
         $this->start_selenium = $this->parseBoolean($ini_array['start_selenium']);
         
         $this->say('--------------------------------------------------');

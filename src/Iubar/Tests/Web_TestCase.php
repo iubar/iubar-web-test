@@ -48,9 +48,9 @@ class Web_TestCase extends Root_TestCase {
 
     const SAFARI = 'safari';
 
-    const JS_DRAG_SCRIPT = 'js/drag.js';
+    const JS_DRAG_SCRIPT = 'js/drag_to_upload_2.js';
 
-    const JS_DELETECOOKIES_SCRIPT = 'js/delete_cookies2.js';
+    const JS_DELETECOOKIES_SCRIPT = 'js/delete_cookies.js';
 
     const SAUCELABS = 'saucelabs';
 
@@ -73,7 +73,7 @@ class Web_TestCase extends Root_TestCase {
     protected static $selenium_session_shutdown;
     
     // easily output colored text and special formatting
-    protected static $climate;
+    protected static $climate = null;
 
     protected static $files_to_del = array();
 
@@ -222,6 +222,7 @@ class Web_TestCase extends Root_TestCase {
                 $capabilities = DesiredCapabilities::firefox();
                 $capabilities->setCapability(self::MARIONETTE, true);
                 // OPZIONALE: $capabilities->setCapability('firefox_binary', 'C:/Program Files (x86)/Firefox Developer Edition/firefox.exe');
+                // Useful to use the portable version of Firefox 
                 break;
             case self::SAFARI:
                 if (self::isWindows()) {
@@ -308,8 +309,12 @@ class Web_TestCase extends Root_TestCase {
             $types = self::$webDriver->manage()->getAvailableLogTypes();
             if (self::DEBUG) {
                 self::$climate->info('Avaiable browser logs types:');
-                print_r($types);
+                self::$climate->out($types);
+                $input = self::$climate->input('Press Enter to continue');                
+                $response = $input->prompt();                
             }
+        }else{
+            
         }
     }
 
@@ -380,6 +385,7 @@ class Web_TestCase extends Root_TestCase {
             self::$climate->comment('Deleting file ' . $file);
             unlink($file);
         }
+        
     }
 
     /**
@@ -785,13 +791,11 @@ class Web_TestCase extends Root_TestCase {
         $wd = $this->getWd();
         
         $file = realpath($file);
-        
+     
         // Execute the js drag file script
         // @see also: https://github.com/facebook/php-webdriver/blob/787e71db74e42cdf13a41d500f75ea43da84bc75/tests/functional/FileUploadTest.php
-        $return = $wd->executeScript($this->get_js_contents(self::JS_DRAG_SCRIPT), array(
-            $drop_area
-        ));
-        
+        $return = $wd->executeScript($this->get_js_contents(self::JS_DRAG_SCRIPT), array($drop_area));       
+                
         self::$climate->info("Waiting the js script execution...");
         $wd->manage()
             ->timeouts()
@@ -806,9 +810,9 @@ class Web_TestCase extends Root_TestCase {
             // upload the file
             self::$climate->info("Uploading file: " . $file);
             
-            $file_input->setFileDetector(new LocalFileDetector())->sendKeys($file); // Soluzione incompatibile con i browser MARIONETTE e SAFARI
+            $file_input->setFileDetector(new LocalFileDetector())->sendKeys($file); // Soluzione incompatibile con il browser MARIONETTE
                                                                                     // https://bugzilla.mozilla.org/show_bug.cgi?id=941085
-                                                                                     // equivalente:   $file_input->sendKeys($file);
+                                                                                    // Lo statement è equivalente a $file_input->sendKeys($file);
 
         }
     }
@@ -893,11 +897,11 @@ class Web_TestCase extends Root_TestCase {
             $console_error = count($severe_records);
             
             // write the console error in log file
-            if (self::DEBUG && !self::$travis) {
+            if (!$this->isTravis()) {
                 $this->dumpConsoleError($severe_records);
             }
         } else {
-            self::$climate->error("Warning: can't use countErrorsOnConsole() with " . self::$browser);
+            self::$climate->error("Warning: can't use countErrorsOnConsole() with the browser" . self::$browser);
         }
         return $console_error;
     }
