@@ -35,11 +35,11 @@ var tgt=arguments[0],
 	document.body.removeChild(input);
   }, false);
   
-	if (document.body.childElementCount > 0) {
-		document.body.insertBefore(input, document.body.childNodes[0]);
-	} else {
+//	if (document.body.childElementCount > 0) {
+//		document.body.insertBefore(input, document.body.childNodes[0]);
+//	} else {
 		document.body.appendChild(input);
-	}
+//	}
   
   return input;
   
