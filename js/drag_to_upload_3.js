@@ -1,5 +1,7 @@
 /**
- *  http://heliumhq.com/pdfs/AutomatingGmailWithHelium.pdf
+ *  @see: http://stackoverflow.com/questions/34761241/selenium-webdriver-upload-file-by-drag-and-drop
+ *  @see: http://heliumhq.com/pdfs/AutomatingGmailWithHelium.pdf
+ *  
  */
 var tgt=arguments[0],
 	input=document.createElement('input');
