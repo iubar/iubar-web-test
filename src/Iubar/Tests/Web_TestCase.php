@@ -775,6 +775,8 @@ class Web_TestCase extends Root_TestCase {
     /**
      * Click on the drop area and execute the js script to upload a file
      *
+     * @fixme: la soluzione seguente è incompatibile con MARIONETTE e SAFARI
+     *
      * @param string $drop_area the area to click where upload the file
      * @param string $file the file to upload
      */
