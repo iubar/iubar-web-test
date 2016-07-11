@@ -299,12 +299,12 @@ class Web_TestCase extends Root_TestCase {
             ->timeouts()
             ->setScriptTimeout(240); // Set the amount of time (in seconds) to wait for an asynchronous script to finish execution before throwing an error.
         
-        /*
-         * Window size $self::$webDriver->manage()->window()->maximize(); $window = new WebDriverDimension(1024, 768); $this->webDriver->manage()->window()->setSize($window);
-         */
         
-        // write avaiable browser logs (not works with marionette)
-        if (self::$browser != self::MARIONETTE) {
+        // Window size $self::$webDriver->manage()->window()->maximize(); $window = new WebDriverDimension(1024, 768); $this->webDriver->manage()->window()->setSize($window);
+        
+        
+        // Write avaiable browser logs (not works with marionette)                 
+        if (self::$browser != self::MARIONETTE) { // NOTE: can't read the console with MARIONETTE: https://github.com/mozilla/geckodriver/issues/144
             // Console
             $types = self::$webDriver->manage()->getAvailableLogTypes();
             if (self::DEBUG) {
@@ -313,8 +313,6 @@ class Web_TestCase extends Root_TestCase {
                 $input = self::$climate->input('Press Enter to continue');                
                 $response = $input->prompt();                
             }
-        }else{
-            
         }
     }
 
@@ -353,31 +351,11 @@ class Web_TestCase extends Root_TestCase {
         self::$climate->comment('putenv SCREENSHOTS_COUNT=' . $screenshots_count);
         putenv('SCREENSHOTS_COUNT=' . $screenshots_count);
         
-// La seguente funzionalità è stata rimossa e trasferita sullo script Robo collegato        
-        // if there is at least a screenshot show it in the browser     
-//         if (self::$openLastScreenshot && $screenshots_count) {
-//             if (self::$browser == self::PHANTOMJS) {
-//                 self::$climate->info('Unexpected status: browser is phantomjs'); // here I can't call assertNotEqual() becasue it's a dynamic method
-//                 exit(1);
-//             }
-//             self::$climate->error("Taken " . $screenshots_count . " screenshots");
-//             $first_screenshot = self::$screenshots[0];
-//             self::$climate->info('Opening the last screenshot...');
-//             self::openFile($first_screenshot);
-//         }
-        
         $dumpfile_count = count(self::$dump_files);
         if ($dumpfile_count) {
             $first_dumpfile = self::$dump_files[0];
             self::$climate->comment('putenv DUMP_FILE=' . $first_dumpfile);
             putenv("DUMP_FILE=" . $first_dumpfile);
-            
-// La seguente funzionalità è stata rimossa e trassferita sullo script Robo collegato            
-//             self::$climate->info("Dump files count " . count(self::$dump_files));
-//             if (self::$openLastDumpFile) {
-//                 self::$climate->info('Opening the last console dump...');
-//                 self::openBrowser($first_dumpfile);
-//             }
         }
         
         // delete all temp files
