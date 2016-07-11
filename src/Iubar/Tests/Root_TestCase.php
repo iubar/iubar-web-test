@@ -17,7 +17,7 @@ class Root_TestCase extends \PHPUnit_Framework_TestCase {
     protected static function checkPath($path) {
         if (!is_dir($path)) {
             $error = 'Path not found: ' . $path;
-            throw new \Exception($error);
+            throw new \Exception($error);            
         }
         if (!is_readable($path)) {
             $error = 'Path not readable: ' . $path;

@@ -876,14 +876,18 @@ class Web_TestCase extends Root_TestCase {
             }
             $console_error = count($severe_records);
             
-            // write the console error in log file
-            if (!$this->isTravis()) {
-                $this->dumpConsoleError($severe_records);
-            }else{
-                self::$climate->dump($severe_records);
+            if(count($console_error)>0){
+                self::$climate->yellow()->blink()->out("Errors on console: " . count($console_error) . ". Page is " . $wd->getCurrentURL());
+                // write the console error in log file
+                if (!$this->isTravis()) {
+                    $this->dumpConsoleError($severe_records);
+                }else{
+                    self::$climate->dump($severe_records);
+                }
             }
+            
         } else {
-            self::$climate->error("Warning: can't use countErrorsOnConsole() with the browser" . self::$browser);
+            self::$climate->error("Warning: can't use countErrorsOnConsole() with the browser " . self::$browser);
         }
         return $console_error;
     }
@@ -895,13 +899,9 @@ class Web_TestCase extends Root_TestCase {
      */
     private function dumpConsoleError($records) {
         $data = json_encode($records, JSON_PRETTY_PRINT);
-        $screenshots_path = self::$screenshots_path;
-        if ($screenshots_path) {
-            $path = $screenshots_path . "/..";
-            if (!is_dir($path)) {
-                $this->fail("Path not found: " . $path . " (check the SCREENSHOTS_PATH env variable)" . PHP_EOL);
-            }
-            $dump_file = $path . DIRECTORY_SEPARATOR . date('Y-m-d_His') . "_console.json";
+        $logs_path = self::$logs_path;
+        if ($logs_path && self::isPathWritable($logs_path)){           
+            $dump_file = $logs_path . DIRECTORY_SEPARATOR . date('Y-m-d_His') . "_console.json";
             file_put_contents($dump_file, $data);
             self::$dump_files[] = $dump_file;
         }
@@ -949,7 +949,7 @@ class Web_TestCase extends Root_TestCase {
      */
     private function takeScreenshot($msg, $element = null) {
         $screenshots_path = self::$screenshots_path;
-        if ($screenshots_path) {
+        if ($screenshots_path && self::isPathWritable($screenshots_path)) {
             self::$climate->error('Taking a screenshot...');
             
             // The path where save the screenshot
@@ -976,8 +976,7 @@ class Web_TestCase extends Root_TestCase {
     private function takeScreenshot2($msg, $element, $save_as = null) {
         $screenshot = base64_decode($this->getWd()->execute(DriverCommand::SCREENSHOT));
         $im = imagecreatefromstring($screenshot);
-        
-        
+                
         if ($element) { // Cut the element from the image            
             $element_width = $element->getSize()->getWidth();
             $element_height = $element->getSize()->getHeight();
