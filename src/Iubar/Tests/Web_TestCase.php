@@ -899,6 +899,8 @@ class Web_TestCase extends Root_TestCase {
             // write the console error in log file
             if (!$this->isTravis()) {
                 $this->dumpConsoleError($severe_records);
+            }else{
+                self::$climate->dump($severe_records);
             }
         } else {
             self::$climate->error("Warning: can't use countErrorsOnConsole() with the browser" . self::$browser);

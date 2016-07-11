@@ -4,7 +4,7 @@
 var tgt=arguments[0],
 	input=document.createElement('input');
 	input.setAttribute("id", "upload");
-	input.setAttribute("value", null);
+	input.setAttribute("value", "");
 	input.type='file';
 		
 	input.style.display = 'block';
@@ -13,19 +13,23 @@ var tgt=arguments[0],
 	input.style.height = '1px';
 	input.style.width = '1px';
 	
-	input.addEventListener('change',function(event){
-  	var dataTransfer={files : input.files};
-	var emit = function(event,target){
-		var evt = document.createEvent('Event');
-		evt.initEvent(event,true,false);
-		evt.dataTransfer=dataTransfer;
-		target.dispatchEvent(evt);
-	};
-	emit('dragenter',tgt);
-	emit('dragover',tgt);
-	emit('drop',tgt);
-	document.body.removeChild(input);
-  }, false);
+	input.addEventListener('change', function(event){
+  	
+		var dataTransfer={files : input.files};
+		
+		var emit = function(event,target){
+			var evt = document.createEvent('Event');
+			// evt.initEvent(event, true, false);
+			evt.initCustomEvent(event, true, true, 0);
+			evt.dataTransfer = dataTransfer;
+			target.dispatchEvent(evt);
+		};
+		emit('dragenter', tgt);
+		emit('dragover', tgt);
+		emit('drop', tgt);
+		
+		document.body.removeChild(input);
+	}, false);
   
 	if (document.body.childElementCount > 0) {
 		document.body.insertBefore(input, document.body.childNodes[0]);
