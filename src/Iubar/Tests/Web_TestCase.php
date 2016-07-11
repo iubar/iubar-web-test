@@ -48,7 +48,7 @@ class Web_TestCase extends Root_TestCase {
 
     const SAFARI = 'safari';
 
-    const JS_DRAG_SCRIPT = 'js/drag_to_upload_2.js';
+    const JS_DRAG_SCRIPT = 'js/drag_to_upload_3.js';
 
     const JS_DELETECOOKIES_SCRIPT = 'js/delete_cookies.js';
 
