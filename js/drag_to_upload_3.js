@@ -5,7 +5,7 @@ var tgt=arguments[0],
 	input=document.createElement('input');
 	input.setAttribute("id", "upload");
 	input.setAttribute("value", "");
-	input.type='file';
+	input.type = 'file';
 		
 	input.style.display = 'block';
 	input.style.opacity = '1';
@@ -15,12 +15,11 @@ var tgt=arguments[0],
 	
 	input.addEventListener('change', function(event){
   	
-		var dataTransfer={files : input.files};
+		var dataTransfer = {files : input.files};
 		
 		var emit = function(event,target){
 			var evt = document.createEvent('Event');
-			// evt.initEvent(event, true, false);
-			evt.initCustomEvent(event, true, true, 0);
+			evt.initEvent(event, true, false);
 			evt.dataTransfer = dataTransfer;
 			target.dispatchEvent(evt);
 		};
