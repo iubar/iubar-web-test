@@ -876,8 +876,8 @@ class Web_TestCase extends Root_TestCase {
             }
             $console_error = count($severe_records);
             
-            if(count($console_error)>0){
-                self::$climate->yellow()->blink()->out("Errors on console: " . count($console_error) . ". Page is " . $wd->getCurrentURL());
+            if($console_error>0){
+                self::$climate->yellow()->blink()->out("Errors on console: " . $console_error . ". Url is: " . $wd->getCurrentURL());
                 // write the console error in log file
                 if (!$this->isTravis()) {
                     $this->dumpConsoleError($severe_records);
