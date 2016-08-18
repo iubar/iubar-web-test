@@ -18,7 +18,8 @@ class RestApi_TestCase extends Root_TestCase {
     
     const CONTENT_TYPE = 'Content-Type';
     
-    
+    protected $client = null;
+        
     /**
      * Handle the RequestException writing his msg
      *
@@ -28,11 +29,6 @@ class RestApi_TestCase extends Root_TestCase {
         echo "REQUEST: " . Psr7\str($e->getRequest());
         echo "ECCEZIONE: " . $e->getMessage() . PHP_EOL;
         $this->fail();
-    }
-    
-    protected function sleep($seconds){
-        self::$climate->info('Waiting ' . $seconds . ' seconds...');
-        sleep($seconds);
     }
     
     /**
@@ -71,7 +67,7 @@ class RestApi_TestCase extends Root_TestCase {
             $this->assertContains(self::APP_JSON_CT, $response->getHeader(self::CONTENT_TYPE)[0]);
             $this->assertEquals(self::HTTP_OK, $response->getStatusCode());
     
-            self::$climate->shout('Response code is: ' . $response->getStatusCode());
+            echo 'Response code is: ' . $response->getStatusCode() . PHP_EOL;
             // Getting data
             $data = json_decode($response->getBody(), true);
         }
