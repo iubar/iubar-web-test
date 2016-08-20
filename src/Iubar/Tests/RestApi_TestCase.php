@@ -4,6 +4,9 @@ namespace Iubar\Tests;
 use GuzzleHttp\Psr7;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Exception\RequestException;
+use GuzzleHttp\Exception\ServerException;
+use GuzzleHttp\Exception\ConnectException;
+use GuzzleHttp\Exception\ClientException;
 
 /**
  * PHPUnit_Framework_TestCase Develop
@@ -12,23 +15,51 @@ use GuzzleHttp\Exception\RequestException;
  */
 class RestApi_TestCase extends Root_TestCase {
 
+    const GET = 'GET';
+    
+    const POST = 'POST';
+    
     const APP_JSON_CT = 'application/json';
     
     const HTTP_OK = 200;
     
     const CONTENT_TYPE = 'Content-Type';
+        
+    const TIMEOUT = 4; // seconds
     
     protected $client = null;
-        
+
+    protected function factoryClient($base_uri){
+        // Base URI is used with relative requests
+        // You can set any number of default request options.
+        $client = new Client([
+            'base_uri' => $base_uri,
+            'http_errors' => true,
+            // 'headers' => ['User-Agent' => "Mozilla/5.0 (Windows NT 5.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2272.101 Safari/537.36"],
+            'timeout' => self::TIMEOUT
+        ]);
+        return $client;
+    }
+    
     /**
      * Handle the RequestException writing his msg
      *
      * @param RequestException $e the exception
      */
     protected function handleException(RequestException $e) {
-        echo "REQUEST: " . Psr7\str($e->getRequest());
-        echo "ECCEZIONE: " . $e->getMessage() . PHP_EOL;
+        $request = $e->getRequest();
+        echo "REQUEST STR: " . Psr7\str($request);
+        if ($e->hasResponse()) {
+            $response = $e->getResponse();
+            echo 'RESPONSE CODE: ' . $response->getStatusCode() . PHP_EOL;
+            echo "RESPONSE STR: " .  Psr7\str($response);            
+        }        
+        echo "EXCEPTION: " . $e->getMessage() . PHP_EOL;
         $this->fail();
+    }
+    
+    protected function sendRequest($method, $partial_uri, $array) {
+        return $this->sendRequest($method, $partial_uri, $array, self::TIMEOUT);
     }
     
     /**
@@ -42,13 +73,22 @@ class RestApi_TestCase extends Root_TestCase {
      */
     protected function sendRequest($method, $partial_uri, $array, $timeout) {
         $response = null;
+        if(!$this->client){
+            throw new \Exception("Client obj is null");
+        }
         try {
             $request = new Request($method, $partial_uri);
             $response = $this->client->send($request, [
                 'timeout' => $timeout,
                 'query' => $array
             ]);
-        } catch (RequestException $e) {
+        } catch (ConnectException $e) { // Is thrown in the event of a networking error. (This exception extends from GuzzleHttp\Exception\RequestException.)
+            $this->handleException($e);
+        } catch (ClientException $e) { // Is thrown for 400 level errors if the http_errors request option is set to true.
+            $this->handleException($e);            
+        } catch (RequestException $e) { // In the event of a networking error (connection timeout, DNS errors, etc.), a GuzzleHttp\Exception\RequestException is thrown.
+            $this->handleException($e);
+        } catch (ServerException $e) { // Is thrown for 500 level errors if the http_errors request option is set to true.
             $this->handleException($e);
         }
         return $response;
@@ -67,9 +107,8 @@ class RestApi_TestCase extends Root_TestCase {
             $this->assertContains(self::APP_JSON_CT, $response->getHeader(self::CONTENT_TYPE)[0]);
             $this->assertEquals(self::HTTP_OK, $response->getStatusCode());
     
-            echo 'Response code is: ' . $response->getStatusCode() . PHP_EOL;
             // Getting data
-            $data = json_decode($response->getBody(), true);
+            $data = json_decode($response->getBody()->getContents(), true); // returns an array
         }
         return $data;
     }
