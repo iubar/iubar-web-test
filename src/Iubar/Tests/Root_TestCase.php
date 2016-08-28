@@ -5,7 +5,7 @@ namespace Iubar\Tests;
  *
  * @author Matteo
  */
-class Root_TestCase extends \PHPUnit_Framework_TestCase {
+abstract class Root_TestCase extends \PHPUnit_Framework_TestCase {
 
     /**
      * Check if the path is a directory and is readable

@@ -25,7 +25,7 @@ use \League\CLImate\CLImate;
  * @see : https://github.com/facebook/php-webdriver/wiki
  * @see : https://docs.travis-ci.com/user/gui-and-headless-browsers/
  */
-class Web_TestCase extends Root_TestCase {
+abstract class Web_TestCase extends Root_TestCase {
 
     const DEBUG = false;
 

@@ -7,13 +7,14 @@ use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Exception\ServerException;
 use GuzzleHttp\Exception\ConnectException;
 use GuzzleHttp\Exception\ClientException;
+use GuzzleHttp\Client;
 
 /**
  * PHPUnit_Framework_TestCase Develop
  *
  * @author Matteo
  */
-class RestApi_TestCase extends Root_TestCase {
+abstract class RestApi_TestCase extends Root_TestCase {
 
     const GET = 'GET';
     
@@ -58,12 +59,8 @@ class RestApi_TestCase extends Root_TestCase {
         $this->fail();
     }
     
-    protected function sendRequest($method, $partial_uri, $array) {
-        return $this->sendRequest($method, $partial_uri, $array, self::TIMEOUT);
-    }
-    
     /**
-     * Send an http request and return the response
+     * Send an http GET request and return the response
      *
      * @param string $method the method
      * @param string $partial_uri the partial uri
@@ -71,13 +68,16 @@ class RestApi_TestCase extends Root_TestCase {
      * @param int $timeout the timeout
      * @return string the response
      */
-    protected function sendRequest($method, $partial_uri, $array, $timeout) {
+    protected function sendGetReq($partial_uri, $array, $timeout=null) {
         $response = null;
+        if(!$timeout){
+            $timeout = self::TIMEOUT;
+        }
         if(!$this->client){
             throw new \Exception("Client obj is null");
         }
         try {
-            $request = new Request($method, $partial_uri);
+            $request = new Request(self::GET, $partial_uri);
             $response = $this->client->send($request, [
                 'timeout' => $timeout,
                 'query' => $array
@@ -103,12 +103,23 @@ class RestApi_TestCase extends Root_TestCase {
     protected function checkResponse($response) {
         $data = null;
         if ($response) {
+            
             // Response
-            $this->assertContains(self::APP_JSON_CT, $response->getHeader(self::CONTENT_TYPE)[0]);
+            // self::$climate->info('Status code: ' . $response->getStatusCode());
+            // self::$climate->info('Content-Type: '  . json_encode($response->getHeader('Content-Type'), JSON_PRETTY_PRINT));
+            // self::$climate->info('Access-Control-Allow-Origin: '  . json_encode($response->getHeader('Access-Control-Allow-Origin'), JSON_PRETTY_PRINT));
+            
+            // Asserzioni
             $this->assertEquals(self::HTTP_OK, $response->getStatusCode());
+            $this->assertContains(self::APP_JSON_CT, $response->getHeader(self::CONTENT_TYPE)[0]);            
     
-            // Getting data
+            // Format the response
             $data = json_decode($response->getBody()->getContents(), true); // returns an array
+            // Warning: call 'getBody()->getContents()' only once !
+            
+            // Print the response
+            // self::$climate->info('Response Body: ' . PHP_EOL . json_encode($data, JSON_PRETTY_PRINT));            
+            
         }
         return $data;
     }
