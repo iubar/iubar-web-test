@@ -79,6 +79,11 @@ abstract class RestApi_TestCase extends Root_TestCase {
         try {
             $request = new Request(self::GET, $partial_uri);
             $response = $this->client->send($request, [
+                'headers' => [
+                                'User-Agent' => 'testing/1.0',
+                                'Accept'     => 'application/json',
+                                'X-Requested-With' => 'XMLHttpRequest' // for Whoops' JsonResponseHandler
+                            ],
                 'timeout' => $timeout,
                 'query' => $array
             ]);
