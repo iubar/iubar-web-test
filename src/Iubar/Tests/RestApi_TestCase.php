@@ -24,6 +24,8 @@ abstract class RestApi_TestCase extends Root_TestCase {
     
     const HTTP_OK = 200;
     
+    const HTTP_BAD_REQUEST = 400;
+    
     const CONTENT_TYPE = 'Content-Type';
         
     const TIMEOUT = 4; // seconds
