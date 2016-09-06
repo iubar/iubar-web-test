@@ -30,6 +30,8 @@ abstract class RestApi_TestCase extends Root_TestCase {
     
     const HTTP_FORBIDDEN = 403;
     
+    const HTTP_METHOD_NOT_ALLOWED = 405;
+    
     const HTTP_NOT_FOUND = 404;
     
     
@@ -44,7 +46,7 @@ abstract class RestApi_TestCase extends Root_TestCase {
         // You can set any number of default request options.
         $client = new Client([
             'base_uri' => $base_uri,
-            'http_errors' => true,
+            'http_errors' => false, // Vedi http://docs.guzzlephp.org/en/latest/request-options.html#http-errors
             // 'headers' => ['User-Agent' => "Mozilla/5.0 (Windows NT 5.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2272.101 Safari/537.36"],
             'timeout' => self::TIMEOUT
         ]);
@@ -87,6 +89,7 @@ abstract class RestApi_TestCase extends Root_TestCase {
         }
         try {
             $request = new Request(self::GET, $partial_uri);
+
             $response = $this->client->send($request, [
                 'headers' => [
                                 'User-Agent' => 'testing/1.0',
