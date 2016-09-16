@@ -39,7 +39,7 @@ abstract class RestApi_TestCase extends Root_TestCase {
         
     const TIMEOUT = 4; // seconds
     
-    protected $client = null;
+    protected static $client = null;
 
     protected static function factoryClient($base_uri){
         // Base URI is used with relative requests
