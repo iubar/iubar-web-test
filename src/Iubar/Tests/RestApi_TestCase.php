@@ -33,8 +33,7 @@ abstract class RestApi_TestCase extends Root_TestCase {
     const HTTP_METHOD_NOT_ALLOWED = 405;
     
     const HTTP_NOT_FOUND = 404;
-    
-    
+        
     const CONTENT_TYPE = 'Content-Type';
         
     const TIMEOUT = 4; // seconds
@@ -84,13 +83,13 @@ abstract class RestApi_TestCase extends Root_TestCase {
         if(!$timeout){
             $timeout = self::TIMEOUT;
         }
-        if(!$this->client){
+        if(!self::$client){
             throw new \Exception("Client obj is null");
         }
         try {
             $request = new Request(self::GET, $partial_uri);
 
-            $response = $this->client->send($request, [
+            $response = self::$client->send($request, [
                 'headers' => [
                                 'User-Agent' => 'testing/1.0',
                                 'Accept'     => 'application/json',
