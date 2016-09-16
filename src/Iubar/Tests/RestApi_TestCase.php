@@ -41,7 +41,7 @@ abstract class RestApi_TestCase extends Root_TestCase {
     
     protected $client = null;
 
-    protected function factoryClient($base_uri){
+    protected static function factoryClient($base_uri){
         // Base URI is used with relative requests
         // You can set any number of default request options.
         $client = new Client([
