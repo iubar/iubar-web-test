@@ -47,7 +47,6 @@ abstract class RestApi_TestCase extends Root_TestCase {
             'base_uri' => $base_uri,
             'http_errors' => false, // Vedi http://docs.guzzlephp.org/en/latest/request-options.html#http-errors
             // 'headers' => ['User-Agent' => "Mozilla/5.0 (Windows NT 5.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2272.101 Safari/537.36"],
-            'verify' => false, // Ignora la verifica dei certificati SSL (obbligatorio per accesso a risorse https)
             'timeout' => self::TIMEOUT
         ]);
         return $client;
@@ -96,8 +95,10 @@ abstract class RestApi_TestCase extends Root_TestCase {
                                 'Accept'     => 'application/json',
                                 'X-Requested-With' => 'XMLHttpRequest' // for Whoops' JsonResponseHandler
                             ],
-                'timeout' => $timeout,
-                'query' => $array
+                'query' => $array,
+                'verify' => false,  // Ignora la verifica dei certificati SSL (obbligatorio per accesso a risorse https)
+                                    // @see: http://docs.guzzlephp.org/en/latest/request-options.html#verify-option
+                'timeout' => $timeout                
             ]);
             
             echo 'Request: ' . PHP_EOL . 'url = ' . $partial_uri . PHP_EOL . 'query: ' . json_encode($array, JSON_PRETTY_PRINT) . PHP_EOL;
