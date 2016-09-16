@@ -99,6 +99,8 @@ abstract class RestApi_TestCase extends Root_TestCase {
                 'timeout' => $timeout,
                 'query' => $array
             ]);
+            
+            echo 'Request: ' . PHP_EOL . 'url = ' . $partial_uri . PHP_EOL . 'query: ' . json_encode($array, JSON_PRETTY_PRINT) . PHP_EOL;
         } catch (ConnectException $e) { // Is thrown in the event of a networking error. (This exception extends from GuzzleHttp\Exception\RequestException.)
             $this->handleException($e);
         } catch (ClientException $e) { // Is thrown for 400 level errors if the http_errors request option is set to true.
@@ -125,14 +127,17 @@ abstract class RestApi_TestCase extends Root_TestCase {
             // self::$climate->info('Status code: ' . $response->getStatusCode());
             // self::$climate->info('Content-Type: '  . json_encode($response->getHeader('Content-Type'), JSON_PRETTY_PRINT));
             // self::$climate->info('Access-Control-Allow-Origin: '  . json_encode($response->getHeader('Access-Control-Allow-Origin'), JSON_PRETTY_PRINT));
+                    
+    
+            $body = $response->getBody()->getContents(); // Warning: call 'getBody()->getContents()' only once ! getContents() returns the remaining contents, so that a second call returns nothing unless you seek the position of the stream with rewind or seek                       
+            echo "Response body: " . PHP_EOL . $body;
             
             // Asserzioni
             $this->assertEquals(self::HTTP_OK, $response->getStatusCode());
-            $this->assertContains(self::APP_JSON_CT, $response->getHeader(self::CONTENT_TYPE)[0]);            
-    
+            $this->assertContains(self::APP_JSON_CT, $response->getHeader(self::CONTENT_TYPE)[0]);
+            
             // Format the response
-            $data = json_decode($response->getBody()->getContents(), true); // returns an array
-            // Warning: call 'getBody()->getContents()' only once !
+            $data = json_decode($body, true); // returns an array
             
             // Print the response
             // self::$climate->info('Response Body: ' . PHP_EOL . json_encode($data, JSON_PRETTY_PRINT));            
