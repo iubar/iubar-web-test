@@ -59,14 +59,14 @@ abstract class RestApi_TestCase extends Root_TestCase {
      */
     protected function handleException(RequestException $e) {
         $request = $e->getRequest();
-        echo "REQUEST STR: " . Psr7\str($request);
+        echo '->REQUEST STR: ' . Psr7\str($request);
         if ($e->hasResponse()) {
             $response = $e->getResponse();
-            echo 'RESPONSE CODE: ' . $response->getStatusCode() . PHP_EOL;
-            echo "RESPONSE STR: " .  Psr7\str($response);            
+            echo '->RESPONSE CODE: ' . $response->getStatusCode() . PHP_EOL;
+            echo '->RESPONSE STR: ' .  Psr7\str($response);            
         }        
-        echo "EXCEPTION: " . $e->getMessage() . PHP_EOL;
-        $this->fail();
+        echo '->EXCEPTION: ' . $e->getMessage() . PHP_EOL;
+        $this->fail('Exception');
     }
     
     /**
