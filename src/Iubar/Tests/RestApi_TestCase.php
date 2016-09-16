@@ -131,13 +131,21 @@ abstract class RestApi_TestCase extends Root_TestCase {
             $body = $response->getBody()->getContents(); // Warning: call 'getBody()->getContents()' only once ! getContents() returns the remaining contents, so that a second call returns nothing unless you seek the position of the stream with rewind or seek                       
             echo "Response body: " . PHP_EOL . $body;
             
-            // Asserzioni
-            $this->assertEquals(self::HTTP_OK, $response->getStatusCode());
-            $this->assertContains(self::APP_JSON_CT, $response->getHeader(self::CONTENT_TYPE)[0]);
-            
             // Format the response
             $data = json_decode($body, true); // returns an array
             
+            $content_type = $response->getHeader(self::CONTENT_TYPE)[0];
+            
+            if($content_type==self::APP_JSON_CT && isset($data['error'])){ // Intercetto un'eccezione nel formato json restituito da Whoops
+                $payload = $data['error'];
+                $message = $payload['message'];
+                $this->fail($message);
+            }else{
+                // Asserzioni
+                $this->assertEquals(self::HTTP_OK, $response->getStatusCode());
+                $this->assertContains(self::APP_JSON_CT, $content_type);
+            }
+                        
             // Print the response
             // self::$climate->info('Response Body: ' . PHP_EOL . json_encode($data, JSON_PRETTY_PRINT));            
             
