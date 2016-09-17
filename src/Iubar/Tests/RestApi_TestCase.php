@@ -38,8 +38,15 @@ abstract class RestApi_TestCase extends Root_TestCase {
         
     const TIMEOUT = 4; // seconds
     
+    // easily output colored text and special formatting
+    protected static $climate = null;
+    
     protected static $client = null;
 
+    protected static function init(){
+        self::$climate = new CLImate();
+    }
+    
     protected static function factoryClient($base_uri){
         // Base URI is used with relative requests
         // You can set any number of default request options.
@@ -50,6 +57,19 @@ abstract class RestApi_TestCase extends Root_TestCase {
             'timeout' => self::TIMEOUT
         ]);
         return $client;
+    }
+    
+    protected function sleep($seconds){
+        self::$climate->info('Waiting ' . $seconds . ' seconds...');
+        sleep($seconds);
+    }
+    
+    protected static function getHost(){
+        $http_host = getenv('HTTP_HOST');
+        if(!$http_host){
+            throw new \Exception('Wrong config'); // in un contesto statico non posso usare $this->fail('Wrong config');
+        }
+        return $http_host;
     }
     
     /**
@@ -116,6 +136,9 @@ abstract class RestApi_TestCase extends Root_TestCase {
     
     /**
      * Check the OK status code and the APP_JSON_CT content type of the response
+     * 
+     * Usage:   $data = $this->checkResponse($response); 
+     *          self::$climate->info('Response Body: ' . PHP_EOL . json_encode($data, JSON_PRETTY_PRINT)); 
      *
      * @param string $response the response
      * @return string the body of the decode response
@@ -129,9 +152,9 @@ abstract class RestApi_TestCase extends Root_TestCase {
             // self::$climate->info('Content-Type: '  . json_encode($response->getHeader('Content-Type'), JSON_PRETTY_PRINT));
             // self::$climate->info('Access-Control-Allow-Origin: '  . json_encode($response->getHeader('Access-Control-Allow-Origin'), JSON_PRETTY_PRINT));
                     
-    
-            $body = $response->getBody()->getContents(); // Warning: call 'getBody()->getContents()' only once ! getContents() returns the remaining contents, so that a second call returns nothing unless you seek the position of the stream with rewind or seek                       
-            echo "Response body: " . PHP_EOL . $body;
+            $body = $response->getBody()->getContents(); // Warning: call 'getBody()->getContents()' only once ! getContents() returns the remaining contents, so that a second call returns nothing unless you seek the position of the stream with rewind or seek
+            
+            $this->printBody($body);
             
             // Format the response
             $data = json_decode($body, true); // returns an array
@@ -146,13 +169,19 @@ abstract class RestApi_TestCase extends Root_TestCase {
                 // Asserzioni
                 $this->assertEquals(self::HTTP_OK, $response->getStatusCode());
                 $this->assertContains(self::APP_JSON_CT, $content_type);
-            }
-                        
-            // Print the response
-            // self::$climate->info('Response Body: ' . PHP_EOL . json_encode($data, JSON_PRETTY_PRINT));            
+            }         
             
         }
         return $data;
+    }
+    
+    private function printBody($body){
+        $max_char = 320;
+        if(strlen($body) > $max_char){
+            $body = substr($body, 0, $max_char) . '...(missing)...';
+        }
+        $json = json_encode($body, JSON_PRETTY_PRINT);
+        self::$climate->info('Response body: ' . PHP_EOL . $body);
     }
     
     
