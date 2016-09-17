@@ -114,7 +114,7 @@ abstract class RestApi_TestCase extends Root_TestCase {
                 'timeout' => $timeout                
             ]);
             
-            self::$climate->comment(PHP_EOL . 'Request: ' . PHP_EOL . '\tUrl:\t' . $partial_uri . PHP_EOL . '\tQuery:\t' . json_encode($array, JSON_PRETTY_PRINT));
+            self::$climate->comment(PHP_EOL . "Request: " . PHP_EOL . "\tUrl:\t" . $partial_uri . PHP_EOL . "\tQuery:\t" . json_encode($array, JSON_PRETTY_PRINT));
         } catch (ConnectException $e) { // Is thrown in the event of a networking error. (This exception extends from GuzzleHttp\Exception\RequestException.)
             $this->handleException($e);
         } catch (ClientException $e) { // Is thrown for 400 level errors if the http_errors request option is set to true.
@@ -157,11 +157,14 @@ abstract class RestApi_TestCase extends Root_TestCase {
             if($content_type==self::APP_JSON_CT && isset($data['error'])){ // Intercetto un'eccezione nel formato json restituito da Whoops
                 $payload = $data['error'];
                 $message = $payload['message'];
-                $this->fail($message);
+                self::$climate->error($message);
+                $this->fail('Failed');
             }else{
                 // Asserzioni
+                self::$climate->info('checking assertions...');
                 $this->assertEquals(self::HTTP_OK, $response->getStatusCode());
                 $this->assertContains(self::APP_JSON_CT, $content_type);
+                self::$climate->info('...ok');
             }         
             
         }
