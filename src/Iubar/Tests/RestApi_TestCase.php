@@ -8,6 +8,7 @@ use GuzzleHttp\Exception\ServerException;
 use GuzzleHttp\Exception\ConnectException;
 use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Client;
+use League\CLImate\CLImate;
 
 /**
  * PHPUnit_Framework_TestCase Develop
