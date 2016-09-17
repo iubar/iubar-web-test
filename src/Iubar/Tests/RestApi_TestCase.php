@@ -8,7 +8,6 @@ use GuzzleHttp\Exception\ServerException;
 use GuzzleHttp\Exception\ConnectException;
 use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Client;
-use League\CLImate\CLImate;
 
 /**
  * PHPUnit_Framework_TestCase Develop
@@ -38,16 +37,9 @@ abstract class RestApi_TestCase extends Root_TestCase {
     const CONTENT_TYPE = 'Content-Type';
         
     const TIMEOUT = 4; // seconds
-    
-    // easily output colored text and special formatting
-    protected static $climate = null;
-    
+      
     protected static $client = null;
 
-    protected static function init(){
-        self::$climate = new CLImate();
-    }
-    
     protected static function factoryClient($base_uri){
         // Base URI is used with relative requests
         // You can set any number of default request options.
@@ -79,14 +71,14 @@ abstract class RestApi_TestCase extends Root_TestCase {
      * @param RequestException $e the exception
      */
     protected function handleException(RequestException $e) {
-        $request = $e->getRequest();
-        echo '->REQUEST STR: ' . Psr7\str($request);
+        $request = $e->getRequest();      
+        self::$climate->comment(PHP_EOL . 'Request: ' . Psr7\str($request));
         if ($e->hasResponse()) {
             $response = $e->getResponse();
-            echo '->RESPONSE CODE: ' . $response->getStatusCode() . PHP_EOL;
-            echo '->RESPONSE STR: ' .  Psr7\str($response);            
+            self::$climate->error('Response code: ' . $response->getStatusCode());
+            self::$climate->error('Response string: ' . PHP_EOL . Psr7\str($response));
         }        
-        echo '->EXCEPTION: ' . $e->getMessage() . PHP_EOL;
+        self::$climate->error('Exception: ' . PHP_EOL . $e->getMessage());
         $this->fail('Exception');
     }
     
@@ -122,7 +114,7 @@ abstract class RestApi_TestCase extends Root_TestCase {
                 'timeout' => $timeout                
             ]);
             
-            echo 'Request: ' . PHP_EOL . 'url = ' . $partial_uri . PHP_EOL . 'query: ' . json_encode($array, JSON_PRETTY_PRINT) . PHP_EOL;
+            self::$climate->comment(PHP_EOL . 'Request: ' . PHP_EOL . '\tUrl:\t' . $partial_uri . PHP_EOL . '\tQuery:\t' . json_encode($array, JSON_PRETTY_PRINT));
         } catch (ConnectException $e) { // Is thrown in the event of a networking error. (This exception extends from GuzzleHttp\Exception\RequestException.)
             $this->handleException($e);
         } catch (ClientException $e) { // Is thrown for 400 level errors if the http_errors request option is set to true.
@@ -179,10 +171,10 @@ abstract class RestApi_TestCase extends Root_TestCase {
     private function printBody($body){
         $max_char = 320;
         if(strlen($body) > $max_char){
-            $body = substr($body, 0, $max_char) . '...(missing)...';
+            $body = substr($body, 0, $max_char) . ' ...<truncated>';
         }
         $json = json_encode($body, JSON_PRETTY_PRINT);
-        self::$climate->info('Response body: ' . PHP_EOL . $body);
+        self::$climate->comment('Response body: ' . PHP_EOL . $body);
     }
     
     

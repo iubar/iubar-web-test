@@ -1,12 +1,22 @@
 <?php
 namespace Iubar\Tests;
 
+use League\CLImate\CLImate;
+
 /**
  *
  * @author Matteo
  */
 abstract class Root_TestCase extends \PHPUnit_Framework_TestCase {
 
+
+    // easily output colored text and special formatting
+    protected static $climate = null;
+    
+    protected static function init(){
+        self::$climate = new CLImate();
+    }
+        
     /**
      * Check if the path is a directory and is readable
      *
@@ -17,10 +27,12 @@ abstract class Root_TestCase extends \PHPUnit_Framework_TestCase {
     protected static function checkPath($path) {
         if (!is_dir($path)) {
             $error = 'Path not found: ' . $path;
+            self::$climate->error(PHP_EOL . 'Exception: ' . $error);
             throw new \Exception($error);            
         }
         if (!is_readable($path)) {
             $error = 'Path not readable: ' . $path;
+            self::$climate->error(PHP_EOL . 'Exception: ' . $error);
             throw new \Exception($error);
         }
         return true;

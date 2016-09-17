@@ -71,9 +71,6 @@ abstract class Web_TestCase extends Root_TestCase {
     protected static $selenium_server_shutdown;
 
     protected static $selenium_session_shutdown;
-    
-    // easily output colored text and special formatting
-    protected static $climate = null;
 
     protected static $files_to_del = array();
 
@@ -117,8 +114,7 @@ abstract class Web_TestCase extends Root_TestCase {
      * Start the WebDriver
      */
     public static function setUpBeforeClass() {
-        self::$climate = new CLImate();
-        
+        self::init();
         self::$browser = getenv('BROWSER');
         
         // Setting the default enviroment variables when not set
