@@ -71,14 +71,17 @@ abstract class RestApi_TestCase extends Root_TestCase {
      * @param RequestException $e the exception
      */
     protected function handleException(RequestException $e) {
+        self::$climate->out(PHP_EOL . '--------------------------------------------' . PHP_EOL);
+        self::$climate->flank('Exception catched');
         $request = $e->getRequest();      
-        self::$climate->comment(PHP_EOL . 'Request: ' . Psr7\str($request));
+        self::$climate->comment(PHP_EOL . 'Request: ' . trim(Psr7\str($request)));
         if ($e->hasResponse()) {
             $response = $e->getResponse();
             self::$climate->error('Response code: ' . $response->getStatusCode());
-            self::$climate->error('Response string: ' . PHP_EOL . Psr7\str($response));
+            self::$climate->error('Response string: ' . PHP_EOL . trim(Psr7\str($response)));
         }        
         self::$climate->error('Exception: ' . PHP_EOL . $e->getMessage());
+        self::$climate->out(PHP_EOL . '--------------------------------------------' . PHP_EOL);
         $this->fail('Exception');
     }
     
