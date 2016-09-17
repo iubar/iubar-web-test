@@ -47,8 +47,10 @@ abstract class Root_TestCase extends \PHPUnit_Framework_TestCase {
     protected static function isPathWritable($path) {
         if (self::checkPath($path) && !is_writable($path)) {
             $error = 'Path not writable: ' . $path;
+            self::$climate->error(PHP_EOL . 'Exception: ' . $error);
             throw new \Exception($error);
         }
+        return true;
     }
 
     /**
@@ -60,10 +62,12 @@ abstract class Root_TestCase extends \PHPUnit_Framework_TestCase {
     protected static function checkFile($file) {
         if (!is_file($file)) {
             $error = 'File not found: ' . $file;
+            self::$climate->error(PHP_EOL . 'Exception: ' . $error);
             throw new \Exception($error);
         }
         if (!is_readable($file)) {
             $error = 'File not readable: ' . $file;
+            self::$climate->error(PHP_EOL . 'Exception: ' . $error);
             throw new \Exception($error);
         }
         return true;
