@@ -71,8 +71,8 @@ abstract class RestApi_TestCase extends Root_TestCase {
      * @param RequestException $e the exception
      */
     protected function handleException(RequestException $e) {
-        self::$climate->out(PHP_EOL . '--------------------------------------------' . PHP_EOL);
-        self::$climate->flank('Exception catched');
+        $this->printSeparator();
+        self::$climate->flank('Http client exception catched...');
         $request = $e->getRequest();      
         self::$climate->comment(PHP_EOL . 'Request: ' . trim(Psr7\str($request)));
         if ($e->hasResponse()) {
@@ -80,8 +80,8 @@ abstract class RestApi_TestCase extends Root_TestCase {
             self::$climate->error('Response code: ' . $response->getStatusCode());
             self::$climate->error('Response string: ' . PHP_EOL . trim(Psr7\str($response)));
         }        
-        self::$climate->error('Exception: ' . PHP_EOL . $e->getMessage());
-        self::$climate->out(PHP_EOL . '--------------------------------------------' . PHP_EOL);
+        self::$climate->error(PHP_EOL . 'Exception message: ' . PHP_EOL . $e->getMessage());
+        $this->printSeparator();
         $this->fail('Exception');
     }
     
@@ -137,9 +137,10 @@ abstract class RestApi_TestCase extends Root_TestCase {
      *          self::$climate->info('Response Body: ' . PHP_EOL . json_encode($data, JSON_PRETTY_PRINT)); 
      *
      * @param string $response the response
+     * @param int $status_code the expected http status code          
      * @return string the body of the decode response
      */
-    protected function checkResponse($response) {
+    protected function checkResponse($response, $expected_status_code = self::HTTP_OK) {
         $data = null;
         if ($response) {
             
@@ -157,21 +158,28 @@ abstract class RestApi_TestCase extends Root_TestCase {
             
             $content_type = $response->getHeader(self::CONTENT_TYPE)[0];
             
-            if($content_type==self::APP_JSON_CT && isset($data['error'])){ // Intercetto un'eccezione nel formato json restituito da Whoops
+            if($content_type==self::APP_JSON_CT && isset($data['error'])){ // Intercetto le eccezioni nel formato json restituito da Whoops e stampo il messaggio di errore contenuto nella risposta json
+                $this->printSeparator();
+                self::$climate->flank('The json returned contains an error message...');
                 $payload = $data['error'];
                 $message = $payload['message'];
                 self::$climate->error($message);
+                $this->printSeparator();
                 $this->fail('Failed');
             }else{
-                // Asserzioni
-                self::$climate->info('checking assertions...');
-                $this->assertEquals(self::HTTP_OK, $response->getStatusCode());
+                // Asserzioni                
+                self::$climate->info('Checking assertions...');                                    
+                $this->assertEquals($expected_status_code, $response->getStatusCode());
                 $this->assertContains(self::APP_JSON_CT, $content_type);
                 self::$climate->info('...ok');
             }         
             
         }
         return $data;
+    }
+
+    private function printSeparator(){
+        self::$climate->out(PHP_EOL . '--------------------------------------------' . PHP_EOL);
     }
     
     private function printBody($body){
@@ -181,6 +189,13 @@ abstract class RestApi_TestCase extends Root_TestCase {
         }
         $json = json_encode($body, JSON_PRETTY_PRINT);
         self::$climate->comment('Response body: ' . PHP_EOL . $body);
+    }
+    
+    private function printHttpHeader($response){
+        foreach ($response->getHeaders() as $name => $values) {
+            $str = $name . ': ' . implode(', ', $values);
+            self::$climate->info($str);
+        }        
     }
     
     
