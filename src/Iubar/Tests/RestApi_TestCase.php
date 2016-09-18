@@ -40,7 +40,13 @@ abstract class RestApi_TestCase extends Root_TestCase {
       
     protected static $client = null;
 
-    protected static function factoryClient($base_uri){
+    protected static function factoryClient($base_uri=null){
+        if(!$base_uri){            
+            $base_uri = self::getHost() . '/';            
+        }
+        self::$climate->comment('factoryClient()');
+        self::$climate->comment ("\thost: " . self::getHost());
+        self::$climate->comment("\tbase url: " . $base_url);
         // Base URI is used with relative requests
         // You can set any number of default request options.
         $client = new Client([
@@ -53,7 +59,7 @@ abstract class RestApi_TestCase extends Root_TestCase {
     }
     
     protected function sleep($seconds){
-        self::$climate->info('Waiting ' . $seconds . ' seconds...');
+        self::$climate->comment('Waiting ' . $seconds . ' seconds...');
         sleep($seconds);
     }
     
@@ -172,10 +178,10 @@ abstract class RestApi_TestCase extends Root_TestCase {
                         
                 
                 // Asserzioni                
-                self::$climate->info('Checking assertions...');                                    
+                self::$climate->comment('Checking assertions...');                                    
                 $this->assertEquals($expected_status_code, $response->getStatusCode());
                 $this->assertContains(self::APP_JSON_CT, $content_type);
-                self::$climate->info('...ok');
+                self::$climate->comment('...ok');
             }         
             
         }
