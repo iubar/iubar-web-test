@@ -45,8 +45,8 @@ abstract class RestApi_TestCase extends Root_TestCase {
             $base_uri = self::getHost() . '/';            
         }
         self::$climate->comment('factoryClient()');
-        self::$climate->comment ("\thost: " . self::getHost());
-        self::$climate->comment("\tbase uri: " . $base_uri);
+        self::$climate->comment ("\tHost:\t\t" . self::getHost());
+        self::$climate->comment("\tBase Uri:\t" . $base_uri);
         // Base URI is used with relative requests
         // You can set any number of default request options.
         $client = new Client([
