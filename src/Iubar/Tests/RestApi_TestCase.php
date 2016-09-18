@@ -143,12 +143,7 @@ abstract class RestApi_TestCase extends Root_TestCase {
     protected function checkResponse($response, $expected_status_code = self::HTTP_OK) {
         $data = null;
         if ($response) {
-            
-            // Response
-            // self::$climate->info('Status code: ' . $response->getStatusCode());
-            // self::$climate->info('Content-Type: '  . json_encode($response->getHeader('Content-Type'), JSON_PRETTY_PRINT));
-            // self::$climate->info('Access-Control-Allow-Origin: '  . json_encode($response->getHeader('Access-Control-Allow-Origin'), JSON_PRETTY_PRINT));
-                    
+                 
             $body = $response->getBody()->getContents(); // Warning: call 'getBody()->getContents()' only once ! getContents() returns the remaining contents, so that a second call returns nothing unless you seek the position of the stream with rewind or seek
             
             $this->printBody($body);
@@ -167,6 +162,15 @@ abstract class RestApi_TestCase extends Root_TestCase {
                 $this->printSeparator();
                 $this->fail('Failed');
             }else{
+                
+                if($response->getStatusCode()!=self::HTTP_OK){
+                // Response
+                self::$climate->comment('Status code: ' . $response->getStatusCode());
+                self::$climate->comment('Content-Type: '  . json_encode($response->getHeader('Content-Type'), JSON_PRETTY_PRINT));
+                // self::$climate->info('Access-Control-Allow-Origin: '  . json_encode($response->getHeader('Access-Control-Allow-Origin'), JSON_PRETTY_PRINT));
+                }
+                        
+                
                 // Asserzioni                
                 self::$climate->info('Checking assertions...');                                    
                 $this->assertEquals($expected_status_code, $response->getStatusCode());
