@@ -17,6 +17,12 @@ class RoboFile extends Tasks {
 
     use IO;
     use Timer;
+
+    private $phpunit_xml_path = null;
+    
+    private $update_vendor = false;
+    
+    private $composer_json_path = null;
     
     private $browser = null;
 
@@ -40,12 +46,6 @@ class RoboFile extends Tasks {
     
     private $batch_mode = true;
 
-    private $update_vendor = false;
-
-    private $phpunit_xml_path = null;
-
-    private $composer_json_path = null;
-
     private $logs_path = null;
 
     private $screenshots_path = null;
@@ -57,18 +57,22 @@ class RoboFile extends Tasks {
         $this->say('Working path: ' . $this->working_path);
     }
 
+    private function composer() {
+        if ($this->update_vendor) {
+            $this->say('Updating vendor...');
+            $this->taskComposerUpdate()
+            ->dir($this->composer_json_path)
+            ->run();
+        }
+    }
+    
     public function run() {
        
         $this->startTimer();        
         $this->say('Initializing...');
         $this->init();
         
-        if ($this->update_vendor) {
-            $this->say('Updating vendor...');
-            $this->taskComposerUpdate()
-                ->dir($this->composer_json_path)
-                ->run();
-        }
+        $this->composer();
         
         $result1 = null;
         if ($this->start_selenium) {
