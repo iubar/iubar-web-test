@@ -53,7 +53,8 @@ abstract class RestApi_TestCase extends Root_TestCase {
             'base_uri' => $base_uri,
             'http_errors' => false, // Vedi http://docs.guzzlephp.org/en/latest/request-options.html#http-errors
             // 'headers' => ['User-Agent' => "Mozilla/5.0 (Windows NT 5.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2272.101 Safari/537.36"],
-            'timeout' => self::TIMEOUT
+            'timeout' => self::TIMEOUT,
+            'verify' => false
         ]);
         return $client;
     }
