@@ -81,14 +81,25 @@ abstract class RestApi_TestCase extends Root_TestCase {
      * @param RequestException $e the exception
      */
     protected function handleException(RequestException $e) {
+        // ConnectException extends RequestException
+        // ...is thrown in the event of a networking error.
+        // ClientException extends BadResponseException which extends RequestException
+        // ...is thrown for 400 level errors
+        // ServerException extends BadResponseException which extends RequestException
+        // ...is thrown for 500 level errors
+        // RequestException
+        // ..is thrown in the event of a networking error (connection timeout, DNS errors, etc.),
+        
         $this->printSeparator();
         self::$climate->flank('Http client exception catched...');
         $request = $e->getRequest();      
         self::$climate->comment(PHP_EOL . 'Request: ' . trim(Psr7\str($request)));
+        // oppure $this->printRequest($request);
         if ($e->hasResponse()) {
             $response = $e->getResponse();
             self::$climate->error('Response code: ' . $response->getStatusCode());
             self::$climate->error('Response string: ' . PHP_EOL . trim(Psr7\str($response)));
+            // oppure $this->printResponse($response);
         }        
         self::$climate->error(PHP_EOL . 'Exception message: ' . PHP_EOL . $e->getMessage());
         $this->printSeparator();
@@ -189,11 +200,11 @@ abstract class RestApi_TestCase extends Root_TestCase {
         return $data;
     }
 
-    private function printSeparator(){
+    protected function printSeparator(){
         self::$climate->out(PHP_EOL . '--------------------------------------------' . PHP_EOL);
     }
     
-    private function printBody($body){
+    protected function printBody($body){
         $max_char = 320;
         if(strlen($body) > $max_char){
             $body = substr($body, 0, $max_char) . ' ...<truncated>';
@@ -202,7 +213,29 @@ abstract class RestApi_TestCase extends Root_TestCase {
         self::$climate->comment('Response body: ' . PHP_EOL . $body);
     }
     
-    private function printHttpHeader($response){
+    protected function printResponse($response){
+        self::$climate->flank('Response');
+        $status_code = $response->getStatusCode();
+        self::$climate->comment('Status Code: ' . $status_code);
+    
+        $reason = $response->getReasonPhrase();
+        self::$climate->comment('Reason: ' . $reason);
+    
+        $header = $response->getHeader('content-type');     // eg: 'application/json; charset=utf8'
+        self::$climate->comment('Headers: ' . json_encode($header, JSON_PRETTY_PRINT));
+    
+        $body = $response->getBody()->getContents(); // Attenzione, se il metodo getContents() è già stato invocato, qui restituisce la stringa vuota
+        self::$climate->comment('Body: ' . $body);
+    }
+    
+    protected function printRequest($request){
+        $body = $request->getBody();
+        $query = $request->getUri()->getQuery();
+        self::$climate->comment('Body: ' . $body);
+        self::$climate->comment('Query: ' . $query);
+    }
+        
+    protected function printHttpHeader($response){
         foreach ($response->getHeaders() as $name => $values) {
             $str = $name . ': ' . implode(', ', $values);
             self::$climate->info($str);
