@@ -44,17 +44,20 @@ abstract class RestApi_TestCase extends Root_TestCase {
         if(!$base_uri){            
             $base_uri = self::getHost() . '/';            
         }
+        
         self::$climate->comment('factoryClient()');
         self::$climate->comment ("\tHost:\t\t" . self::getHost());
         self::$climate->comment("\tBase Uri:\t" . $base_uri);
-        // Base URI is used with relative requests
-        // You can set any number of default request options.
+        
         $client = new Client([
-            'base_uri' => $base_uri,
-            'http_errors' => false, // Vedi http://docs.guzzlephp.org/en/latest/request-options.html#http-errors
-            // 'headers' => ['User-Agent' => "Mozilla/5.0 (Windows NT 5.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2272.101 Safari/537.36"],
+            'base_uri' => $base_uri,    // Base URI is used with relative requests
+            'http_errors' => false,     // Vedi http://docs.guzzlephp.org/en/latest/request-options.html#http-errors
+            // 'headers' => [
+            //    'User-Agent' => "Mozilla/5.0 (Windows NT 5.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2272.101 Safari/537.36"            
+            // ],
             'timeout' => self::TIMEOUT,
-            'verify' => false
+            'verify' => false,          // Ignora la verifica dei certificati SSL (obbligatorio per accesso a risorse https)
+                                        // @see: http://docs.guzzlephp.org/en/latest/request-options.html#verify-option
         ]);
         return $client;
     }
@@ -67,7 +70,7 @@ abstract class RestApi_TestCase extends Root_TestCase {
     protected static function getHost(){
         $http_host = getenv('HTTP_HOST');
         if(!$http_host){
-            throw new \Exception('Wrong config'); // in un contesto statico non posso usare $this->fail('Wrong config');
+            throw new \Exception('Wrong config !'); // in un contesto statico non posso usare $this->fail('Wrong config');
         }
         return $http_host;
     }
@@ -119,8 +122,6 @@ abstract class RestApi_TestCase extends Root_TestCase {
                                 'X-Requested-With' => 'XMLHttpRequest' // for Whoops' JsonResponseHandler
                             ],
                 'query' => $array,
-                'verify' => false,  // Ignora la verifica dei certificati SSL (obbligatorio per accesso a risorse https)
-                                    // @see: http://docs.guzzlephp.org/en/latest/request-options.html#verify-option
                 'timeout' => $timeout                
             ]);
             
@@ -176,7 +177,6 @@ abstract class RestApi_TestCase extends Root_TestCase {
                 self::$climate->comment('Content-Type: '  . json_encode($response->getHeader('Content-Type'), JSON_PRETTY_PRINT));
                 // self::$climate->info('Access-Control-Allow-Origin: '  . json_encode($response->getHeader('Access-Control-Allow-Origin'), JSON_PRETTY_PRINT));
                 }
-                        
                 
                 // Asserzioni                
                 self::$climate->comment('Checking assertions...');                                    
@@ -207,7 +207,6 @@ abstract class RestApi_TestCase extends Root_TestCase {
             $str = $name . ': ' . implode(', ', $values);
             self::$climate->info($str);
         }        
-    }
-    
+    }    
     
 }
