@@ -7,23 +7,14 @@
 namespace Iubar\Build;
 
 use Iubar\Tests\Web_TestCase;
-use League\CLImate\CLImate;
-use Robo\Tasks;
 use Robo\Result;
 use Robo\Common\IO;
-use Robo\Common\Timer;
 
-class RoboFile extends Tasks {
+
+class Selenium_RoboTask extends Root_RoboTask {
 
     use IO;
-    use Timer;
-
-    private $phpunit_xml_path = null;
-    
-    private $update_vendor = false;
-    
-    private $composer_json_path = null;
-    
+        
     private $browser = null;
 
     private $browser_version = null;
@@ -50,29 +41,19 @@ class RoboFile extends Tasks {
 
     private $screenshots_path = null;
 
-    private $working_path = '';
-
-    function __construct($working_path) {
-        $this->working_path = $working_path;
-        $this->say('Working path: ' . $this->working_path);
-    }
-
-    private function composer() {
-        if ($this->update_vendor) {
-            $this->say('Updating vendor...');
-            $this->taskComposerUpdate()
-            ->dir($this->composer_json_path)
-            ->run();
-        }
-    }
     
-    public function run() {
-       
-        $this->startTimer();        
-        $this->say('Initializing...');
-        $this->init();
-        
+    function __construct($working_path) {
+        parent::__construct($working_path);
+    }      
+    
+    public function test() {
+        parent::init();
+        $this->config();
         $this->composer();
+        $this->testSelenium();
+    }
+        
+    private function testSelenium() {
         
         $result1 = null;
         if ($this->start_selenium) {
@@ -83,8 +64,7 @@ class RoboFile extends Tasks {
         if(!$result1 || !$result1->wasSuccessful()){
             $this->yell('Can\'t start Selenium');
         }else{
-            $this->say('Running php unit tests...');
-            $result2 = $this->runPhpunit();
+            $result2 = $this->phpUnit($this->phpunit_xml_file);
                 
             if(!$result2 || !$result2->wasSuccessful()){
                 $this->yell('Done with errors.');                
@@ -95,11 +75,7 @@ class RoboFile extends Tasks {
             $this->afterTestRun();
          
         }
-        
-        $this->stopTimer();
-        
-        $this->say('Total execution time: ' . $this->getExecutionTime());
-        
+                
         if(!$this->batch_mode){
             $dummy = $this->ask('Press Enter to quit:');
         }
@@ -134,19 +110,6 @@ class RoboFile extends Tasks {
                 $this->browser($dump_file);
             }              
         }        
-    }
-
-    /**
-     *
-     * @param unknown $b
-     * @return string
-     */
-    protected function formatBoolean($b) {
-        if ($b) {
-            return 'true';
-        } else {
-            return 'false';
-        }
     }
     
     /**
@@ -213,17 +176,11 @@ class RoboFile extends Tasks {
         }
     }
 
+    
     /**
      */
-    private function init() {
-        $ini_file = 'config.ini';
-        if (!is_file($ini_file)) {            
-            $error = 'File not found: ' . $ini_file;
-            $this->yell($error);
-            exit(1);
-        }
-        $ini_array = parse_ini_file($ini_file);
-        
+    private function config() {
+                        
         if (!getenv('BROWSER')) {
             $this->browser = $ini_array['browser'];
             putenv('BROWSER=' . $this->browser);
@@ -233,7 +190,7 @@ class RoboFile extends Tasks {
             $this->browser_version = $ini_array['browser_version'][$this->browser];
             putenv('BROWSER_VERSION=' . $this->browser_version);
         }
-        
+
         if (!getenv('OS_VERSION')) {
             $this->os_version = $ini_array['os_version'][$this->browser];
             putenv('OS_VERSION=' . $this->os_version);
@@ -272,9 +229,9 @@ class RoboFile extends Tasks {
             }
             if (!$app_password) {
                 if(!$this->batch_mode){
-                    $app_password = $this->ask('Please enter password for ' . $app_username . ':'); // Change in askHidden();
+                    $app_password = $this->ask('Please enter password for ' . $app_username . ':'); // TODO: Change ask() with askHidden();
                                                                                                     // FIXME: https://github.com/consolidation-org/Robo/issues/376
-                                                                                                    // see https://github.com/symfony/console/blob/master/Resources/bin/hiddeninput.exe
+                                                                                                    // @see https://github.com/symfony/console/blob/master/Resources/bin/hiddeninput.exe
                 }else{
                     $error = 'Enviroment var not set: APP_PASSWORD';
                     $this->yell($error);
@@ -283,18 +240,12 @@ class RoboFile extends Tasks {
             }
             putenv('APP_PASSWORD=' . $app_password);
         }
-        
+
         $this->logs_path = $ini_array['logs_path'];
         $this->putEnv('LOGS_PATH', $this->logs_path);
         
         $this->screenshots_path = $ini_array['screenshots_path'];
-        $this->putEnv('SCREENSHOTS_PATH', $this->screenshots_path);
-        
-        $this->composer_json_path = $ini_array['composer_json_path'];
-        $this->putEnv('COMPOSER_JSON_PATH', $this->composer_json_path);
-        
-        $this->phpunit_xml_path = $ini_array['phpunit_xml_path'];
-        $this->putEnv('PHPUNIT_XML_PATH', $this->phpunit_xml_path);
+        $this->putEnv('SCREENSHOTS_PATH', $this->screenshots_path);               
         
         // Non uso variabili d'ambiente per i seguenti valori, perchè riguardano solo il testing con Robo
         $this->selenium_path = $ini_array['selenium_path'];
@@ -304,30 +255,41 @@ class RoboFile extends Tasks {
         $this->edge_driver = $this->selenium_path . DIRECTORY_SEPARATOR . $ini_array['edge_driver'];
         $this->phantomjs_binary = $this->selenium_path . DIRECTORY_SEPARATOR . $ini_array['phantomjs_binary'];
         
-        $this->update_vendor = $this->parseBoolean($ini_array['update_vendor']);
         $this->open_slideshow = $this->parseBoolean($ini_array['open_slideshow']);
         $this->open_dump_file = $this->parseBoolean($ini_array['open_dumpfile']);
         $this->batch_mode = $this->parseBoolean($ini_array['batch_mode']);
-        $this->start_selenium = $this->parseBoolean($ini_array['start_selenium']);
+        $this->start_selenium = $this->parseBoolean($ini_array['start_selenium']);                                                  
         
-        $this->say('--------------------------------------------------');
-        $this->say('Enviroment variables');
-        $this->say('--------------------------------------------------');
-        $this->say('PHPUNIT_XML_PATH: ' . getenv('PHPUNIT_XML_PATH'));
-        $this->say('COMPOSER_JSON_PATH: ' . getenv('COMPOSER_JSON_PATH'));        
-        $this->say('Specific Robo (only) settings');
-        $this->say('selenium path: ' . $this->selenium_path);
-        $this->say('selenium jar: ' . $this->selenium_jar);
-        $this->say('chrome driver: ' . $this->chrome_driver);
-        $this->say('geko driver: ' . $this->geko_driver);
-        $this->say('edge driver: ' . $this->edge_driver);
-        $this->say('phantomjs binary: ' . $this->phantomjs_binary);
-        $this->say('update vendor: ' . $this->formatBoolean($this->update_vendor));
-        $this->say('open slideshow: ' . $this->formatBoolean($this->open_slideshow));      
-        $this->say('open dumpfile: ' . $this->formatBoolean($this->open_dump_file));
-        $this->say('batch mode: ' . $this->formatBoolean($this->batch_mode));
-        $this->say('start selenium: ' . $this->formatBoolean($this->start_selenium));
+        $this->env_cfg['BROWSER'] = getenv('BROWSER');
+        $this->env_cfg['BROWSER_VERSION'] = getenv('BROWSER_VERSION');
+        $this->env_cfg['OS_VERSION'] = getenv('OS_VERSION');
+        $this->env_cfg['SELENIUM_SERVER'] = getenv('SELENIUM_SERVER');
+        $this->env_cfg['SELENIUM_PORT'] = getenv('SELENIUM_PORT');
+        $this->env_cfg['PHANTOMJS_BINARY'] = getenv('APP_USERNAME');
+        $this->env_cfg['APP_HOST'] = getenv('APP_HOST');
+        $this->env_cfg['APP_USERNAME'] = getenv('APP_USERNAME');
+        $this->env_cfg['APP_PASSWORD'] = $this->formatPassword(getenv('APP_PASSWORD')) ;        
+        $this->env_cfg['LOGS_PATH'] = getenv('LOGS_PATH');
+        $this->env_cfg['SCREENSHOTS_PATH'] = getenv('SCREENSHOTS_PATH');
         
+        $this->other_cfg['batch mode'] = $this->formatBoolean($this->batch_mode);
+        $this->other_cfg['selenium path'] =  $this->selenium_path;
+        $this->other_cfg['selenium jar'] = $this->selenium_jar;
+        $this->other_cfg['chrome driver'] = $this->chrome_driver;
+        $this->other_cfg['geko driver'] = $this->geko_driver;
+        $this->other_cfg['edge driver'] = $this->edge_driver;
+        $this->other_cfg['phantomjs binary'] = $this->phantomjs_binary;
+        $this->other_cfg['start selenium'] = $this->formatBoolean($this->start_selenium);
+        $this->other_cfg['open slideshow'] = $this->formatBoolean($this->open_slideshow);
+        $this->other_cfg['open dumpfile'] = $this->formatBoolean($this->open_dump_file);
+        
+        
+        
+        
+        
+        
+        $this->printConfig();
+                
     }
     
     private function startSeleniumAllDrivers() {
@@ -422,7 +384,6 @@ class RoboFile extends Tasks {
      */
     private function browser($url, $default=false) {
         $browser = self::$browser;
-        
         if (self::$browser == self::PHANTOMJS) {
             $default = true;
         } else {
@@ -430,9 +391,7 @@ class RoboFile extends Tasks {
                 $default = true;
             }
         }
-
         $this->say('Opening browser at: ' . $url);
-
         if (self::isWindows()){
             if(!$default){
                 $cmd = "start \"\" \"$browser $url\""; // opening the same browser that was choosen for the test 
@@ -444,41 +403,10 @@ class RoboFile extends Tasks {
             $this->yell($error);
             exit(1);
         }
-        
         $this->say('Command is : ' . $cmd);
         self::startShell($cmd);
         return $output;
     }
 
-    /**
-     */
-    private function runPhpunit() {
-        $result = null;
-        $cfg_file = $this->phpunit_xml_path . DIRECTORY_SEPARATOR . 'phpunit.xml';
-        $this->checkFile($cfg_file);
-        // runs PHPUnit tests
-        $result = $this->taskPHPUnit('phpunit')->configFile($cfg_file)->run();
-        return $result;
-    }
-
-    /**
-     *
-     * @param unknown $file
-     * @return \Exception|boolean
-     */
-    private function checkFile($file) {
-        // In alternativa si potrebbe utilizzare https://github.com/consolidation-org/Robo/blob/master/src/Common/ResourceExistenceChecker.php
-        if (!is_file($file)) {
-            $error = 'File not found: ' . $file;
-            $this->yell($error);
-            exit(1);
-        }
-        if (!is_readable($file)) {
-            $error = 'File not found: ' . $file;
-            $this->yell($error);
-            exit(1);
-        }
-        return true;
-    }
 
 }
