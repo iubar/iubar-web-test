@@ -49,6 +49,7 @@ class Selenium_RoboTask extends Root_RoboTask {
     public function test() {
         parent::init();
         $this->config();
+        $this->printConfig();
         $this->composer();
         $this->testSelenium();
     }
@@ -179,53 +180,53 @@ class Selenium_RoboTask extends Root_RoboTask {
     
     /**
      */
-    private function config() {
+    protected function config() {
                         
         if (!getenv('BROWSER')) {
-            $this->browser = $ini_array['browser'];
+            $this->browser = $this->ini_array['browser'];
             putenv('BROWSER=' . $this->browser);
         }
         
         if (!getenv('BROWSER_VERSION')) {
-            $this->browser_version = $ini_array['browser_version'][$this->browser];
+            $this->browser_version = $this->ini_array['browser_version'][$this->browser];
             putenv('BROWSER_VERSION=' . $this->browser_version);
         }
 
         if (!getenv('OS_VERSION')) {
-            $this->os_version = $ini_array['os_version'][$this->browser];
+            $this->os_version = $this->ini_array['os_version'][$this->browser];
             putenv('OS_VERSION=' . $this->os_version);
         }
         
         if (!getenv('SELENIUM_SERVER')) {
-            $this->selenium_server = $ini_array['selenium_server'];
+            $this->selenium_server = $this->ini_array['selenium_server'];
             putenv('SELENIUM_SERVER=' . $this->selenium_server);
         }
         
         if (!getenv('SELENIUM_PORT')) {
-            $this->selenium_port = $ini_array['selenium_port'];
+            $this->selenium_port = $this->ini_array['selenium_port'];
             putenv('SELENIUM_PORT=' . $this->selenium_port);
         }
         
         if (!getenv('PHANTOMJS_BINARY')) {
-            $this->phantomjs_binary = $ini_array['selenium_path'] . DIRECTORY_SEPARATOR . $ini_array['phantomjs_binary'];
+            $this->phantomjs_binary = $this->ini_array['selenium_path'] . DIRECTORY_SEPARATOR . $this->ini_array['phantomjs_binary'];
             putenv('PHANTOMJS_BINARY=' . $this->phantomjs_binary);
         }
         
         if (!getenv('APP_HOST')) {
-            $app_host = $ini_array['app_host'];
+            $app_host = $this->ini_array['app_host'];
             putenv('APP_HOST=' . $app_host);
         }
         
         if (!getenv('APP_USERNAME')) {
-            $app_username = $ini_array['app_username'];
+            $app_username = $this->ini_array['app_username'];
             putenv('APP_USERNAME=' . $app_username);
         }
         
         // Posso specificare la password a) come variabile d'ambiente, b) nel file .ini, c) in modo interattivo da console
         
         if (!getenv('APP_PASSWORD')) {
-            if (isset($ini_array['app_password'])) {
-                $app_password = $ini_array['app_password'];
+            if (isset($this->ini_array['app_password'])) {
+                $app_password = $this->ini_array['app_password'];
             }
             if (!$app_password) {
                 if(!$this->batch_mode){
@@ -241,24 +242,24 @@ class Selenium_RoboTask extends Root_RoboTask {
             putenv('APP_PASSWORD=' . $app_password);
         }
 
-        $this->logs_path = $ini_array['logs_path'];
+        $this->logs_path = $this->ini_array['logs_path'];
         $this->putEnv('LOGS_PATH', $this->logs_path);
         
-        $this->screenshots_path = $ini_array['screenshots_path'];
+        $this->screenshots_path = $this->ini_array['screenshots_path'];
         $this->putEnv('SCREENSHOTS_PATH', $this->screenshots_path);               
         
         // Non uso variabili d'ambiente per i seguenti valori, perchè riguardano solo il testing con Robo
-        $this->selenium_path = $ini_array['selenium_path'];
-        $this->selenium_jar = $this->selenium_path . DIRECTORY_SEPARATOR . $ini_array['selenium_jar'];
-        $this->chrome_driver = $this->selenium_path . DIRECTORY_SEPARATOR . $ini_array['chrome_driver'];
-        $this->geko_driver = $this->selenium_path . DIRECTORY_SEPARATOR . $ini_array['geko_driver'];
-        $this->edge_driver = $this->selenium_path . DIRECTORY_SEPARATOR . $ini_array['edge_driver'];
-        $this->phantomjs_binary = $this->selenium_path . DIRECTORY_SEPARATOR . $ini_array['phantomjs_binary'];
+        $this->selenium_path = $this->ini_array['selenium_path'];
+        $this->selenium_jar = $this->selenium_path . DIRECTORY_SEPARATOR . $this->ini_array['selenium_jar'];
+        $this->chrome_driver = $this->selenium_path . DIRECTORY_SEPARATOR . $this->ini_array['chrome_driver'];
+        $this->geko_driver = $this->selenium_path . DIRECTORY_SEPARATOR . $this->ini_array['geko_driver'];
+        $this->edge_driver = $this->selenium_path . DIRECTORY_SEPARATOR . $this->ini_array['edge_driver'];
+        $this->phantomjs_binary = $this->selenium_path . DIRECTORY_SEPARATOR . $this->ini_array['phantomjs_binary'];
         
-        $this->open_slideshow = $this->parseBoolean($ini_array['open_slideshow']);
-        $this->open_dump_file = $this->parseBoolean($ini_array['open_dumpfile']);
-        $this->batch_mode = $this->parseBoolean($ini_array['batch_mode']);
-        $this->start_selenium = $this->parseBoolean($ini_array['start_selenium']);                                                  
+        $this->open_slideshow = $this->parseBoolean($this->ini_array['open_slideshow']);
+        $this->open_dump_file = $this->parseBoolean($this->ini_array['open_dumpfile']);
+        $this->batch_mode = $this->parseBoolean($this->ini_array['batch_mode']);
+        $this->start_selenium = $this->parseBoolean($this->ini_array['start_selenium']);                                                  
         
         $this->env_cfg['BROWSER'] = getenv('BROWSER');
         $this->env_cfg['BROWSER_VERSION'] = getenv('BROWSER_VERSION');
@@ -282,13 +283,6 @@ class Selenium_RoboTask extends Root_RoboTask {
         $this->other_cfg['start selenium'] = $this->formatBoolean($this->start_selenium);
         $this->other_cfg['open slideshow'] = $this->formatBoolean($this->open_slideshow);
         $this->other_cfg['open dumpfile'] = $this->formatBoolean($this->open_dump_file);
-        
-        
-        
-        
-        
-        
-        $this->printConfig();
                 
     }
     

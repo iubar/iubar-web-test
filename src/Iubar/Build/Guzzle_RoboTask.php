@@ -16,6 +16,7 @@ class Guzzle_RoboTask extends Root_RoboTask {
     public function test(){
         parent::init();
         $this->config();
+        $this->printConfig();
         $this->composer();
         $this->phpUnit($this->phpunit_xml_file);
     }

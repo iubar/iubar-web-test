@@ -22,6 +22,8 @@ class Root_RoboTask extends \Robo\Tasks {
     
     protected $composer_json_path = null;
     
+    protected $ini_array = array();
+    
     function __construct($working_path) {
         $this->working_path = $working_path;
         $this->other_cfg['working path'] = $this->working_path;
@@ -90,19 +92,18 @@ class Root_RoboTask extends \Robo\Tasks {
     private function readConfig($ini_file){
         $this->say('Reading config file: ' . $ini_file);
         $this->checkFile($ini_file);
-        $ini_array = parse_ini_file($ini_file);
+        $this->ini_array = parse_ini_file($ini_file);
                 
-        $this->update_vendor = $ini_array['update_vendor'];
-        $this->composer_json_path = $ini_array['composer_json_path'];        
-        $this->phpunit_xml_file = $ini_array['phpunit_xml_file'];
+        $this->update_vendor = $this->ini_array['update_vendor'];
+        $this->composer_json_path = $this->ini_array['composer_json_path'];        
+        $this->phpunit_xml_file = $this->ini_array['phpunit_xml_file'];
         putenv('PHPUNIT_XML_FILE=' . $this->phpunit_xml_file);
         
         
         $this->env_cfg['PHPUNIT_XML_FILE'] = getenv('PHPUNIT_XML_FILE');
         $this->other_cfg['update vendor'] = $this->formatBoolean($this->update_vendor);
         $this->other_cfg['composer_json_path'] = getenv('composer_json_path');
-                
-        return $ini_array;
+
     }
     
     protected function printConfig(){
@@ -124,7 +125,7 @@ class Root_RoboTask extends \Robo\Tasks {
     protected function init(){
         $this->say('Initializing...');
         $this->startTimer();
-        $ini_array = $this->readConfig('config.ini');               
+        $this->readConfig('config.ini');               
     }
     
     /**
