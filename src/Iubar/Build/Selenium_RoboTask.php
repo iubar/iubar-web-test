@@ -77,9 +77,11 @@ class Selenium_RoboTask extends Root_RoboTask {
          
         }
                 
-        if(!$this->batch_mode){
-            $dummy = $this->ask('Press Enter to quit:');
-        }
+        // if($this->batch_mode){
+        //    $dummy = $this->ask('Press Enter to quit:');
+        //}        
+        
+        
         
     }
     
@@ -89,9 +91,13 @@ class Selenium_RoboTask extends Root_RoboTask {
             // echo 'Shutting down Selenium...' . PHP_EOL;
             // $this->stopSelenium();        
         }        
+        
+        
+        $screenshots_count = getenv('SCREENSHOTS_COUNT');
+        $this->yell("Screnshots taken: " . $screenshots_count);
+        $this->say("Screnshots path: " . $this->screenshots_path);
         if(!$this->batch_mode){
-            // Screenshots
-            $screenshots_count = getenv('SCREENSHOTS_COUNT');
+            // Screenshots            
             if ($this->open_slideshow && $screenshots_count) {
                 $confirmed = $this->confirm('Do you want to see the slideshow ?');
                 if ($confirmed) {
