@@ -28,8 +28,9 @@ class Root_RoboTask extends \Robo\Tasks {
     }
     
     function __destruct() {
+        $this->say("Destroying Root_RoboTask class...");
         $this->stopTimer();
-        $this->say("Destroying Root_RoboTask class.");
+        $this->say('Total execution time: ' . $this->getExecutionTime());        
     }        
     
     /**
@@ -124,12 +125,6 @@ class Root_RoboTask extends \Robo\Tasks {
         $this->say('Initializing...');
         $this->startTimer();
         $ini_array = $this->readConfig('config.ini');               
-    }
-    
-    
-    private function stopTimer(){
-        parent::stopTimer();    
-        $this->say('Total execution time: ' . $this->getExecutionTime());
     }
     
     /**
