@@ -4,7 +4,7 @@ namespace Iubar\Build;
 
 use Robo\Common\Timer;
 
-class Root_RoboTask extends Robo\Tasks {
+class Root_RoboTask extends \Robo\Tasks {
     
     use Timer;
     
