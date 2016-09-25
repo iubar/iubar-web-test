@@ -9,7 +9,7 @@ namespace Iubar\Build;
 
 class Guzzle_RoboTask extends Root_RoboTask {
     
-    function __construct($working_path) {
+    public function __construct($working_path) {
         parent::__construct($working_path);
     }
     

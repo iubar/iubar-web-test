@@ -24,12 +24,12 @@ class Root_RoboTask extends \Robo\Tasks {
     
     protected $ini_array = array();
     
-    function __construct($working_path) {
+    public function __construct($working_path) {
         $this->working_path = $working_path;
         $this->other_cfg['working path'] = $this->working_path;
     }
     
-    function __destruct() {
+    public function __destruct() {
         $this->say("Destroying Root_RoboTask class...");
         $this->stopTimer();
         $this->say('Total execution time: ' . $this->getExecutionTime());        

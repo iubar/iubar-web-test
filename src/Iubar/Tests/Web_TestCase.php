@@ -349,9 +349,9 @@ abstract class Web_TestCase extends Root_TestCase {
         
         $dumpfile_count = count(self::$dump_files);
         if ($dumpfile_count) {
-            $first_dumpfile = self::$dump_files[0];
-            self::$climate->comment('putenv DUMP_FILE=' . $first_dumpfile);
-            putenv("DUMP_FILE=" . $first_dumpfile);
+            $json = json_encode(self::$dump_files);
+            self::$climate->comment('putenv DUMP_FILES=' . $json);
+            putenv("DUMP_FILES=" . $json);
         }
         
         // delete all temp files
@@ -426,6 +426,7 @@ abstract class Web_TestCase extends Root_TestCase {
      * @return string the output command
      */
     protected static function startShell($cmd) {
+        self::$climate->comment('Command is : ' . $cmd);
         $output = shell_exec($cmd);
         return $output;
     }
@@ -452,12 +453,10 @@ abstract class Web_TestCase extends Root_TestCase {
                 $cmd = "start \"\" $url"; // opening the default system browser
             }
         }else{
-            $error = 'TODO: linux os not supported';
+            $error = 'Warning: Linux Os not supported';
             self::$climate->error($error);
             exit(1);
         }
-        
-        self::$climate->comment('Command is : ' . $cmd);
         self::startShell($cmd);
     }
 
@@ -470,11 +469,10 @@ abstract class Web_TestCase extends Root_TestCase {
             $cmd = "start \"\" \"$file\"";
             self::$climate->info('Command is : ' . $cmd);
         }else{
-            $error = 'TODO: linux os not supported';
+            $error = 'Warning: Linux Os not supported';
             self::$climate->error($error);
             exit(1);
         }
-        self::$climate->comment('Command is : ' . $cmd);
         self::startShell($cmd);        
     }
 

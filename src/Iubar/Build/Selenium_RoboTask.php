@@ -42,7 +42,7 @@ class Selenium_RoboTask extends Root_RoboTask {
     private $screenshots_path = null;
 
     
-    function __construct($working_path) {
+    public function __construct($working_path) {
         parent::__construct($working_path);
     }      
     
@@ -75,13 +75,7 @@ class Selenium_RoboTask extends Root_RoboTask {
             
             $this->afterTestRun();
          
-        }
-                
-        // if($this->batch_mode){
-        //    $dummy = $this->ask('Press Enter to quit:');
-        //}        
-        
-        
+        } 
         
     }
     
@@ -94,14 +88,15 @@ class Selenium_RoboTask extends Root_RoboTask {
         
         
         $screenshots_count = getenv('SCREENSHOTS_COUNT');
-        $this->yell("Screnshots taken: " . $screenshots_count);
-        $this->say("Screnshots path: " . $this->screenshots_path);
+        $this->yell("Screnshots taken: " . $screenshots_count);        
+        if($screenshots_count){
+            $this->say("Screnshots path: " . $this->screenshots_path);
+        }
         if(!$this->batch_mode){
             // Screenshots            
             if ($this->open_slideshow && $screenshots_count) {
                 $confirmed = $this->confirm('Do you want to see the slideshow ?');
                 if ($confirmed) {
-                    $this->say('Screenshots taken: ' . $screenshots_count);
                     $host = 'localhost';
                     $port = '8000';
                     $this->say("Running slideshow on local php integrated webserver at $host:$port...");
@@ -111,11 +106,17 @@ class Selenium_RoboTask extends Root_RoboTask {
                 }
             }
             // Console output
-            $dump_file = getenv('DUMP_FILE');
-            if ($this->open_dump_file && $dump_file) {
-                $this->say('Opening the last console dump: ' . $dump_file);
-                $this->browser($dump_file);
-            }              
+            $json_dump_files = getenv('DUMP_FILES');
+            $dump_files = array();
+            if($json_dump_files){
+                $dump_files = json_decode($json_dump_files);
+            }
+            $this->yell("Console dumps: " . count($dump_files));                        
+            if ($this->open_dump_file) {                                              
+                foreach ($dump_files as $filename){
+                    $this->browser($filename);
+                }
+            }
         }        
     }
     
@@ -295,18 +296,16 @@ class Selenium_RoboTask extends Root_RoboTask {
     private function startSeleniumAllDrivers() {
         $result = null;
         $cmd = $this->getSeleniumAllCmd();
-        $this->say('Selenium cmd: ' . $cmd);
         // launches Selenium server
-        $result = $this->taskExec($cmd)->background()->run();
+        $result = $this->taskExec($cmd)->background()->printed(true)->run();
         return $result;
     }
     
     private function startSelenium() {
         $result = null;
         $cmd = $this->getSeleniumCmd();               
-        $this->say('Selenium cmd: ' . $cmd);
         // launches Selenium server
-        $result = $this->taskExec($cmd)->background()->run();
+        $result = $this->taskExec($cmd)->background()->printed(true)->run();
         return $result;
     }
 
@@ -354,7 +353,7 @@ class Selenium_RoboTask extends Root_RoboTask {
                 $cmd = $cmd_prefix . ' -Dphantomjs.ghostdriver.cli.args=[\'--loglevel=DEBUG\'] -Dphantomjs.cli.args=[\'--debug=true --webdrive --loglevel=DEBUG --webdriver-logfile=' . $phantomjs_log_file . '\'] -Dphantomjs.binary.path=' . $this->phantomjs_binary;
                 break;
             default:
-                $error = 'Browser ' . $this->browser . ' not supported';
+                $error = 'The browser ' . $this->browser . ' is not supported';
                 $this->yell($error);
                 exit(1);
         }
@@ -392,6 +391,7 @@ class Selenium_RoboTask extends Root_RoboTask {
             }
         }
         $this->say('Opening browser at: ' . $url);
+        $cmd = null;
         if (self::isWindows()){
             if(!$default){
                 $cmd = "start \"\" \"$browser $url\""; // opening the same browser that was choosen for the test 
@@ -399,13 +399,13 @@ class Selenium_RoboTask extends Root_RoboTask {
                 $cmd = "start \"\" $url"; // opening the default system browser
             }
         }else{
-            $error = 'TODO: Linux Os not yet supported'; // FIXME: 
+            $error = 'Warning: Linux Os not yet supported'; // FIXME: 
             $this->yell($error);
-            exit(1);
         }
-        $this->say('Command is : ' . $cmd);
-        self::startShell($cmd);
-        return $output;
+        if($cmd){
+            $this->taskExec($cmd)->arg('')->printed(true)->run();
+        }
+        return true;
     }
 
 
