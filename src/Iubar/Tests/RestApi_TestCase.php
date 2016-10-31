@@ -209,7 +209,7 @@ abstract class RestApi_TestCase extends Root_TestCase {
         if(strlen($body) > $max_char){
             $body = substr($body, 0, $max_char) . ' ...<truncated>';
         }
-        $json = json_encode($body, JSON_PRETTY_PRINT);
+        // $json = json_encode($body, JSON_PRETTY_PRINT);
         self::$climate->comment('Response body: ' . PHP_EOL . $body);
     }
     
