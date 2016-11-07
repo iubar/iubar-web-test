@@ -231,7 +231,7 @@ abstract class Web_TestCase extends Root_TestCase {
                 // see: https://github.com/SeleniumHQ/selenium/wiki/DesiredCapabilities#safari-specific
                 break;
             default:
-				$error = "Browser '" . self::$browser . "' not supported. (you should set the BROWSER global var with a supported browser name)";
+		$error = "Browser '" . self::$browser . "' not supported. (you should set the BROWSER global var with a supported browser name)";
                 self::$climate->error($error);
                 $this->fail($error);
         }
@@ -284,8 +284,9 @@ abstract class Web_TestCase extends Root_TestCase {
         try {
             self::$webDriver = RemoteWebDriver::create($server, $capabilities, $connection_timeout_in_ms, $request_timeout_in_ms); // This is the default
         } catch (\Exception $e) {
-			$error = self::$climate->error($error);
-            $this->fail($error);
+		$error = "Exception: " . $e->getMessage();
+		$error = self::$climate->error($error);
+        	$this->fail($error);
         }
         
         // set some timeouts
@@ -455,7 +456,7 @@ abstract class Web_TestCase extends Root_TestCase {
         }else{
             $error = 'TODO: linux os not supported';
             self::$climate->error($error);
-            throw new \PHPUnitException(error);
+            throw new \PHPUnitException($error);
         }
         
         self::$climate->comment('Command is : ' . $cmd);
@@ -473,7 +474,7 @@ abstract class Web_TestCase extends Root_TestCase {
         }else{
             $error = 'TODO: linux os not supported';
             self::$climate->error($error);
-            throw new \PHPUnitException(error);
+            throw new \PHPUnitException($error);
         }
         self::$climate->comment('Command is : ' . $cmd);
         self::startShell($cmd);        
@@ -957,7 +958,7 @@ abstract class Web_TestCase extends Root_TestCase {
             if (!file_exists($save_as)) {
                 $error = 'Error saving the screenshot file: ' . $save_as;
                 self::$climate->error($error);
-                throw new \PHPUnitException(error);
+                throw new \PHPUnitException($error);
             }
             self::$screenshots[] = $save_as;
         }
