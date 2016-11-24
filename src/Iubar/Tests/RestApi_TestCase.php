@@ -126,6 +126,8 @@ abstract class RestApi_TestCase extends Root_TestCase {
         try {
             $request = new Request(self::GET, $partial_uri);
 
+            self::$climate->comment(PHP_EOL . "Request: " . PHP_EOL . "\tUrl:\t" . $partial_uri . PHP_EOL . "\tQuery:\t" . json_encode($array, JSON_PRETTY_PRINT));
+            
             $response = self::$client->send($request, [
                 'headers' => [
                                 'User-Agent' => 'testing/1.0',
@@ -135,8 +137,7 @@ abstract class RestApi_TestCase extends Root_TestCase {
                 'query' => $array,
                 'timeout' => $timeout                
             ]);
-            
-            self::$climate->comment(PHP_EOL . "Request: " . PHP_EOL . "\tUrl:\t" . $partial_uri . PHP_EOL . "\tQuery:\t" . json_encode($array, JSON_PRETTY_PRINT));
+                        
         } catch (ConnectException $e) { // Is thrown in the event of a networking error. (This exception extends from GuzzleHttp\Exception\RequestException.)
             $this->handleException($e);
         } catch (ClientException $e) { // Is thrown for 400 level errors if the http_errors request option is set to true.
