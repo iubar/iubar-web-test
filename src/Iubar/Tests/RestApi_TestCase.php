@@ -60,7 +60,7 @@ abstract class RestApi_TestCase extends Root_TestCase {
             // 'headers' => [
             //    'User-Agent' => "Mozilla/5.0 (Windows NT 5.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2272.101 Safari/537.36"            
             // ],
-//             'timeout' => self::TIMEOUT, Fonte di errori ?
+            'timeout' => self::TIMEOUT, // defaut timeout for all requests
             'verify' => false,          // Ignora la verifica dei certificati SSL (obbligatorio per accesso a risorse https)
                                         // @see: http://docs.guzzlephp.org/en/latest/request-options.html#verify-option
         ]);
