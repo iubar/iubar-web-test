@@ -36,7 +36,7 @@ abstract class RestApi_TestCase extends Root_TestCase {
         
     const CONTENT_TYPE = 'Content-Type';
         
-    const TIMEOUT = 4; // seconds
+    const TIMEOUT = 6; // seconds
       
     protected static $client = null;
 
