@@ -13,9 +13,14 @@ use GuzzleHttp\Client;
  * PHPUnit_Framework_TestCase Develop
  *
  * @author Matteo
+ * 
+ * #see https://curl.haxx.se/libcurl/c/libcurl-errors.html
+ * 
  */
 abstract class RestApi_TestCase extends Root_TestCase {
 
+    const VERSION = '1.0';
+    
     const GET = 'GET';
     
     const POST = 'POST';
@@ -95,12 +100,16 @@ abstract class RestApi_TestCase extends Root_TestCase {
         $client_config = self::$client->getConfig();
         if($client_config && is_array($client_config)){
             self::$climate->out('Client config');
-            foreach ($client_config as $key=>$value){
-                if(is_array($value)){
-                    self::$climate->out($key . ':');
-                    print_r($value);
-                }else{
-                    self::$climate->out($key . "\t" . $value);
+            foreach ($client_config as $key=>$value){                
+                if($key=='handler'){
+                    self::$climate->out($key . "\t" . $value->__toString());
+                }else{                
+                    if(is_array($value)){
+                        self::$climate->out($key . ':');
+                        print_r($value);
+                    }else{
+                        self::$climate->out($key . "\t" . $value);
+                    }
                 }
             }
         }
@@ -143,7 +152,7 @@ abstract class RestApi_TestCase extends Root_TestCase {
             
             $response = self::$client->send($request, [
                 'headers' => [
-                                'User-Agent' => 'testing/1.0',
+                                'User-Agent' => 'restapi_testcase/' . self::VERSION,
                                 'Accept'     => 'application/json',
                                 'X-Requested-With' => 'XMLHttpRequest' // for Whoops' JsonResponseHandler
                             ],
