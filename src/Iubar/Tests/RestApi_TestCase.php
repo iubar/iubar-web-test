@@ -96,7 +96,12 @@ abstract class RestApi_TestCase extends Root_TestCase {
         if($client_config && is_array($client_config)){
             self::$climate->out('Client config');
             foreach ($client_config as $key=>$value){
-                self::$climate->out($key . "\t" . $value);
+                if(is_array($value)){
+                    self::$climate->out($key . ':');
+                    print_r($value);
+                }else{
+                    self::$climate->out($key . "\t" . $value);
+                }
             }
         }
         
