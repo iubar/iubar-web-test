@@ -54,17 +54,28 @@ abstract class RestApi_TestCase extends Root_TestCase {
         self::$climate->comment ("\tHost:\t\t" . self::getHost());
         self::$climate->comment("\tBase Uri:\t" . $base_uri);
         
+        $userAgent = "Mozilla/5.0 (Windows NT 5.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2272.101 Safari/537.36";
         $client = new Client([
             'base_uri' => $base_uri,    // Base URI is used with relative requests
-            'http_errors' => false,     // Vedi http://docs.guzzlephp.org/en/latest/request-options.html#http-errors
+            'http_errors' => false,     // Set to false to disable throwing exceptions on an HTTP protocol errors (i.e., 4xx and 5xx responses). 
+                                        // Vedi http://docs.guzzlephp.org/en/latest/request-options.html#http-errors
             // 'headers' => [
-            //    'User-Agent' => "Mozilla/5.0 (Windows NT 5.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2272.101 Safari/537.36"            
+            //    'User-Agent' => $userAgent            
             // ],
             'timeout' => self::TIMEOUT, // defaut timeout for all requests
             'verify' => false,          // Ignora la verifica dei certificati SSL (obbligatorio per accesso a risorse https)
                                         // @see: http://docs.guzzlephp.org/en/latest/request-options.html#verify-option
+                                                    
+//             "debug"      => true,
+//             "curl"        => [
+//                 CURLOPT_TIMEOUT => 0,
+//                 CURLOPT_TIMEOUT_MS => 0,
+//                 CURLOPT_CONNECTTIMEOUT => 0,
+//             ]
+            
         ]);
-        return $client;
+        return $client;       
+        
     }
     
     protected function sleep($seconds){
