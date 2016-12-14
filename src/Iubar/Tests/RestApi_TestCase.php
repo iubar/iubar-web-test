@@ -36,7 +36,7 @@ abstract class RestApi_TestCase extends Root_TestCase {
         
     const CONTENT_TYPE = 'Content-Type';
         
-    const TIMEOUT = 10; // seconds
+    const TIMEOUT = 6; // seconds
       
     protected static $client = null;
 
@@ -92,6 +92,14 @@ abstract class RestApi_TestCase extends Root_TestCase {
         
         $this->printSeparator();
         self::$climate->flank('Http client exception catched...');
+        $client_config = self::$client->getConfig();
+        if($client_config && is_array($client_config)){
+            self::$climate->out('Client config');
+            foreach ($client_config as $key=>$value){
+                self::$climate->out($key . "\t" . $value);
+            }
+        }
+        
         $request = $e->getRequest();      
         self::$climate->comment(PHP_EOL . 'Request: ' . trim(Psr7\str($request)));
         // oppure $this->printRequest($request);
@@ -115,7 +123,7 @@ abstract class RestApi_TestCase extends Root_TestCase {
      * @param int $timeout the timeout
      * @return string the response
      */
-    protected function sendGetReq($partial_uri, $array, $timeout=null) {
+    protected function sendGetReq($partial_uri, array $array, $timeout=null) {
         $response = null;
         if(!$timeout){
             $timeout = self::TIMEOUT;
