@@ -505,9 +505,9 @@ abstract class Web_TestCase extends Root_TestCase {
     /**
      * This method is called when a test method did not execute successfully
      *
-     * @param \Exception $e the exception
+     * @param $e
      */
-    public function onNotSuccessfulTest(\Exception $e) {
+    public function onNotSuccessfulTest($e) {
         // reduced the error message
         $msg = $this->formatErrorMsg($e);
         self::$climate->error("EXCEPTION: " . $msg);
