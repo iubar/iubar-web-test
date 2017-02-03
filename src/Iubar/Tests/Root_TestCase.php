@@ -1,13 +1,14 @@
 <?php
 namespace Iubar\Tests;
 
+use PHPUnit\Framework\TestCase;
 use League\CLImate\CLImate;
 
 /**
  *
  * @author Matteo
  */
-abstract class Root_TestCase extends \PHPUnit_Framework_TestCase {
+abstract class Root_TestCase extends TestCase {
 
 
     // easily output colored text and special formatting
