@@ -318,8 +318,8 @@ class Selenium_RoboTask extends Root_RoboTask {
         $this->checkFile($this->chrome_driver);
         $this->checkFile($this->geko_driver);
         $this->checkFile($this->phantomjs_binary);
-        $cmd .= ' -Dwebdriver.chrome.driver=' . $this->chrome_driver . ' -Dwebdriver.gecko.driver=' . $this->geko_driver . ' -Dphantomjs.binary.path=' . $this->phantomjs_binary;
-        $cmd .= ' ' . $this->selenium_jar;
+        $cmd = $cmd . ' -Dwebdriver.chrome.driver=' . $this->chrome_driver . ' -Dwebdriver.gecko.driver=' . $this->geko_driver . ' -Dphantomjs.binary.path=' . $this->phantomjs_binary;
+        $cmd = $cmd . ' ' . $this->selenium_jar;
         return $cmd;
     }
     
