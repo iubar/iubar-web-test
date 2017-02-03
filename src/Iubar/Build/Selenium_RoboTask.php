@@ -318,31 +318,29 @@ class Selenium_RoboTask extends Root_RoboTask {
         $this->checkFile($this->chrome_driver);
         $this->checkFile($this->geko_driver);
         $this->checkFile($this->phantomjs_binary);
-        $cmd = $cmd . ' -Dwebdriver.chrome.driver=' . $this->chrome_driver . ' -Dwebdriver.gecko.driver=' . $this->geko_driver . ' -Dphantomjs.binary.path=' . $this->phantomjs_binary;
-        $cmd = $cmd . ' ' . $this->selenium_jar;
+        $cmd .= ' -Dwebdriver.chrome.driver=' . $this->chrome_driver . ' -Dwebdriver.gecko.driver=' . $this->geko_driver . ' -Dphantomjs.binary.path=' . $this->phantomjs_binary;
+        $cmd .= ' ' . $this->selenium_jar;
         return $cmd;
     }
     
     private function getSeleniumCmd(){
-        $cmd = null;
-        $this->checkFile($this->selenium_jar);
-        $cmd_prefix = 'java -jar ' . $this->selenium_jar;
+        $cmd = 'java -jar';
+        $this->checkFile($this->selenium_jar);        
         switch ($this->browser) {
             case Web_TestCase::CHROME:
                 $this->checkFile($this->chrome_driver);
-                $cmd = $cmd_prefix . ' -Dwebdriver.chrome.driver=' . $this->chrome_driver;
+                $cmd .= ' -Dwebdriver.chrome.driver=' . $this->chrome_driver;
                 break;
             case Web_TestCase::MARIONETTE:
                 $this->checkFile($this->geko_driver);
                 // per scegliere eseguibile: ' -Dwebdriver.firefox.bin=' . '\'C:/Program Files (x86)/Firefox Developer Edition/firefox.exe\'';
-                $cmd = $cmd_prefix . ' -Dwebdriver.gecko.driver=' . $this->geko_driver;
+                $cmd .= ' -Dwebdriver.gecko.driver=' . $this->geko_driver;
                 break;
-            case Web_TestCase::FIREFOX:
-        
-                $cmd = $cmd_prefix . '';
+            case Web_TestCase::FIREFOX:        
+                // nothing to do
                 break;
             case Web_TestCase::SAFARI:
-                $cmd = $cmd_prefix . ''; // SafariDriver now requires manual installation of the extension prior to automation.
+                // SafariDriver now requires manual installation of the extension prior to automation.
                 // (So I think no driver is required)
                 // see https://github.com/SeleniumHQ/selenium/wiki/SafariDriver
                 break;
@@ -353,13 +351,14 @@ class Selenium_RoboTask extends Root_RoboTask {
                 // OK:
                 // $cmd = $cmd_prefix . ' -Dphantomjs.ghostdriver.cli.args=[\'--loglevel=DEBUG\'] -Dphantomjs.binary.path=' . $this->phantomjs_binary;
                 // FIXME: non scrive il file di log:
-                $cmd = $cmd_prefix . ' -Dphantomjs.ghostdriver.cli.args=[\'--loglevel=DEBUG\'] -Dphantomjs.cli.args=[\'--debug=true --webdrive --loglevel=DEBUG --webdriver-logfile=' . $phantomjs_log_file . '\'] -Dphantomjs.binary.path=' . $this->phantomjs_binary;
+                $cmd .= ' -Dphantomjs.ghostdriver.cli.args=[\'--loglevel=DEBUG\'] -Dphantomjs.cli.args=[\'--debug=true --webdrive --loglevel=DEBUG --webdriver-logfile=' . $phantomjs_log_file . '\'] -Dphantomjs.binary.path=' . $this->phantomjs_binary;
                 break;
             default:
                 $error = 'The browser ' . $this->browser . ' is not supported';
                 $this->yell($error);
                 exit(1);
         }
+        $cmd .=  ' ' . $this->selenium_jar; 
         return $cmd;
     }
 
