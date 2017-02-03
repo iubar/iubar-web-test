@@ -15,6 +15,7 @@ use \League\CLImate\CLImate;
  * @author Matteo
  * @global env BROWSER
  * @global env SELENIUM_SERVER
+ * @global env SELENIUM_PORT 
  * @global env SCREENSHOTS_PATH
  * @global env APP_HOST
  * @global env APP_USERNAME
@@ -373,6 +374,7 @@ abstract class Web_TestCase extends Root_TestCase {
         $padding->label('LOGS_PATH: ')->result(getenv("LOGS_PATH"));
         $padding->label('SCREENSHOTS_PATH: ')->result(getenv("SCREENSHOTS_PATH"));
         $padding->label('SELENIUM SERVER: ')->result(getenv("SELENIUM_SERVER"));
+        $padding->label('SELENIUM_PORT: ')->result(getenv("SELENIUM_PORT"));
         $padding->label('BROWSER: ')->result(getenv("BROWSER"));
         $padding->label('BROWSER VERSION: ')->result(getenv("BROWSER_VERSION"));
         $padding->label('OS VERSION: ')->result(getenv("OS_VERSION"));
