@@ -8,7 +8,7 @@
         "guzzle/guzzle" : "*",
         "league/climate" : "*",
         "digitalnature/php-ref": "*",
-        "phpunit/phpunit": "^6.0"
+        "phpunit/phpunit": "^5.7"
     },
      
     "autoload": {
