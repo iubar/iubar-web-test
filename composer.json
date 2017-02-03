@@ -5,9 +5,10 @@
     "require" : {
         "php": ">=5.5.0",
         "facebook/webdriver" : "*",
-        "guzzlehttp/guzzle" : "*",
+        "guzzle/guzzle" : "*",
         "league/climate" : "*",
-        "digitalnature/php-ref": "*"
+        "digitalnature/php-ref": "*",
+        "phpunit/phpunit": "^4.8"
     },
      
     "autoload": {

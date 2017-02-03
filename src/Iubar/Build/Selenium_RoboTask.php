@@ -188,10 +188,11 @@ class Selenium_RoboTask extends Root_RoboTask {
     /**
      */
     protected function config() {
-                        
         if (!getenv('BROWSER')) {
             $this->browser = $this->ini_array['browser'];
             putenv('BROWSER=' . $this->browser);
+        }else{
+            $this->browser = getenv('BROWSER');
         }
         
         if (!getenv('BROWSER_VERSION')) {
@@ -296,7 +297,8 @@ class Selenium_RoboTask extends Root_RoboTask {
     private function startSeleniumAllDrivers() {
         $result = null;
         $cmd = $this->getSeleniumAllCmd();
-        // launches Selenium server
+        $this->say('Cmd is: ' . $cmd);
+        // launches Selenium server        
         $result = $this->taskExec($cmd)->background()->printed(true)->run();
         return $result;
     }
