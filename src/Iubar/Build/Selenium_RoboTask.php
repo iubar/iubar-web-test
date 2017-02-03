@@ -314,11 +314,12 @@ class Selenium_RoboTask extends Root_RoboTask {
     private function getSeleniumAllCmd(){
         $cmd = null;
         $this->checkFile($this->selenium_jar);
-        $cmd_prefix = 'java -jar ' . $this->selenium_jar;        
+        $cmd = 'java -jar';        
         $this->checkFile($this->chrome_driver);
         $this->checkFile($this->geko_driver);
         $this->checkFile($this->phantomjs_binary);
-        $cmd = $cmd_prefix . ' -Dwebdriver.chrome.driver=' . $this->chrome_driver . ' -Dwebdriver.gecko.driver=' . $this->geko_driver . ' -Dphantomjs.binary.path=' . $this->phantomjs_binary;
+        $cmd .= ' -Dwebdriver.chrome.driver=' . $this->chrome_driver . ' -Dwebdriver.gecko.driver=' . $this->geko_driver . ' -Dphantomjs.binary.path=' . $this->phantomjs_binary;
+        $cmd .= ' ' . $this->selenium_jar;
         return $cmd;
     }
     
