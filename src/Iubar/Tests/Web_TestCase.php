@@ -1066,6 +1066,37 @@ abstract class Web_TestCase extends Root_TestCase {
         $script = file_get_contents($js_file);
         return $script;
     }
+    
+    /**
+     * Write into the respective field
+     *
+     * @param string $id the id of the elem
+     * @param string $sendKey what do you wanna write in the elem
+     */
+    protected function fillField($id, $sendKey) {
+        $wd = $this->getWd();
+        $this->waitForId($id); // Wait until the element is visible
+        $elem = $wd->findElement(WebDriverBy::id($id));
+        $elem->sendKeys($sendKey);
+        $this->assertNotNull($elem);
+        $this->assertContains($expected_title, $elem->getText());
+    }
+        
+    /**
+     * Take a temporary directory
+     *
+     * @return string the temporary directory
+     */
+    protected function getTmpDir() {
+        $tmp_dir = sys_get_temp_dir();
+        if ($this->isTravis()) {
+            $tmp_dir = __DIR__;
+        }
+        if (!is_writable($tmp_dir)) {
+            $this->fail("Temp dir not writable: " . $tmp_dir);
+        }
+        return $tmp_dir;
+    }    
         
     
 }
