@@ -44,14 +44,31 @@ abstract class RestApi_TestCase extends Root_TestCase {
     const TIMEOUT = 4; // seconds
       
     protected static $client = null;
+    protected static $host = null;
 
-    protected static function factoryClient($base_uri=null){
+    protected static function getHost(){
+    	if(!self::$host){
+    		throw new \Exception('Missing host config !'); // in un contesto statico non posso usare $this->fail('Wrong config');
+    	}
+    	return self::$host;
+    }
+    
+    protected static function factoryClient($host, $base_uri=null){
+
+    	if(isset(getenv('HTTP_HOST'))){
+    		self::$host = getenv('HTTP_HOST');
+    	}else if($host){
+    		self::$host = $host;
+    	}else{
+    		die('Host non specificato');
+    	}
+    	    	
         if(!$base_uri){            
-            $base_uri = self::getHost() . '/';            
+        	$base_uri = self::$host . '/';            
         }
         
         self::$climate->comment('factoryClient()');
-        self::$climate->comment ("\tHost:\t\t" . self::getHost());
+        self::$climate->comment ("\tHost:\t\t" . self::$host);
         self::$climate->comment("\tBase Uri:\t" . $base_uri);
         
         $userAgent = "Mozilla/5.0 (Windows NT 5.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2272.101 Safari/537.36";
@@ -81,14 +98,6 @@ abstract class RestApi_TestCase extends Root_TestCase {
     protected function sleep($seconds){
         self::$climate->comment('Waiting ' . $seconds . ' seconds...');
         sleep($seconds);
-    }
-    
-    protected static function getHost(){
-        $http_host = getenv('HTTP_HOST');
-        if(!$http_host){
-            throw new \Exception('Wrong config !'); // in un contesto statico non posso usare $this->fail('Wrong config');
-        }
-        return $http_host;
     }
     
     /**
@@ -138,11 +147,12 @@ abstract class RestApi_TestCase extends Root_TestCase {
         }        
         self::$climate->error(PHP_EOL . 'Exception message: ' . PHP_EOL . $e->getMessage());
         $this->printSeparator();
-        $this->fail('Exception');
+        $this->fail('Failed beacause an exception was raised.');
     }
     
     /**
      * Send an http GET request and return the response
+     *     
      *
      * @param string $method the method
      * @param string $partial_uri the partial uri

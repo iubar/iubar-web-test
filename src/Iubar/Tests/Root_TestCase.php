@@ -17,6 +17,7 @@ abstract class Root_TestCase extends TestCase {
     protected static function init(){
         self::$climate = new CLImate();
     }
+  
         
     /**
      * Check if the path is a directory and is readable
