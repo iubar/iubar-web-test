@@ -55,7 +55,7 @@ abstract class RestApi_TestCase extends Root_TestCase {
     
     protected static function factoryClient($host, $base_uri=null){
 
-    	if(isset(getenv('HTTP_HOST'))){
+    	if(getenv('HTTP_HOST')){
     		self::$host = getenv('HTTP_HOST');
     	}else if($host){
     		self::$host = $host;
