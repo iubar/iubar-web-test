@@ -225,15 +225,16 @@ abstract class Web_TestCase extends Root_TestCase {
                 if (self::isWindows()) {
                     $error = 'Can\'t test with Safari on Windows Os';
                     self::$climate->error($error);
-                    exit(1);                    
+                    $this->fail($error);                   
                 }
                 $capabilities = DesiredCapabilities::safari();
                 // DOESN'T WORK: $capabilities->setCapability('options', array("cleanSession"=>"true"));
                 // see: https://github.com/SeleniumHQ/selenium/wiki/DesiredCapabilities#safari-specific
                 break;
             default:
-                self::$climate->error("Browser '" . self::$browser . "' not supported. (you should set the BROWSER global var with a supported browser name)");
-                exit(1);
+		$error = "Browser '" . self::$browser . "' not supported. (you should set the BROWSER global var with a supported browser name)";
+                self::$climate->error($error);
+                $this->fail($error);
         }
         
         if (self::$browser_version) {
@@ -284,8 +285,9 @@ abstract class Web_TestCase extends Root_TestCase {
         try {
             self::$webDriver = RemoteWebDriver::create($server, $capabilities, $connection_timeout_in_ms, $request_timeout_in_ms); // This is the default
         } catch (\Exception $e) {
-            self::$climate->error("Exception: " . $e->getMessage());
-            exit(1);
+		$error = "Exception: " . $e->getMessage();
+		$error = self::$climate->error($error);
+        	$this->fail($error);
         }
         
         // set some timeouts
@@ -457,7 +459,7 @@ abstract class Web_TestCase extends Root_TestCase {
         }else{
             $error = 'Warning: Linux Os not supported';
             self::$climate->error($error);
-            exit(1);
+            throw new \PHPUnitException($error);
         }
         self::startShell($cmd);
     }
@@ -473,7 +475,7 @@ abstract class Web_TestCase extends Root_TestCase {
         }else{
             $error = 'Warning: Linux Os not supported';
             self::$climate->error($error);
-            exit(1);
+            throw new \PHPUnitException($error);
         }
         self::startShell($cmd);        
     }
@@ -956,7 +958,7 @@ abstract class Web_TestCase extends Root_TestCase {
             if (!file_exists($save_as)) {
                 $error = 'Error saving the screenshot file: ' . $save_as;
                 self::$climate->error($error);
-                exit(1); 
+                throw new \PHPUnitException($error);
             }
             self::$screenshots[] = $save_as;
         }
