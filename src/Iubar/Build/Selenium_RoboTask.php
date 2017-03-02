@@ -314,6 +314,7 @@ class Selenium_RoboTask extends Root_RoboTask {
     private function getSeleniumAllCmd(){
         $cmd = null;
         $this->checkFile($this->selenium_jar);
+        // https://github.com/SeleniumHQ/selenium/issues/2571 for the command
         $cmd = 'java -jar';        
         $this->checkFile($this->chrome_driver);
         $this->checkFile($this->geko_driver);
@@ -325,6 +326,7 @@ class Selenium_RoboTask extends Root_RoboTask {
     
     private function getSeleniumCmd(){
         $cmd = 'java -jar';
+         // https://github.com/SeleniumHQ/selenium/issues/2571 for the command
         $this->checkFile($this->selenium_jar);        
         switch ($this->browser) {
             case Web_TestCase::CHROME:
