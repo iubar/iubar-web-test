@@ -6,19 +6,17 @@
  */
 namespace Iubar\Build;
 
-
 class Guzzle_RoboTask extends Root_RoboTask {
-    
-    public function __construct($working_path) {
-        parent::__construct($working_path);
-    }
-    
-    public function test($type='local-dev'){
-        parent::init();
-        $this->config($type);
-        $this->printConfig();
-        $this->composer();
-        $this->phpUnit($this->phpunit_xml_file);
-    }
-    
+
+	public function __construct($working_path) {
+		parent::__construct($working_path);
+	}
+
+	public function test($type = 'local-dev') {
+		parent::init();
+		$this->config($type);
+		$this->printConfig();
+		$this->composer();
+		$this->phpUnit($this->phpunit_xml_file);
+	}
 }
