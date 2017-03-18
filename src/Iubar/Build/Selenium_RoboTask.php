@@ -7,13 +7,17 @@
 namespace Iubar\Build;
 
 use Iubar\Tests\Web_TestCase;
-use Robo\Common\IO;
 use Robo\Result;
 use Robo\ResultData;
+use Robo\Common\IO;
 
 class Selenium_RoboTask extends Root_RoboTask {
 
 	use IO;
+
+	const EXIT_ERROR = 1;
+
+	const EXIT_OK = 0;
 
 	private $browser = null;
 
@@ -129,6 +133,7 @@ class Selenium_RoboTask extends Root_RoboTask {
 	}
 
 	/**
+	 * From Selenium 3.x it works only if it's runnning in "node" mode
 	 */
 	private function stopSelenium() {
 		$url = 'http://' . $this->selenium_server . '/selenium-server/driver/?cmd=shutDownSeleniumServer';
@@ -136,6 +141,7 @@ class Selenium_RoboTask extends Root_RoboTask {
 	}
 
 	/**
+	 * It doesn't work
 	 */
 	private function closeSeleniumSession() {
 		$url = 'http://' . $this->selenium_server . '/selenium-server/driver/?cmd=shutDown';
@@ -311,12 +317,12 @@ class Selenium_RoboTask extends Root_RoboTask {
 
 	private function getSeleniumAllCmd() {
 		$cmd = null;
-		$this->checkFile($this->selenium_jar);
+		$this->checkFile($this->selenium_jar, true);
 		// https://github.com/SeleniumHQ/selenium/issues/2571 for the command
 		$cmd = 'java -jar';
-		$this->checkFile($this->chrome_driver);
-		$this->checkFile($this->geko_driver);
-		$this->checkFile($this->phantomjs_binary);
+		$this->checkFile($this->chrome_driver, true);
+		$this->checkFile($this->geko_driver, true);
+		$this->checkFile($this->phantomjs_binary, true);
 		$cmd .= ' -Dwebdriver.chrome.driver=' . $this->chrome_driver . ' -Dwebdriver.gecko.driver=' . $this->geko_driver . ' -Dphantomjs.binary.path=' . $this->phantomjs_binary;
 		$cmd .= ' ' . $this->selenium_jar;
 		return $cmd;
@@ -325,14 +331,14 @@ class Selenium_RoboTask extends Root_RoboTask {
 	private function getSeleniumCmd() {
 		$cmd = 'java -jar';
 		// https://github.com/SeleniumHQ/selenium/issues/2571 for the command
-		$this->checkFile($this->selenium_jar);
+		$this->checkFile($this->selenium_jar, true);
 		switch ($this->browser) {
 			case Web_TestCase::CHROME:
-				$this->checkFile($this->chrome_driver);
+				$this->checkFile($this->chrome_driver, true);
 				$cmd .= ' -Dwebdriver.chrome.driver=' . $this->chrome_driver;
 				break;
 			case Web_TestCase::MARIONETTE:
-				$this->checkFile($this->geko_driver);
+				$this->checkFile($this->geko_driver, true);
 				// per scegliere eseguibile: ' -Dwebdriver.firefox.bin=' . '\'C:/Program Files (x86)/Firefox Developer Edition/firefox.exe\'';
 				$cmd .= ' -Dwebdriver.gecko.driver=' . $this->geko_driver;
 				break;
@@ -345,7 +351,7 @@ class Selenium_RoboTask extends Root_RoboTask {
 				// see https://github.com/SeleniumHQ/selenium/wiki/SafariDriver
 				break;
 			case Web_TestCase::PHANTOMJS:
-				$this->checkFile($this->phantomjs_binary);
+				$this->checkFile($this->phantomjs_binary, true);
 				$phantomjs_log_file = realpath($this->logs_path) . DIRECTORY_SEPARATOR . 'phantomjsdriver.log';
 				// see: https://github.com/detro/ghostdriver
 				// OK:
