@@ -129,6 +129,7 @@ fabric.properties
 ### Sonar ###
 #Sonar generated dir
 /.sonar/
+/.scannerwork/
 
 # End of https://www.gitignore.io/api/eclipse,phpstorm,composer,sonar
 
