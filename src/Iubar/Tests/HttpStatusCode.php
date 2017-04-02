@@ -4,9 +4,9 @@ namespace Iubar\Tests;
 
 /** HTTP status codes */
 
-class HttpStatusCode extends SplEnum {
+class HttpStatusCode {
     const __default = self::OK;
-    
+
     const SWITCHING_PROTOCOLS = 101;
     const OK = 200;
     const CREATED = 201;
