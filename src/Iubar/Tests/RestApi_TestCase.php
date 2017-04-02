@@ -118,25 +118,6 @@ abstract class RestApi_TestCase extends Root_TestCase {
         $this->printSeparator();
         self::$climate->flank('Http client exception catched...');
 
-// TODO: BLOCCO COMMENTATO DA CANCELLARE
-	     //    FIXME:
-//         $client_config = self::$client->getConfig();
-//         if($client_config && is_array($client_config)){
-//             self::$climate->out('Client config');
-//             foreach ($client_config as $key=>$value){
-//                 if($key=='handler'){
-//                     self::$climate->out($key . "\t" . $value->__toString());
-//                 }else{
-//                     if(is_array($value)){
-//                         self::$climate->out($key . ':');
-//                         print_r($value);
-//                     }else{
-//                         self::$climate->out($key . "\t" . $value);
-//                     }
-//                 }
-//             }
-//         }
-
         $request = $e->getRequest();
         self::$climate->comment(PHP_EOL . 'Request: ' . trim(Psr7\str($request)));
         // oppure $this->printRequest($request);
@@ -148,7 +129,6 @@ abstract class RestApi_TestCase extends Root_TestCase {
         }
         self::$climate->error(PHP_EOL . 'Exception message: ' . PHP_EOL . $e->getMessage());
         $this->printSeparator();
-        $this->fail('Failed beacause an exception was raised.');
     }
 
     /**
@@ -186,12 +166,16 @@ abstract class RestApi_TestCase extends Root_TestCase {
 
         } catch (ConnectException $e) { // Is thrown in the event of a networking error. (This exception extends from GuzzleHttp\Exception\RequestException.)
             $this->handleException($e);
+            $this->fail('Failed beacause an ConnectException was raised.');
         } catch (ClientException $e) { // Is thrown for 400 level errors if the http_errors request option is set to true.
             $this->handleException($e);
+            $this->fail('Failed beacause an ClientException was raised.');
         } catch (RequestException $e) { // In the event of a networking error (connection timeout, DNS errors, etc.), a GuzzleHttp\Exception\RequestException is thrown.
             $this->handleException($e);
+            $this->fail('Failed beacause an RequestException was raised.');
         } catch (ServerException $e) { // Is thrown for 500 level errors if the http_errors request option is set to true.
             $this->handleException($e);
+            $this->fail('Failed beacause an ServerException was raised.');
         }
         return $response;
     }
