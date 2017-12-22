@@ -57,7 +57,7 @@ class SimpleSafeRestApi_TestCase extends RestApi_TestCase {
         return $ts_str;
     }
 
-    protected static function setUrl($url){
+    protected function setUrl($url){
     	$this->url = $url;
     }
 
