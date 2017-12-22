@@ -39,7 +39,7 @@ class SimpleSafeRestApi_TestCase extends RestApi_TestCase {
 
     protected function getAuthData(){
     	$user = $this->user;
-    	$ts = rawurlencode(self::getTimeStampString()); // Nota: il valore del timestamp deve essere codificato con urlencode perchè contiene il simbolo '+'
+    	$ts = self::getTimeStampString();
     	$hash = $this->calcHash();
 
     	$query = [
