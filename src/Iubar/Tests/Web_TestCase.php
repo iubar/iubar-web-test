@@ -120,7 +120,7 @@ abstract class Web_TestCase extends Root_TestCase {
         
         // Setting the default enviroment variables when not set
         
-        if (!getenv('BROWSER_VERSION')) {
+        if (false && !getenv('BROWSER_VERSION')) {
             // On Saucelabs the selenium version depends on the browser verions.
             // See https://wiki.saucelabs.com/display/DOCS/Test+Configuration+Options#TestConfigurationOptions-ChromeDriverVersion
             $def_browser_version = "";
@@ -143,7 +143,7 @@ abstract class Web_TestCase extends Root_TestCase {
             }
             putenv('BROWSER_VERSION=' . $def_browser_version);
         }
-        if (!getenv('OS_VERSION')) {
+        if (false && !getenv('OS_VERSION')) {
             $def_os_version = "";
             switch (self::$browser) {
                 case self::PHANTOMJS:

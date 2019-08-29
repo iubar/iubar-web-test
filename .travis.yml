@@ -1,0 +1,23 @@
+language: php
+php:
+- 7.2
+env:
+  global:
+    # - APP_HOST="iubar.it"
+before_script:
+  - cat /etc/os-release
+  - php -v
+script:
+  - composer require --dev jakub-onderka/php-parallel-lint
+  - composer require --dev jakub-onderka/php-console-highlighter
+  - composer install --prefer-source --no-suggest --no-progress --no-interaction 
+  - vendor/bin/parallel-lint --exclude vendor .
+  - vendor/bin/phpstan -V
+  - vendor/bin/phpstan analyse src --no-interaction --no-progress --level 0
+  - phpunit
+notifications:
+  email:
+    recipients:
+      - ${EMAIL_BORGO}
+    on_success: change  # options: [always|never|change] default: changes
+    on_failure: always  # options: [always|never|change] default: always
