@@ -114,7 +114,7 @@ abstract class Web_TestCase extends Root_TestCase {
     /**
      * Start the WebDriver
      */
-    public static function setUpBeforeClass() {
+    public static function setUpBeforeClass() : void {
         self::init();
         self::$browser = getenv('BROWSER');
         
