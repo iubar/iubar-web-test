@@ -336,7 +336,7 @@ abstract class Web_TestCase extends Root_TestCase {
     /**
      * Close the WebDriver and show the screenshot in the browser
      */
-    public static function tearDownAfterClass() {
+    public static function tearDownAfterClass() : void {
         if (self::$browser != self::PHANTOMJS) {
             self::$climate->info('Closing all windows...');
             self::closeAllWindows();
