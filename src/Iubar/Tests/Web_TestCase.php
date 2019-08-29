@@ -509,7 +509,7 @@ abstract class Web_TestCase extends Root_TestCase {
      *
      * @param $e
      */
-    public function onNotSuccessfulTest($e) {
+    public function onNotSuccessfulTest($e) : void {
         // reduced the error message
         $msg = $this->formatErrorMsg($e);
         self::$climate->error("EXCEPTION: " . $msg);
