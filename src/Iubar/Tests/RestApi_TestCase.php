@@ -223,7 +223,7 @@ abstract class RestApi_TestCase extends Root_TestCase {
                 // Asserzioni
                 self::$climate->comment('Checking assertions...');
                 $this->assertEquals($expected_status_code, $response->getStatusCode());
-                $this->assertContains(self::APP_JSON_CT, $content_type);
+                $this->assertStringContainsStringIgnoringCase(self::APP_JSON_CT, $content_type);
                 self::$climate->comment('...ok');
             }
 

@@ -1079,7 +1079,7 @@ abstract class Web_TestCase extends Root_TestCase {
         $elem = $wd->findElement(WebDriverBy::id($id));
         $elem->sendKeys($sendKey);
         $this->assertNotNull($elem);
-        $this->assertContains($expected_title, $elem->getText());
+        $this->assertStringContainsStringIgnoringCase($expected_title, $elem->getText());
     }
         
     /**
