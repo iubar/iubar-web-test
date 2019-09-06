@@ -132,7 +132,7 @@ abstract class Web_TestCase extends Root_TestCase {
                     $def_browser_version = "46.0";
                     break;
                 case self::FIREFOX:
-                    $def_browser_version = "44.0";
+                    $def_browser_version = "68.0";
                     break;
                 case self::MARIONETTE:
                     $def_browser_version = "39.0";
