@@ -329,7 +329,7 @@ abstract class Web_TestCase extends Root_TestCase {
 		// Selenium<--(W3C Webdriver)-->Geckodriver<---(Marionette)--->Firefox
 
 
-		if (self::$browser == self::CHROME) { 	// Write avaiable browser logs (works only on Chrome) // TODO: Verificare se con Firefo 70+ è possibile invocare getAvailableLogTypes() come di seguito
+		if (self::$browser == self::CHROME) { 	// Write avaiable browser logs (works only on Chrome)
             // Console
 			self::$climate->info("invoking getAvailableLogTypes()...");
             $types = self::$webDriver->manage()->getAvailableLogTypes();
@@ -591,7 +591,7 @@ abstract class Web_TestCase extends Root_TestCase {
         $this->getWd()
             ->manage()
             ->timeouts()
-            ->implicitlyWait($wait);
+            ->implicitlyWait($wait);  // FIXME: non compatibile con Safari (soluzione https://github.com/facebook/php-webdriver/wiki/HowTo-Wait)
     }
 
     /**
@@ -813,7 +813,7 @@ abstract class Web_TestCase extends Root_TestCase {
         self::$climate->info("Waiting the js script execution...");
         $wd->manage()
             ->timeouts()
-            ->implicitlyWait(3);
+            ->implicitlyWait(3);  // FIXME: non compatibile con Safari (soluzione https://github.com/facebook/php-webdriver/wiki/HowTo-Wait)
 
         $file_input = $wd->findElement(WebDriverBy::id("upload")); // return an RemoteWebElement obj
                                                                    // "upload" is the id of the input tag added by the js script
@@ -844,7 +844,7 @@ abstract class Web_TestCase extends Root_TestCase {
      * Clear the log buffer of the browser, log buffer is reset after each request
      */
     protected function clearBrowserConsole() {
-        if (self::$browser != self::MARIONETTE) {
+        if (self::$browser == self::CHROME) { // Write avaiable browser logs (works only on Chrome)
             $this->getWd()
                 ->manage()
                 ->getLog('browser');
