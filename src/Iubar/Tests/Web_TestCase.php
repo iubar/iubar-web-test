@@ -15,7 +15,7 @@ use \League\CLImate\CLImate;
  * @author Matteo
  * @global env BROWSER
  * @global env SELENIUM_SERVER
- * @global env SELENIUM_PORT 
+ * @global env SELENIUM_PORT
  * @global env SCREENSHOTS_PATH
  * @global env APP_HOST
  * @global env APP_USERNAME
@@ -31,13 +31,13 @@ abstract class Web_TestCase extends Root_TestCase {
     const DEBUG = false;
 
     const TAKE_SCREENSHOTS = true;
-    
+
     // seconds
     const DEFAULT_WAIT_TIMEOUT = 30;
-    
+
     // the interval in miliseconds
     const DEFAULT_WAIT_INTERVAL = 250;
-    
+
     // Browser
     const PHANTOMJS = 'phantomjs';
 
@@ -117,9 +117,9 @@ abstract class Web_TestCase extends Root_TestCase {
     public static function setUpBeforeClass() : void {
         self::init();
         self::$browser = getenv('BROWSER');
-        
+
         // Setting the default enviroment variables when not set
-        
+
         if (false && !getenv('BROWSER_VERSION')) {
             // On Saucelabs the selenium version depends on the browser verions.
             // See https://wiki.saucelabs.com/display/DOCS/Test+Configuration+Options#TestConfigurationOptions-ChromeDriverVersion
@@ -164,9 +164,9 @@ abstract class Web_TestCase extends Root_TestCase {
             }
             putenv('OS_VERSION=' . $def_os_version);
         }
-        
+
         self::printEnviroments();
-        
+
         self::$browser_version = getenv('BROWSER_VERSION');
         self::$os_version = getenv('OS_VERSION');
         self::$selenium_server = getenv('SELENIUM_SERVER');
@@ -183,11 +183,11 @@ abstract class Web_TestCase extends Root_TestCase {
         self::$sauce_access_key = getenv('SAUCE_ACCESS_KEY');
         self::$browserstack_username = getenv('BROWSERSTACK_USERNAME');
         self::$browserstack_acces_key = getenv('BROWSERSTACK_ACCESS_KEY');
-        
+
         self::checkPaths();
-        
+
         $capabilities = null;
-        
+
         self::$climate->info("Inizializing " . self::$browser . " browser");
         // set capabilities according to the browers
         // @see: https://wiki.saucelabs.com/display/DOCS/Platform+Configurator
@@ -219,13 +219,13 @@ abstract class Web_TestCase extends Root_TestCase {
                 $capabilities = DesiredCapabilities::firefox();
                 $capabilities->setCapability(self::MARIONETTE, true);
                 // OPZIONALE: $capabilities->setCapability('firefox_binary', 'C:/Program Files (x86)/Firefox Developer Edition/firefox.exe');
-                // Useful to use the portable version of Firefox 
+                // Useful to use the portable version of Firefox
                 break;
             case self::SAFARI:
                 if (self::isWindows()) {
                     $error = 'Can\'t test with Safari on Windows Os';
                     self::$climate->error($error);
-                    exit(1);                    
+                    exit(1);
                 }
                 $capabilities = DesiredCapabilities::safari();
                 // DOESN'T WORK: $capabilities->setCapability('options', array("cleanSession"=>"true"));
@@ -235,35 +235,37 @@ abstract class Web_TestCase extends Root_TestCase {
                 self::$climate->error("Browser '" . self::$browser . "' not supported. (you should set the BROWSER global var with a supported browser name)");
                 exit(1);
         }
-        
+
         if (self::$browser_version) {
             $capabilities->setCapability("version", self::$browser_version);
         }
         if (self::$os_version) {
             $capabilities->setCapability("platform", self::$os_version);
         }
-        
+
         // create the WebDriver
         $connection_timeout_in_ms = 10 * 1000; // Set the maximum time of a request
         $request_timeout_in_ms = 20 * 1000; // Set the maximum time of a request
-        
+
         $server_root = null;
         // set Travis params
         if (self::$travis) {
             self::$climate->info("Travis detected...");
             $msg = "WebDriver test";
             if (self::isSaucelabs()) {
+				self::$climate->info("isSaucelabs()...true");
                 $capabilities->setCapability('tunnel-identifier', self::$travis_job_number);
                 $capabilities->setCapability('name', $msg);
                 $username = self::$sauce_access_username;
                 $access_key = self::$sauce_access_key;
             } else if (self::isBrowserstack()) {
+				self::$climate->info("isBrowserstack()...true");
                 $capabilities->setCapability('browserstack.debug', true);
                 $capabilities->setCapability('browserstack.local', true);
                 $capabilities->setCapability('browserstack.localIdentifier', $msg);
                 $capabilities->setCapability('takesScreenshot', true);
                 $username = self::$browserstack_username;
-                $access_key = self::$browserstack_acces_key;                 
+                $access_key = self::$browserstack_acces_key;
             }
             $server_root = "http://" . $username . ":" . $access_key . "@" . self::$selenium_server; // Attention: never print-out this string.
             $server_printable = "http://" . self::HIDDEN . ":" . self::HIDDEN . "@" . self::$selenium_server;
@@ -278,16 +280,13 @@ abstract class Web_TestCase extends Root_TestCase {
         self::$selenium_server_shutdown = $server_root . '/selenium-server/driver/?cmd=shutDownSeleniumServer';
         self::$selenium_session_shutdown = $server_root . '/selenium-server/driver/?cmd=shutDown';
         $server = $server_root . "/wd/hub"; // Attention: never print-out this string.
-        
+
         self::$climate->info("Server: " . $server_printable);
-        
+
         try {
             self::$webDriver = RemoteWebDriver::create($server, $capabilities, $connection_timeout_in_ms, $request_timeout_in_ms); // This is the default
-        } catch (\Exception $e) {
-            self::$climate->error("Exception: " . $e->getMessage());
-            exit(1);
-        }
-        
+
+
         // set some timeouts
         self::$webDriver->manage()
             ->timeouts()
@@ -295,22 +294,33 @@ abstract class Web_TestCase extends Root_TestCase {
         self::$webDriver->manage()
             ->timeouts()
             ->setScriptTimeout(240); // Set the amount of time (in seconds) to wait for an asynchronous script to finish execution before throwing an error.
-        
-        
+
+
         // Window size $self::$webDriver->manage()->window()->maximize(); $window = new WebDriverDimension(1024, 768); $this->webDriver->manage()->window()->setSize($window);
-        
-        
-        // Write avaiable browser logs (not works with marionette)                 
+
+
+		// Marionette is the new driver that is shipped/included with Firefox. This driver has it's own protocol which is not directly compatible with the Selenium/WebDriver protocol.
+		// The Gecko driver (previously named wires) is an application server implementing the Selenium/WebDriver protocol. It translates the Selenium commands and forwards them to the Marionette driver.
+
+
+        // Write avaiable browser logs (not works with marionette)
         if (self::$browser != self::MARIONETTE) { // NOTE: can't read the console with MARIONETTE: https://github.com/mozilla/geckodriver/issues/144
             // Console
             $types = self::$webDriver->manage()->getAvailableLogTypes();
             if (self::DEBUG) {
                 self::$climate->info('Avaiable browser logs types:');
                 self::$climate->out($types);
-                $input = self::$climate->input('Press Enter to continue');                
-                $response = $input->prompt();                
+                $input = self::$climate->input('Press Enter to continue');
+                $response = $input->prompt();
             }
-        }
+		}
+
+		} catch (\Exception $e) {
+			self::$climate->error("Exception: " . $e->getMessage());
+			self::$climate->error("QUIT.");
+			exit(1);
+		}
+
     }
 
     protected static function isSaucelabs(){
@@ -322,7 +332,7 @@ abstract class Web_TestCase extends Root_TestCase {
         }
         return $b;
     }
-    
+
     protected static function isBrowserstack(){
         $b = false;
         $findme   = 'browserstack';
@@ -332,7 +342,7 @@ abstract class Web_TestCase extends Root_TestCase {
         }
         return $b;
     }
-    
+
     /**
      * Close the WebDriver and show the screenshot in the browser
      */
@@ -343,33 +353,33 @@ abstract class Web_TestCase extends Root_TestCase {
         }
         self::$climate->info('Quitting webdriver...');
         self::$webDriver->quit();
-        
+
         $screenshots_count = count(self::$screenshots);
         self::$climate->comment('putenv SCREENSHOTS_COUNT=' . $screenshots_count);
         putenv('SCREENSHOTS_COUNT=' . $screenshots_count);
-        
+
         $dumpfile_count = count(self::$dump_files);
         if ($dumpfile_count) {
             $json = json_encode(self::$dump_files);
             self::$climate->comment('putenv DUMP_FILES=' . $json);
             putenv("DUMP_FILES=" . $json);
         }
-        
+
         // delete all temp files
         foreach (self::$files_to_del as $file) {
             self::$climate->comment('Deleting file ' . $file);
             unlink($file);
         }
-        
+
     }
 
     /**
      */
     protected static function printEnviroments() {
         self::$climate->underline()->bold("Enviroment variables for PhpUnit");
-        
+
         // @see https://github.com/thephpleague/climate/issues/9 (search for: yparisien)
-        
+
         $padding = self::$climate->padding(25);
         $padding->label('LOGS_PATH: ')->result(getenv("LOGS_PATH"));
         $padding->label('SCREENSHOTS_PATH: ')->result(getenv("SCREENSHOTS_PATH"));
@@ -440,14 +450,14 @@ abstract class Web_TestCase extends Root_TestCase {
      */
     protected static function openBrowser($url) {
         $browser = self::$browser;
-        self::$climate->info('Opening browser at: ' . $url);                
+        self::$climate->info('Opening browser at: ' . $url);
         if (self::$browser == self::PHANTOMJS) {
             $browser = null;
         } else {
             if (self::$browser == self::MARIONETTE) {
                 $browser = null;
             }
-        }                
+        }
         if (self::isWindows()){
             if($browser){
                 $cmd = "start \"\" \"$browser $url\"";;  // opening the same browser that was choosen for the test
@@ -467,7 +477,7 @@ abstract class Web_TestCase extends Root_TestCase {
      * @param unknown $file
      */
     protected static function openFile($file) {
-        if (self::isWindows()){       
+        if (self::isWindows()){
             $cmd = "start \"\" \"$file\"";
             self::$climate->info('Command is : ' . $cmd);
         }else{
@@ -475,7 +485,7 @@ abstract class Web_TestCase extends Root_TestCase {
             self::$climate->error($error);
             exit(1);
         }
-        self::startShell($cmd);        
+        self::startShell($cmd);
     }
 
     /**
@@ -549,7 +559,7 @@ abstract class Web_TestCase extends Root_TestCase {
         $this->getWd()
             ->findElement(WebDriverBy::xpath($xpath))
             ->click();
-        
+
         $this->getWd()
             ->manage()
             ->timeouts()
@@ -582,14 +592,14 @@ abstract class Web_TestCase extends Root_TestCase {
 
     /**
      *
-     * @param unknown $xpath
-     * @param unknown $timeout
+     * @param string $xpath
+     * @param float $timeout
      */
     protected function waitForXpathToBeClickable($xpath, $timeout = self::DEFAULT_WAIT_TIMEOUT) {
         $this->getWd()
             ->wait($timeout, self::DEFAULT_WAIT_INTERVAL)
             ->until(WebDriverExpectedCondition::elementToBeClickable(WebDriverBy::xpath($xpath)));
-        
+
         // TODO: Verificare differenze con
         // $wait = new WebDriverWait($wd, $timeout, self::DEFAULT_WAIT_INTERVAL);
         // $wait->until(WebDriverExpectedCondition::elementToBeClickable(WebDriverBy::xpath($xpath)));
@@ -621,8 +631,8 @@ abstract class Web_TestCase extends Root_TestCase {
 
     /**
      *
-     * @param unknown $css
-     * @param unknown $timeout
+     * @param string $css
+     * @param float $timeout
      */
     protected function waitForCssToBeClickable($css, $timeout = self::DEFAULT_WAIT_TIMEOUT) {
         $this->getWd()
@@ -698,8 +708,8 @@ abstract class Web_TestCase extends Root_TestCase {
 
     /**
      *
-     * @param unknown $id
-     * @param unknown $timeout
+     * @param string $txt
+     * @param float $timeout
      */
     protected function waitForPartialLinkText($txt, $timeout = self::DEFAULT_WAIT_TIMEOUT) {
         $this->getWd()
@@ -709,8 +719,8 @@ abstract class Web_TestCase extends Root_TestCase {
 
     /**
      *
-     * @param unknown $txt
-     * @param unknown $timeout
+     * @param string $txt
+     * @param float $timeout
      */
     protected function waitForPartialLinkTextToBeClickable($txt, $timeout = self::DEFAULT_WAIT_TIMEOUT) {
         $this->getWd()
@@ -755,37 +765,37 @@ abstract class Web_TestCase extends Root_TestCase {
      * @param string $file the file to upload
      */
     protected function dragFileToUpload($drop_area, $file) {
-        
+
         // check the drop area
         if (!$drop_area) {
             $this->fail("\$drop_area is null" . PHP_EOL);
         }
-        
+
         // check the file
         self::checkFile($file);
-        
+
         $wd = $this->getWd();
-        
+
         $file = realpath($file);
-     
+
         // Execute the js drag file script
         // @see also: https://github.com/facebook/php-webdriver/blob/787e71db74e42cdf13a41d500f75ea43da84bc75/tests/functional/FileUploadTest.php
-        $return = $wd->executeScript($this->get_js_contents(self::JS_DRAG_SCRIPT), array($drop_area));       
-                
+        $return = $wd->executeScript($this->get_js_contents(self::JS_DRAG_SCRIPT), array($drop_area));
+
         self::$climate->info("Waiting the js script execution...");
         $wd->manage()
             ->timeouts()
             ->implicitlyWait(3);
-        
+
         $file_input = $wd->findElement(WebDriverBy::id("upload")); // return an RemoteWebElement obj
                                                                    // "upload" is the id of the input tag added by the js script
-        
+
         if (!$file_input) {
             $this->fail("\$file_input is null" . PHP_EOL);
         } else {
             // upload the file
             self::$climate->info("Uploading file: " . $file);
-            
+
             $file_input->setFileDetector(new LocalFileDetector())->sendKeys($file); // Soluzione incompatibile con il browser MARIONETTE
                                                                                     // https://bugzilla.mozilla.org/show_bug.cgi?id=941085
                                                                                     // Lo statement è equivalente a $file_input->sendKeys($file);
@@ -797,8 +807,9 @@ abstract class Web_TestCase extends Root_TestCase {
      * Shutdown Selenium Server Metodo non utilizzato. L'azione è delegata allo script che avvia il test.
      */
     protected function quitSelenium() {
-        self::$climate->info('Quitting Selenium...');
-        self::openBrowser(self::$selenium_shutdown);
+		self::$climate->info('Quitting Selenium...');
+		$selenium_shutdown_url = null; // TODO: valorizzare
+        self::openBrowser($selenium_shutdown_url);
     }
 
     /**
@@ -856,12 +867,12 @@ abstract class Web_TestCase extends Root_TestCase {
     protected function countErrorsOnConsole() {
         $console_error = 0;
         if (self::$browser != self::MARIONETTE) {
-            
+
             $wd = $this->getWd();
             $records = $wd->manage()->getLog('browser');
-            
+
             $severe_records = array();
-            
+
             // search for the error in the console
             foreach ($records as $record) {
                 if ($record['level'] == 'SEVERE') {
@@ -871,7 +882,7 @@ abstract class Web_TestCase extends Root_TestCase {
                 }
             }
             $console_error = count($severe_records);
-            
+
             if($console_error>0){
                 self::$climate->yellow()->blink()->out("Errors on console: " . $console_error . ". Url is: " . $wd->getCurrentURL());
                 // write the console error in log file
@@ -881,7 +892,7 @@ abstract class Web_TestCase extends Root_TestCase {
                     self::$climate->dump($severe_records);
                 }
             }
-            
+
         } else {
             self::$climate->error("Warning: can't use countErrorsOnConsole() with the browser " . self::$browser);
         }
@@ -896,7 +907,7 @@ abstract class Web_TestCase extends Root_TestCase {
     private function dumpConsoleError($records) {
         $data = json_encode($records, JSON_PRETTY_PRINT);
         $logs_path = self::$logs_path;
-        if ($logs_path && self::isPathWritable($logs_path)){           
+        if ($logs_path && self::isPathWritable($logs_path)){
             $dump_file = $logs_path . DIRECTORY_SEPARATOR . date('Y-m-d_His') . "_console.json";
             file_put_contents($dump_file, $data);
             self::$dump_files[] = $dump_file;
@@ -947,16 +958,16 @@ abstract class Web_TestCase extends Root_TestCase {
         $screenshots_path = self::$screenshots_path;
         if ($screenshots_path && self::isPathWritable($screenshots_path)) {
             self::$climate->error('Taking a screenshot...');
-            
+
             // The path where save the screenshot
             $save_as = $screenshots_path . DIRECTORY_SEPARATOR . date('Y-m-d_His') . ".png";
             // $this->getWd()->takeScreenshot($save_as);
             $this->takeScreenshot2($msg, $element, $save_as);
-            
+
             if (!file_exists($save_as)) {
                 $error = 'Error saving the screenshot file: ' . $save_as;
                 self::$climate->error($error);
-                exit(1); 
+                exit(1);
             }
             self::$screenshots[] = $save_as;
         }
@@ -972,44 +983,44 @@ abstract class Web_TestCase extends Root_TestCase {
     private function takeScreenshot2($msg, $element, $save_as = null) {
         $screenshot = base64_decode($this->getWd()->execute(DriverCommand::SCREENSHOT));
         $im = imagecreatefromstring($screenshot);
-                
-        if ($element) { // Cut the element from the image            
+
+        if ($element) { // Cut the element from the image
             $element_width = $element->getSize()->getWidth();
             $element_height = $element->getSize()->getHeight();
             $element_src_x = $element->getLocation()->getX();
             $element_src_y = $element->getLocation()->getY();
-            
+
             // Create image instances
             $dest = imagecreatetruecolor($element_width, $element_height);
-            
+
             // Copy
             imagecopy($dest, $im, 0, 0, $element_src_x, $element_src_y, $element_width, $element_height);
             imagedestroy($im);
             $im = $dest;
-            
+
         }
-        
+
         // Add the text message to the image
         $im = $this->addTextToimage($im, $msg);
-        
+
         if ($save_as) {
             // output the image to file
             imagepng($im, $save_as);
         }
-        
+
         // tidy up
         imagedestroy($im);
     }
-    
+
     private function addTextToimage($im, $msg){
         // define some colours to use with the image
         $yellow = imagecolorallocate($im, 255, 255, 0);
         $black = imagecolorallocate($im, 0, 0, 0);
-        
+
         // get the width and the height of the image
         $width = imagesx($im);
         $height = imagesy($im);
-        
+
         // Split the message in two lines
         // $msg = wordwrap($msg, 7, "\n");
         $first = null;
@@ -1025,25 +1036,25 @@ abstract class Web_TestCase extends Root_TestCase {
         } else {
             $first = $msg;
         }
-        
+
         // draw a black rectangle across the bottom, say, 50 pixels of the image:
         imagefilledrectangle($im, 0, ($height - $box_height), $width, $height, $black);
-        
+
         // now we want to write in the centre of the rectangle:
         $font = 24; // store the int ID of the system font we're using in $font
-        
+
         // calculate the left position of the text:
         $leftTextPos1 = ($width - imagefontwidth($font) * strlen($first)) / 2;
         if ($second) {
             $leftTextPos2 = ($width - imagefontwidth($font) * strlen($second)) / 2;
         }
-        
+
         // finally, write the string:
         imagestring($im, $font, $leftTextPos1, $height - $box_inner_height, $first, $yellow);
         if ($second) {
             imagestring($im, $font, $leftTextPos2, $height - ($box_inner_height / 2), $second, $yellow);
-        } 
-        
+        }
+
         return $im;
     }
 
@@ -1057,7 +1068,7 @@ abstract class Web_TestCase extends Root_TestCase {
 
     /**
      *
-     * @param unknown $js_file
+     * @param string $js_file
      * @return string
      */
     private function get_js_contents($js_file) {
@@ -1066,7 +1077,7 @@ abstract class Web_TestCase extends Root_TestCase {
         $script = file_get_contents($js_file);
         return $script;
     }
-    
+
     /**
      * Write into the respective field
      *
@@ -1079,9 +1090,9 @@ abstract class Web_TestCase extends Root_TestCase {
         $elem = $wd->findElement(WebDriverBy::id($id));
         $elem->sendKeys($sendKey);
         $this->assertNotNull($elem);
-        $this->assertStringContainsStringIgnoringCase($expected_title, $elem->getText());
+        $this->assertStringContainsStringIgnoringCase($sendKey, $elem->getText());
     }
-        
+
     /**
      * Take a temporary directory
      *
@@ -1096,7 +1107,7 @@ abstract class Web_TestCase extends Root_TestCase {
             $this->fail("Temp dir not writable: " . $tmp_dir);
         }
         return $tmp_dir;
-    }    
-        
-    
+    }
+
+
 }
