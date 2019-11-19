@@ -7,6 +7,8 @@ use Facebook\WebDriver\WebDriverExpectedCondition;
 use Facebook\WebDriver\Remote\DesiredCapabilities;
 use Facebook\WebDriver\Remote\DriverCommand;
 use Facebook\WebDriver\Remote\LocalFileDetector;
+use Facebook\WebDriver\Firefox\FirefoxProfile;
+use Facebook\WebDriver\Firefox\FirefoxDriver;
 use \League\CLImate\CLImate;
 
 /**
@@ -213,7 +215,13 @@ abstract class Web_TestCase extends Root_TestCase {
                 $capabilities = DesiredCapabilities::chrome();
                 break;
             case self::FIREFOX:
-                $capabilities = DesiredCapabilities::firefox();
+
+				// $profile = new FirefoxProfile();
+				$capabilities = DesiredCapabilities::firefox(); // Gecko driver
+
+				// $capabilities->setCapability(FirefoxDriver::PROFILE, $profile);
+				// $capabilities->setCapability(self::MARIONETTE, true);
+				// $capabilities->setCapability('acceptSslCerts', false);
                 break;
             case self::MARIONETTE:
                 $capabilities = DesiredCapabilities::firefox();
