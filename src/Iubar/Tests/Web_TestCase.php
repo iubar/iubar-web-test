@@ -217,15 +217,13 @@ abstract class Web_TestCase extends Root_TestCase {
                 $capabilities = DesiredCapabilities::chrome();
                 break;
             case self::FIREFOX:
-				$profile = new FirefoxProfile();
 				$capabilities = DesiredCapabilities::firefox();
-				$capabilities->setCapability(FirefoxDriver::PROFILE, $profile);
-				$capabilities->setCapability(self::MARIONETTE, false); // Gecko driver
+				$capabilities->setCapability(self::MARIONETTE, false); // Gecko driver (require Firefox 48+)
 				// $capabilities->setCapability('acceptSslCerts', false);
                 break;
             case self::MARIONETTE:
                 $capabilities = DesiredCapabilities::firefox();
-                $capabilities->setCapability(self::MARIONETTE, true);
+                $capabilities->setCapability(self::MARIONETTE, true); // Marionette driver
                 // OPZIONALE: $capabilities->setCapability('firefox_binary', 'C:/Program Files (x86)/Firefox Developer Edition/firefox.exe');
                 // Useful to use the portable version of Firefox
                 break;
