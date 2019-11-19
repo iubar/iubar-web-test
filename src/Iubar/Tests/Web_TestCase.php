@@ -894,7 +894,7 @@ abstract class Web_TestCase extends Root_TestCase {
      */
     protected function countErrorsOnConsole() {
         $console_error = 0;
-        if (self::$browser != self::MARIONETTE) {
+        if (self::$browser == self::CHROME) { 	// Write avaiable browser logs (works only on Chrome)
 
             $wd = $this->getWd();
             $records = $wd->manage()->getLog('browser');
