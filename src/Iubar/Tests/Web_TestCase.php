@@ -217,12 +217,13 @@ abstract class Web_TestCase extends Root_TestCase {
                 $capabilities = DesiredCapabilities::chrome();
                 break;
 			case self::FIREFOX:
-				//$profile = new FirefoxProfile();
 				$capabilities = DesiredCapabilities::firefox();
-				//$capabilities->setCapability(FirefoxDriver::PROFILE, $profile);
 				$capabilities->setCapability(self::MARIONETTE, false); // Gecko driver (require Firefox 48+)
+				// Lo statment sopra sembra essere ignorato da saucelabs.com chenel log riporta sempre il valore "marionette": true
 				$capabilities->setCapability('acceptSslCerts', true);
-				$capabilities->setCapability('acceptInsecureCerts', true);
+				$capabilities->setCapability('acceptInsecureCerts', true); // https://github.com/SeleniumHQ/selenium/wiki/DesiredCapabilities
+				// Senza lo statement sopra, il certificato di Comodo da Firefox 48.0 non verrebbe accettato
+				// TODO: Perchè ? E' forse solo una questione di versione di Firefox ?
                 break;
             case self::MARIONETTE:
                 $capabilities = DesiredCapabilities::firefox();
@@ -298,7 +299,11 @@ abstract class Web_TestCase extends Root_TestCase {
             self::$webDriver = RemoteWebDriver::create($server, $capabilities, $connection_timeout_in_ms, $request_timeout_in_ms); // This is the default
 
 			self::$climate->info("pageLoadTimeout()...");
-        // set some timeouts
+
+
+
+			if (self::$browser != self::SAFARI) {
+			// set some timeouts
         self::$webDriver->manage()
             ->timeouts()
             ->pageLoadTimeout(60); // Set the amount of time (in seconds) to wait for a page load to complete before throwing an error
@@ -308,6 +313,7 @@ abstract class Web_TestCase extends Root_TestCase {
             ->timeouts()
             ->setScriptTimeout(240); // Set the amount of time (in seconds) to wait for an asynchronous script to finish execution before throwing an error.
 
+			}
 
         // Window size $self::$webDriver->manage()->window()->maximize(); $window = new WebDriverDimension(1024, 768); $this->webDriver->manage()->window()->setSize($window);
 
@@ -316,10 +322,14 @@ abstract class Web_TestCase extends Root_TestCase {
 		// This driver has it's own protocol which is not directly compatible with the Selenium/WebDriver protocol.
 		// 2) The Gecko driver (previously named wires) is an application server implementing
 		// the Selenium/WebDriver protocol. It translates the Selenium commands and forwards them to the Marionette driver.
+		//
+		// In other words:
+		//
+		// Selenium uses W3C Webdriver protocol to send requests to Geckodriver, which translates them and uses Marionette protocol to send them to Firefox
+		// Selenium<--(W3C Webdriver)-->Geckodriver<---(Marionette)--->Firefox
 
 
-        // Write avaiable browser logs (works only on Chrome)
-        if (self::$browser == self::CHROME) {
+		if (self::$browser == self::CHROME) { 	// Write avaiable browser logs (works only on Chrome) // TODO: Verificare se con Firefo 70+ è possibile invocare getAvailableLogTypes() come di seguito
             // Console
 			self::$climate->info("invoking getAvailableLogTypes()...");
             $types = self::$webDriver->manage()->getAvailableLogTypes();
