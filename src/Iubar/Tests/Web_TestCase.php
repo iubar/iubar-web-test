@@ -216,10 +216,13 @@ abstract class Web_TestCase extends Root_TestCase {
             case self::CHROME:
                 $capabilities = DesiredCapabilities::chrome();
                 break;
-            case self::FIREFOX:
+			case self::FIREFOX:
+				//$profile = new FirefoxProfile();
 				$capabilities = DesiredCapabilities::firefox();
+				//$capabilities->setCapability(FirefoxDriver::PROFILE, $profile);
 				$capabilities->setCapability(self::MARIONETTE, false); // Gecko driver (require Firefox 48+)
 				$capabilities->setCapability('acceptSslCerts', true);
+				$capabilities->setCapability('acceptInsecureCerts', true);
                 break;
             case self::MARIONETTE:
                 $capabilities = DesiredCapabilities::firefox();
