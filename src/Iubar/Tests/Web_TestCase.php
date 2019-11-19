@@ -164,7 +164,7 @@ abstract class Web_TestCase extends Root_TestCase {
                     $def_os_version = "Windows 10";
                     break;
                 case self::SAFARI:
-                    $def_os_version = "macOS 10.12";
+                    $def_os_version = "MacOS 10.13";
                     break;
             }
             putenv('OS_VERSION=' . $def_os_version);
@@ -242,6 +242,7 @@ abstract class Web_TestCase extends Root_TestCase {
                     exit(1);
                 }
                 $capabilities = DesiredCapabilities::safari();
+                $capabilities.setCapability("version", "11.0");
                 // DOESN'T WORK: $capabilities->setCapability('options', array("cleanSession"=>"true"));
                 // see: https://github.com/SeleniumHQ/selenium/wiki/DesiredCapabilities#safari-specific
                 break;
