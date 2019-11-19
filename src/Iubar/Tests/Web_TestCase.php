@@ -9,6 +9,7 @@ use Facebook\WebDriver\Remote\DriverCommand;
 use Facebook\WebDriver\Remote\LocalFileDetector;
 use Facebook\WebDriver\Firefox\FirefoxProfile;
 use Facebook\WebDriver\Firefox\FirefoxDriver;
+use Facebook\WebDriver\Chrome\ChromeOptions;
 use \League\CLImate\CLImate;
 
 /**
@@ -215,6 +216,9 @@ abstract class Web_TestCase extends Root_TestCase {
                 break;
             case self::CHROME:
                 $capabilities = DesiredCapabilities::chrome();
+                $options = new ChromeOptions(); // https://github.com/facebook/php-webdriver/wiki/ChromeOptions
+                $options.setExperimentalOption("w3c", true); // https://facebook.github.io/php-webdriver/master/ChromeOptions.html
+                $capabilities->setCapability(ChromeOptions::CAPABILITY, $options);
                 break;
 			case self::FIREFOX:
 				$capabilities = DesiredCapabilities::firefox();
