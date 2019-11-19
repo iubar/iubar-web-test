@@ -217,9 +217,10 @@ abstract class Web_TestCase extends Root_TestCase {
                 $capabilities = DesiredCapabilities::chrome();
                 break;
             case self::FIREFOX:
-				// $profile = new FirefoxProfile();
-				$capabilities = DesiredCapabilities::firefox(); // Gecko driver
-				// $capabilities->setCapability(FirefoxDriver::PROFILE, $profile);
+				$profile = new FirefoxProfile();
+				$capabilities = DesiredCapabilities::firefox();
+				$capabilities->setCapability(FirefoxDriver::PROFILE, $profile);
+				$capabilities->setCapability(self::MARIONETTE, false); // Gecko driver
 				// $capabilities->setCapability('acceptSslCerts', false);
                 break;
             case self::MARIONETTE:
@@ -310,8 +311,10 @@ abstract class Web_TestCase extends Root_TestCase {
         // Window size $self::$webDriver->manage()->window()->maximize(); $window = new WebDriverDimension(1024, 768); $this->webDriver->manage()->window()->setSize($window);
 
 
-		// Marionette is the new driver that is shipped/included with Firefox. This driver has it's own protocol which is not directly compatible with the Selenium/WebDriver protocol.
-		// The Gecko driver (previously named wires) is an application server implementing the Selenium/WebDriver protocol. It translates the Selenium commands and forwards them to the Marionette driver.
+		// 1) Marionetteis the new driver that is shipped/included with Firefox.
+		// This driver has it's own protocol which is not directly compatible with the Selenium/WebDriver protocol.
+		// 2) The Gecko driver (previously named wires) is an application server implementing
+		// the Selenium/WebDriver protocol. It translates the Selenium commands and forwards them to the Marionette driver.
 
 
         // Write avaiable browser logs (works only on Chrome)
