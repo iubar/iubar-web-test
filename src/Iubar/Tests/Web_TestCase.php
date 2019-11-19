@@ -313,8 +313,8 @@ abstract class Web_TestCase extends Root_TestCase {
 		// The Gecko driver (previously named wires) is an application server implementing the Selenium/WebDriver protocol. It translates the Selenium commands and forwards them to the Marionette driver.
 
 
-        // Write avaiable browser logs (not works with marionette)
-        if (self::$browser != self::MARIONETTE) { // NOTE: can't read the console with MARIONETTE: https://github.com/mozilla/geckodriver/issues/144
+        // Write avaiable browser logs (works only on Chrome)
+        if (self::$browser == self::CHROME) {
             // Console
             $types = self::$webDriver->manage()->getAvailableLogTypes();
             if (self::DEBUG) {
