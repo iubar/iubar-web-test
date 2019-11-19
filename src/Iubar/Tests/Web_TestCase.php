@@ -123,7 +123,9 @@ abstract class Web_TestCase extends Root_TestCase {
         // Setting the default enviroment variables when not set
 
         if (false && !getenv('BROWSER_VERSION')) {
-            // On Saucelabs the selenium version depends on the browser verions.
+			// On Saucelabs the selenium version depends on the browser verions.
+			// https://wiki.saucelabs.com/display/DOCS/Platform+Configurator#/
+			// https://saucelabs.com/platform/supported-browsers-devices
             // See https://wiki.saucelabs.com/display/DOCS/Test+Configuration+Options#TestConfigurationOptions-ChromeDriverVersion
             $def_browser_version = "";
             switch (self::$browser) {
@@ -131,16 +133,16 @@ abstract class Web_TestCase extends Root_TestCase {
                     $def_browser_version = "";
                     break;
                 case self::CHROME:
-                    $def_browser_version = "46.0";
+                    $def_browser_version = "78.0";
                     break;
                 case self::FIREFOX:
-                    $def_browser_version = "68.0";
+                    $def_browser_version = "48.0"; // "48.0" se sistema è "Linux", "70.0" se il sistema è "Windows 10"
                     break;
                 case self::MARIONETTE:
-                    $def_browser_version = "39.0";
+                    $def_browser_version = "70.0";
                     break;
                 case self::SAFARI:
-                    $def_browser_version = "9.0";
+                    $def_browser_version = "11.0";
                     break;
             }
             putenv('BROWSER_VERSION=' . $def_browser_version);
@@ -161,7 +163,7 @@ abstract class Web_TestCase extends Root_TestCase {
                     $def_os_version = "Windows 10";
                     break;
                 case self::SAFARI:
-                    $def_os_version = "OS X 10.11";
+                    $def_os_version = "macOS 10.12";
                     break;
             }
             putenv('OS_VERSION=' . $def_os_version);
