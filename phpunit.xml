@@ -1,0 +1,52 @@
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="http://schema.phpunit.de/4.5/phpunit.xsd"
+	bootstrap="./tests/bootstrap.php" verbose="true" colors="true"
+	stopOnError="true" stopOnFailure="true">
+	<!-- cacheTokens="false" -->
+	<!-- forceCoversAnnotation="false" -->
+	<!-- mapTestClassNameToCoveredClassName="false" -->
+	<!-- printerClass="PHPUnit_TextUI_ResultPrinter" -->
+	<!-- printerFile="/path/to/ResultPrinter.php" -->
+	<!-- testSuiteLoaderClass="PHPUnit_Runner_StandardTestSuiteLoader" -->
+	<!-- testSuiteLoaderFile="/path/to/StandardTestSuiteLoader.php" -->
+	<!-- backupGlobals="false" -->
+	<!-- backupStaticAttributes="false" -->
+	<!-- convertErrorsToExceptions="true" -->
+	<!-- convertNoticesToExceptions="true" -->
+	<!-- convertWarningsToExceptions="true" -->
+	<!-- processIsolation="false" -->
+
+	<!-- stopOnError="false" -->
+	<!-- stopOnFailure="false" -->
+	<!-- stopOnIncomplete="false" -->
+
+	<!-- stopOnSkipped="false" -->
+	<!-- stopOnRisky="false" -->
+	<!-- timeoutForSmallTests="1" -->
+	<!-- timeoutForMediumTests="10" -->
+	<!-- timeoutForLargeTests="60" -->
+
+	<testsuites>
+<!--
+		<testsuite name="Iubar">
+			<file>./tests/Iubar/HelloWorldTest.php</file>
+		</testsuite>
+-->
+		 <testsuite name="All Tests">
+		 <directory suffix=".php">./tests/</directory>
+		 </testsuite>
+
+	</testsuites>
+
+
+	<php>
+		<!-- Specify the path to a service configuration file -->
+		<!-- <server name="CONFIG" value="test_services.json" /> -->
+		<!-- Or, specify each require parameter individually -->
+		<!-- <server name="GITHUB_USER" value="" /> -->
+		<!-- You can then extract the server variables in your bootstrap.php file
+			by grabbing them from the $_SERVER superglobal: $apiUser = $_SERVER['API_USER']; -->
+	</php>
+
+
+</phpunit>
