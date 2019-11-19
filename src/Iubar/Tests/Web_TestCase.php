@@ -217,12 +217,9 @@ abstract class Web_TestCase extends Root_TestCase {
                 $capabilities = DesiredCapabilities::chrome();
                 break;
             case self::FIREFOX:
-
 				// $profile = new FirefoxProfile();
 				$capabilities = DesiredCapabilities::firefox(); // Gecko driver
-
 				// $capabilities->setCapability(FirefoxDriver::PROFILE, $profile);
-				// $capabilities->setCapability(self::MARIONETTE, true);
 				// $capabilities->setCapability('acceptSslCerts', false);
                 break;
             case self::MARIONETTE:
@@ -294,13 +291,17 @@ abstract class Web_TestCase extends Root_TestCase {
         self::$climate->info("Server: " . $server_printable);
 
         try {
+
+			self::$climate->info("RemoteWebDriver::create()...");
             self::$webDriver = RemoteWebDriver::create($server, $capabilities, $connection_timeout_in_ms, $request_timeout_in_ms); // This is the default
 
-
+			self::$climate->info("pageLoadTimeout()...");
         // set some timeouts
         self::$webDriver->manage()
             ->timeouts()
             ->pageLoadTimeout(60); // Set the amount of time (in seconds) to wait for a page load to complete before throwing an error
+
+			self::$climate->info("setScriptTimeout()...");
         self::$webDriver->manage()
             ->timeouts()
             ->setScriptTimeout(240); // Set the amount of time (in seconds) to wait for an asynchronous script to finish execution before throwing an error.
@@ -316,6 +317,7 @@ abstract class Web_TestCase extends Root_TestCase {
         // Write avaiable browser logs (works only on Chrome)
         if (self::$browser == self::CHROME) {
             // Console
+			self::$climate->info("invoking getAvailableLogTypes()...");
             $types = self::$webDriver->manage()->getAvailableLogTypes();
             if (self::DEBUG) {
                 self::$climate->info('Avaiable browser logs types:');
@@ -323,6 +325,8 @@ abstract class Web_TestCase extends Root_TestCase {
                 $input = self::$climate->input('Press Enter to continue');
                 $response = $input->prompt();
             }
+		}else{
+			self::$climate->info("Skipping getAvailableLogTypes()...");
 		}
 
 		} catch (\Exception $e) {
