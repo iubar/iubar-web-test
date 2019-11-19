@@ -14,7 +14,8 @@
     },
     "autoload": {
     	"psr-4": {
-            "Iubar\\" : "src/Iubar/"
+            "Iubar\\Build\\" : "src/Iubar/Build/",
+			"Iubar\\Tests\\" : "src/Iubar/Tests/"
         }
      }
 }
