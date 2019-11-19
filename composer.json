@@ -1,16 +1,15 @@
 {
 	"name" : "iubar/iubar-web-test",
 	"require-dev" : {
-		"phpunit/phpunit" : "6.4.1",
-		"phpstan/phpstan" : "*"
+		"phpunit/phpunit": "^7.4",
+		"phpstan/phpstan-shim" : "*"
 	},
     "require" : {
         "php": ">=7.1",
         "facebook/webdriver" : "*",
         "guzzlehttp/guzzle" : "6.3.3",
         "league/climate" : "*",
-        "digitalnature/php-ref": "*",
-        "phpunit/phpunit": "^7.4"
+        "digitalnature/php-ref": "*"
     },
     "autoload": {
     	"psr-4": {
@@ -18,3 +17,4 @@
         }
      }
 }
+

@@ -10,7 +10,7 @@ before_script:
 script:
   - composer require --dev jakub-onderka/php-parallel-lint
   - composer require --dev jakub-onderka/php-console-highlighter
-  - composer install --prefer-source --no-suggest --no-progress --no-interaction 
+  - composer install --prefer-source --no-suggest --no-progress --no-interaction
   - vendor/bin/parallel-lint --exclude vendor .
   - vendor/bin/phpstan -V
   - vendor/bin/phpstan analyse src --no-interaction --no-progress --level 0
