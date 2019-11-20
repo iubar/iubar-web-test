@@ -16,7 +16,8 @@ use \League\CLImate\CLImate;
  * Note
  * @see see https://github.com/facebook/php-webdriver/issues/469
  * 1) PHP WebDriver does not support W3C syntax at this time
- * 2) Safari is not working on Saucelabs,
+ * 2) Safari is not working on Saucelabs
+ * @see also https://webdriver.io/blog/2019/09/16/devtools.html
  *
  * @author Matteo
  * @global env BROWSER
