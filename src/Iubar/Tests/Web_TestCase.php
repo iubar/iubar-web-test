@@ -123,7 +123,7 @@ abstract class Web_TestCase extends Root_TestCase {
 
         // Setting the default enviroment variables when not set
 
-        if (false && !getenv('BROWSER_VERSION')) {
+        if (!getenv('BROWSER_VERSION')) {
 			// On Saucelabs the selenium version depends on the browser verions.
 			// https://wiki.saucelabs.com/display/DOCS/Platform+Configurator#/
 			// https://saucelabs.com/platform/supported-browsers-devices
