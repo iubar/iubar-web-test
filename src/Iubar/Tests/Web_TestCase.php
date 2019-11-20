@@ -13,7 +13,10 @@ use Facebook\WebDriver\Chrome\ChromeOptions;
 use \League\CLImate\CLImate;
 
 /**
- * PHPUnit_Framework_TestCase Develop
+ * Note
+ * @see see https://github.com/facebook/php-webdriver/issues/469
+ * 1) PHP WebDriver does not support W3C syntax at this time
+ * 2) Safari is not working on Saucelabs,
  *
  * @author Matteo
  * @global env BROWSER
@@ -217,7 +220,7 @@ abstract class Web_TestCase extends Root_TestCase {
             case self::CHROME:
                 $capabilities = DesiredCapabilities::chrome();
                 $options = new ChromeOptions(); // https://github.com/facebook/php-webdriver/wiki/ChromeOptions
-                $options.setExperimentalOption("w3c", true); // https://facebook.github.io/php-webdriver/master/ChromeOptions.html
+                $options->setExperimentalOption("w3c", true); // https://facebook.github.io/php-webdriver/master/ChromeOptions.html
                 $capabilities->setCapability(ChromeOptions::CAPABILITY, $options);
                 break;
 			case self::FIREFOX:
@@ -242,7 +245,8 @@ abstract class Web_TestCase extends Root_TestCase {
                     exit(1);
                 }
                 $capabilities = DesiredCapabilities::safari();
-                $capabilities.setCapability("version", "11.0");
+                $capabilities->setCapability(ChromeOptions::CAPABILITY, $options);
+                // $capabilities.setCapability("version", "11.0");
                 // DOESN'T WORK: $capabilities->setCapability('options', array("cleanSession"=>"true"));
                 // see: https://github.com/SeleniumHQ/selenium/wiki/DesiredCapabilities#safari-specific
                 break;
