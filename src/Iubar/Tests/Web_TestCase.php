@@ -222,7 +222,7 @@ abstract class Web_TestCase extends Root_TestCase {
                 $capabilities = DesiredCapabilities::chrome();
                 //$options = new ChromeOptions(); // https://github.com/facebook/php-webdriver/wiki/ChromeOptions
                 //$options->setExperimentalOption("w3c", true); // https://facebook.github.io/php-webdriver/master/ChromeOptions.html
-                $capabilities->setCapability(ChromeOptions::CAPABILITY, $options);
+                //$capabilities->setCapability(ChromeOptions::CAPABILITY, $options);
                 break;
 			case self::FIREFOX:
 				$capabilities = DesiredCapabilities::firefox();
