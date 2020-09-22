@@ -7,6 +7,8 @@
 namespace Iubar\Build;
 
 class Guzzle_RoboTask extends Root_RoboTask {
+	
+	private $phpunit_xml_file = null;
 
 	public function __construct($working_path) {
 		parent::__construct($working_path);

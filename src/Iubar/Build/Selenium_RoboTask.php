@@ -44,6 +44,16 @@ class Selenium_RoboTask extends Root_RoboTask {
 	private $logs_path = null;
 
 	private $screenshots_path = null;
+	
+	private $phpunit_xml_file = null;
+	
+	private $selenium_jar = null;
+	
+	private $chrome_driver = null;
+	
+	private $geko_driver = null;
+	
+	private $edge_driver = null;
 
 	public function __construct($working_path) {
 		parent::__construct($working_path);
