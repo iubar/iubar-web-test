@@ -3,7 +3,7 @@
     "require" : {
         "php": ">=7.1",
         "php-webdriver/webdriver" : "*",
-        "guzzlehttp/guzzle" : "6.3.3",
+        "guzzlehttp/guzzle" : "^6.5",
         "league/climate" : "*",
         "digitalnature/php-ref": "*",
 		"phpunit/phpunit": "^8.0",
