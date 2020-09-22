@@ -12,12 +12,12 @@ before_script:
   - cat /etc/os-release
   - php -v
 script:
-  - composer require --dev jakub-onderka/php-parallel-lint
-  - composer require --dev jakub-onderka/php-console-highlighter
+  - composer require --dev php-parallel-lint/php-parallel-lint
+  - composer require --dev php-parallel-lint/php-console-highlighter
   - composer install --prefer-source --no-suggest --no-progress --no-interaction
   - vendor/bin/parallel-lint --exclude vendor .
   - vendor/bin/phpstan -V
-  - vendor/bin/phpstan analyse src --no-interaction --no-progress --level 0 || true
+  - vendor/bin/phpstan analyse src --no-interaction --no-progress --level 0
   - phpunit
 notifications:
   email:
