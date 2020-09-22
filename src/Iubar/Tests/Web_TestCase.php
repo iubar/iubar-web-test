@@ -196,6 +196,7 @@ abstract class Web_TestCase extends Root_TestCase {
         self::checkPaths();
 
         $capabilities = null;
+		$options = [];
 
         self::$climate->info("Inizializing " . self::$browser . " browser");
         // set capabilities according to the browers
