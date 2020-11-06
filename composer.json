@@ -1,9 +1,9 @@
 {
 	"name" : "iubar/iubar-web-test",
     "require" : {
-        "php": ">=7.1",
+        "php": ">=7.2",
         "php-webdriver/webdriver" : "*",
-        "guzzlehttp/guzzle" : "^6.5",
+        "guzzlehttp/guzzle" : "^7.0.2",
         "league/climate" : "*",
         "digitalnature/php-ref": "*",
 		"phpunit/phpunit": "^8.0",
