@@ -1,5 +1,5 @@
 [![Build Status](https://app.travis-ci.com/iubar/iubar-web-test.svg?branch=master)](https://app.travis-ci.com/github/iubar/iubar-web-test)
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/27879da4fb8c44e0b54c84c2c6229135)](https://app.codacy.com/manual/Iubar/iubar-web-test/dashboard)
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/3b788b840b854b7b9689e462b51de74e)](https://www.codacy.com/gh/iubar/iubar-web-test/dashboard)
 
 ## Php Webdriver
  * https://github.com/facebook/php-webdriver
