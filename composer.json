@@ -1,15 +1,18 @@
 {
 	"name" : "iubar/iubar-web-test",
 	"require-dev" : {
-		"phpunit/phpunit": "^7.4",
-		"phpstan/phpstan-shim" : "*",
-		"consolidation/robo": "^1.0.0"
+		"phpunit/phpunit" : "^9.5",
+		"phpstan/phpstan" : "*",
+		"consolidation/robo": "^3.0"
 	},
     "require" : {
-        "php": ">=7.1",
-        "facebook/webdriver" : "*",
-        "guzzlehttp/guzzle" : "6.3.3",
-        "league/climate" : "*",
+		"php" : ">=7.3",
+		"ext-mbstring": "*",
+		"ext-curl": "*",
+		"ext-json": "*",
+        "php-webdriver/webdriver" : "^1.12",
+        "guzzlehttp/guzzle" : "^7.4",
+        "league/climate" : "^3.8",
         "digitalnature/php-ref": "*"
     },
     "autoload": {
