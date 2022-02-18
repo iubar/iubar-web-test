@@ -4,7 +4,7 @@ cache:
     - $HOME/.composer/cache/files
 language: php
 php:
-- 7.2
+- 7.3
 env:
   global:
     # - APP_HOST="iubar.it"
