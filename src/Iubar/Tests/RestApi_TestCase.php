@@ -2,6 +2,7 @@
 namespace Iubar\Tests;
 
 use GuzzleHttp\Psr7;
+use GuzzleHttp\Psr7\Message;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Exception\ServerException;
@@ -119,12 +120,12 @@ abstract class RestApi_TestCase extends Root_TestCase {
         self::$climate->flank('Http client exception catched...');
 
         $request = $e->getRequest();
-        self::$climate->comment(PHP_EOL . 'Request: ' . trim(Psr7\str($request)));
+        self::$climate->comment(PHP_EOL . 'Request: ' . trim(Message::toString($request)));
         // oppure $this->printRequest($request);
         if ($e->hasResponse()) {
             $response = $e->getResponse();
             self::$climate->error('Response code: ' . $response->getStatusCode());
-            self::$climate->error('Response string: ' . PHP_EOL . trim(Psr7\str($response)));
+            self::$climate->error('Response string: ' . PHP_EOL . trim(Message::toString($response)));
             // oppure $this->printResponse($response);
         }
         self::$climate->error(PHP_EOL . 'Exception message: ' . PHP_EOL . $e->getMessage());

@@ -511,11 +511,7 @@ abstract class Web_TestCase extends Root_TestCase {
         self::startShell($cmd);
     }
 
-    /**
-     *
-     * @param unknown $file
-     */
-    protected static function openFile($file) {
+    protected static function openFile(string $file) {
         if (self::isWindows()){
             $cmd = "start \"\" \"$file\"";
             self::$climate->info('Command is : ' . $cmd);
@@ -540,12 +536,7 @@ abstract class Web_TestCase extends Root_TestCase {
         return $b;
     }
 
-    /**
-     *
-     * @param unknown $env
-     * @return string
-     */
-    private static function formatPassword($env) {
+    private static function formatPassword(bool $env) {
         $str = '<not set>';
         if ($env) {
             $str = self::HIDDEN;
@@ -592,9 +583,9 @@ abstract class Web_TestCase extends Root_TestCase {
      * Click on a element that has the corresponding xpath and wait some time if the element is not immediately present
      *
      * @param string $xpath the xpath of the element
-     * @param real $wait the time to wait
+     * @param float $wait the time to wait
      */
-    protected function click($xpath, $wait = 0.50) {
+    protected function click(string $xpath, float $wait = 0.50) {
         $this->getWd()
             ->findElement(WebDriverBy::xpath($xpath))
             ->click();
