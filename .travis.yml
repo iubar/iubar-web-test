@@ -1,10 +1,10 @@
-dist: bionic
+dist: focal
 cache:
   directories:
     - $HOME/.composer/cache/files
 language: php
 php:
-- 7.3
+  - 7.4
 env:
   global:
     # - APP_HOST="iubar.it"
