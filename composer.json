@@ -1,7 +1,7 @@
 {
 	"name" : "iubar/iubar-web-test",
 	"require-dev" : {		
-		"phpstan/phpstan" : "*",
+		"phpstan/phpstan" : "^1.4",
 		"consolidation/robo": "^3.0"
 	},
     "require" : {
