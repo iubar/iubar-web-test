@@ -1,0 +1,10 @@
+parameters:
+  level: 1 # (0 is the loosest and 9 is the strictest)
+  paths:
+    - src
+    - tests 
+#  ignoreErrors:
+#    - '#Method (.)* is unused\.#'
+  	
+
+
