@@ -11,7 +11,7 @@
 		"ext-json": "*",
 		"php-webdriver/webdriver": "^1.15",
 		"guzzlehttp/guzzle": "^7.9",
-		"league/climate": "^3.8",
+		"league/climate": "^3.10",
 		"phpunit/phpunit": "^10.5",
 		"digitalnature/php-ref": "*"
 	},
